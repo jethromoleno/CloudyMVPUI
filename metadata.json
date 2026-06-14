@@ -1,0 +1,5 @@
+{
+  "name": "MyVersion: LogiTrack AI",
+  "description": "A comprehensive logistics management dashboard for trucking companies featuring trip scheduling, fleet metrics, and Gemini-powered route analysis.",
+  "requestFramePermissions": []
+}

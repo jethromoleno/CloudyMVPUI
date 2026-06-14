@@ -1,7 +1,10 @@
 // Cloudy Hybrid Database Schema TypeScript Definitions
 
 export type Theme = 'light' | 'dark';
-export type UserRole = 'SuperAdmin' | 'Admin' | 'User' | string;
+export type UserRoleType = 'SuperAdmin' | 'Admin' | 'Dispatcher' | 'Encoder' | 'Viewer' | string;
+
+// For backward compatibility
+export type UserRoleLegacy = UserRoleType;
 
 // 1. users
 export interface User {
@@ -46,7 +49,7 @@ export interface Permission {
 }
 
 // 4. user_roles
-export interface UserRoleRecord {
+export interface UserRole {
   id: string; // UUID
   user_id: string; // UUID FK -> users
   role_id: string; // UUID FK -> roles
@@ -56,6 +59,9 @@ export interface UserRoleRecord {
   created_at: string;
   updated_at: string;
 }
+
+// For backward compatibility
+export type UserRoleRecord = UserRole;
 
 // 5. role_permissions
 export interface RolePermission {
@@ -93,7 +99,7 @@ export interface AuditLog {
 }
 
 // 8. app_modules
-export interface AppModuleRecord {
+export interface AppModuleDefinition {
   id: string; // UUID
   module_code: string; // e.g. inventory, trip_scheduling, billing, settings
   label: string;
@@ -101,6 +107,9 @@ export interface AppModuleRecord {
   created_at: string;
   updated_at: string;
 }
+
+// For backward compatibility
+export type AppModuleRecord = AppModuleDefinition;
 
 export type AppModule = 'inventory' | 'trip_scheduling' | 'billing' | 'settings';
 
@@ -219,7 +228,7 @@ export interface TripFuelLog {
 export type TripFuel = TripFuelLog;
 
 // 15. trip_statuses
-export interface TripStatusRecord {
+export interface TripStatus {
   id: string; // UUID
   status_code: string; // UNIQUE e.g. Scheduled, In Transit, Completed, Cancelled
   label: string;
@@ -229,7 +238,9 @@ export interface TripStatusRecord {
   updated_at: string;
 }
 
-export type TripStatus = 'Scheduled' | 'In Transit' | 'Completed' | 'Cancelled' | 'Rescue' | 'Backload' | string;
+// For backward compatibility
+export type TripStatusRecord = TripStatus;
+export type TripStatusType = 'Scheduled' | 'In Transit' | 'Completed' | 'Cancelled' | 'Rescue' | 'Backload' | string;
 
 // 16. load_types
 export interface LoadType {
@@ -263,8 +274,8 @@ export interface Employee {
   license_number?: string;
 }
 
-// 18. drivers
-export interface Driver {
+// 18. drivers (extension)
+export interface DriverProfile {
   id: string; // UUID Primary Key
   employee_id: string; // UUID FK -> employees
   license_number?: string;
@@ -276,8 +287,11 @@ export interface Driver {
   updated_at: string;
 }
 
+// For backward compatibility
+export type Driver = DriverProfile;
+
 // 19. employee_roles
-export interface EmployeeRoleRecord {
+export interface EmployeeRole {
   id: string; // UUID Primary Key
   role_code: string; // Driver, Helper, Encoder, Dispatcher, Manager
   label: string;
@@ -286,7 +300,9 @@ export interface EmployeeRoleRecord {
   updated_at: string;
 }
 
-export type EmployeeRole = 'Driver' | 'Helper' | 'Encoder' | string;
+// For backward compatibility
+export type EmployeeRoleRecord = EmployeeRole;
+export type EmployeeRoleType = 'Driver' | 'Helper' | 'Encoder' | 'Dispatcher' | string;
 
 // 20. trucks
 export interface Truck {
@@ -310,7 +326,7 @@ export interface Truck {
 }
 
 // 21. truck_statuses
-export interface TruckStatusRecord {
+export interface TruckStatus {
   id: string; // UUID
   truck_status_code: string; // Available, In Use, Maintenance, Inactive
   label: string;
@@ -319,7 +335,9 @@ export interface TruckStatusRecord {
   updated_at: string;
 }
 
-export type TruckStatus = 'Available' | 'In Use' | 'Maintenance' | string;
+// For backward compatibility
+export type TruckStatusRecord = TruckStatus;
+export type TruckStatusType = 'Available' | 'In Use' | 'Maintenance' | string;
 
 // 22. vehicle_status_logs
 export interface VehicleStatusLog {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SystemUser, AppModule, UserRole } from '../types';
+import { SystemUser, AppModule, UserRoleType } from '../types';
 import { Plus, Edit2, Trash2, X, Shield, Check, AlertTriangle } from 'lucide-react';
 
 interface UserManagementProps {
@@ -17,7 +17,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onUpd
   const initialFormState = {
     username: '',
     password: '',
-    role: 'User' as UserRole,
+    role: 'Viewer' as UserRoleType,
     permissions: {
       inventory: false,
       trip_scheduling: false,
@@ -186,10 +186,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ users, onAddUser, onUpd
                 <label className="block text-xs font-semibold text-navy-500 dark:text-carbon-400 mb-2 uppercase">Role</label>
                 <select 
                   value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value as UserRole})}
+                  onChange={(e) => setFormData({...formData, role: e.target.value as UserRoleType})}
                   className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2.5 text-navy-900 dark:text-white focus:outline-none"
                 >
-                  <option value="User">User</option>
+                  <option value="Viewer">Viewer</option>
+                  <option value="Encoder">Encoder</option>
+                  <option value="Dispatcher">Dispatcher</option>
                   <option value="Admin">Admin</option>
                   <option value="SuperAdmin">SuperAdmin</option>
                 </select>

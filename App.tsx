@@ -30,6 +30,7 @@ const App: React.FC = () => {
 
   // Database State
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [systemUsers, setSystemUsers] = useState<SystemUser[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -51,22 +52,31 @@ const App: React.FC = () => {
   // Data Hydration Effect
   useEffect(() => {
     const loadData = async () => {
-      const [t, e, c, l, v, f, u] = await Promise.all([
-        api.getTrips(),
-        api.getEmployees(),
-        api.getCustomers(),
-        api.getLocations(),
-        api.getTrucks(),
-        api.getFuelLogs(),
-        api.getUsers()
-      ]);
-      setTrips(t);
-      setEmployees(e);
-      setCustomers(c);
-      setLocations(l);
-      setTrucks(v);
-      setFuels(f);
-      setSystemUsers(u);
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [t, e, c, l, v, f, u] = await Promise.all([
+          api.getTrips(),
+          api.getEmployees(),
+          api.getCustomers(),
+          api.getLocations(),
+          api.getTrucks(),
+          api.getFuelLogs(),
+          api.getUsers()
+        ]);
+        setTrips(t);
+        setEmployees(e);
+        setCustomers(c);
+        setLocations(l);
+        setTrucks(v);
+        setFuels(f);
+        setSystemUsers(u);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load telemetry registers from service schema");
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadData();
   }, []);
@@ -166,12 +176,42 @@ const App: React.FC = () => {
         userRole={currentUser.role}
         theme={theme}
         onSelectModule={handleModuleSelect}
+        activeModule={activeModule}
       />
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <AppNavbar activeModule={activeModule as AppModule} onSelectModule={handleModuleSelect} />
         
         <div className="flex-1 overflow-hidden relative">
           {(() => {
+            if (activeModule === 'inventory' || activeModule === 'billing') {
+              const config = activeModule === 'inventory' 
+                ? { title: 'Inventory Management', icon: Package }
+                : { title: 'Billing System', icon: DollarSign };
+              const IconComp = config.icon;
+
+              return (
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-navy-50 dark:bg-carbon-950 transition-colors duration-300">
+                  <div className="p-8 bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-2xl shadow-xl max-w-md w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-350">
+                    <div className="p-4 bg-navy-100/50 dark:bg-carbon-800 text-navy-600 dark:text-carbon-455 rounded-full mb-6">
+                      <IconComp className="w-12 h-12" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-navy-900 dark:text-white mb-2 font-sans tracking-tight">
+                      {config.title}
+                    </h2>
+                    <p className="text-navy-500 dark:text-carbon-400 text-sm mb-6 leading-relaxed">
+                      {config.title} is currently in placeholder mode for this MVP version.
+                    </p>
+                    <button 
+                      onClick={() => handleModuleSelect('hub')}
+                      className="px-6 py-2.5 bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-200 text-white dark:text-black font-semibold text-xs rounded-lg uppercase tracking-wider transition-colors shadow-md shadow-navy-900/10 dark:shadow-none"
+                    >
+                      Return to Hub
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
             switch (currentView) {
               case 'dashboard':
                 return <Dashboard trips={trips} trucks={trucks} fuels={fuels} theme={theme} />;
@@ -185,6 +225,8 @@ const App: React.FC = () => {
                     locations={locations}
                     trucks={trucks}
                     theme={theme}
+                    isLoading={isLoading}
+                    error={error}
                   />
                 );
               case 'trucks':
@@ -195,6 +237,8 @@ const App: React.FC = () => {
                     onUpdate={() => {}} 
                     onDelete={handleDeleteTruck}
                     theme={theme}
+                    isLoading={isLoading}
+                    error={error}
                   />
                 );
               case 'employees':
@@ -205,6 +249,8 @@ const App: React.FC = () => {
                     onUpdate={() => {}}
                     onDelete={() => {}}
                     theme={theme}
+                    isLoading={isLoading}
+                    error={error}
                   />
                 );
               case 'settings':

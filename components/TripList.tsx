@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { Trip, TripStatus, Employee, Customer, Location, Truck, LoadType, Theme } from '../types';
+import { Trip, TripStatusType, Employee, Customer, Location, Truck, LoadType, Theme } from '../types';
 import { 
   Plus, MapPin, User, FileText, Truck as TruckIcon, Settings, X, 
   Calendar as CalendarIcon, List as ListIcon, ChevronLeft, ChevronRight,
-  Map as MapIcon, Search, ZoomIn, ZoomOut, Compass, Activity, RotateCcw, Info
+  Map as MapIcon, Search, ZoomIn, ZoomOut, Compass, Activity, RotateCcw, Info,
+  AlertTriangle, Loader2
 } from 'lucide-react';
 
 interface TripListProps {
@@ -15,6 +16,8 @@ interface TripListProps {
   locations: Location[];
   trucks: Truck[];
   theme: Theme;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 // Background geographic shapes representing the structured Philippine islands schematic
@@ -172,10 +175,14 @@ function calculateRoutePoints(origin: Location, dest: Location): [number, number
 }
 
 const TripList: React.FC<TripListProps> = ({ 
-  trips, setTrips, employees, customers, locations, trucks, theme
+  trips, setTrips, employees, customers, locations, trucks, theme, isLoading = false, error = null
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [cancelTripConfirm, setCancelTripConfirm] = useState<{
+    trip: Trip;
+    onConfirm: () => void;
+  } | null>(null);
   
   // Custom View Mode State: default to Calendar View for prominent and beautiful schedule display
   const [viewMode, setViewMode] = useState<'calendar' | 'list' | 'map'>('calendar');
@@ -509,6 +516,21 @@ const TripList: React.FC<TripListProps> = ({
         trip_id: String(editingId), // Ensure ID persists
         scheduled_start_time: formData.scheduled_start_time || new Date().toISOString()
       };
+
+      const originalTrip = trips.find(t => t.trip_id === editingId || t.id === editingId);
+      const isChangingToCancelled = updatedTrip.status === 'Cancelled' && originalTrip?.status !== 'Cancelled';
+
+      if (isChangingToCancelled) {
+        setCancelTripConfirm({
+          trip: updatedTrip,
+          onConfirm: () => {
+            setTrips(trips.map(t => t.trip_id === editingId || t.id === editingId ? updatedTrip : t));
+            setIsModalOpen(false);
+            setFormData(initialFormState);
+          }
+        });
+        return;
+      }
       
       setTrips(trips.map(t => t.trip_id === editingId || t.id === editingId ? updatedTrip : t));
     } else {
@@ -552,7 +574,7 @@ const TripList: React.FC<TripListProps> = ({
     setFormData(initialFormState);
   };
 
-  const getStatusColor = (status: TripStatus) => {
+  const getStatusColor = (status: TripStatusType) => {
     switch (status) {
       case 'In Transit': return 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 border-blue-200 dark:border-blue-400/20';
       case 'Completed': return 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20';
@@ -562,7 +584,7 @@ const TripList: React.FC<TripListProps> = ({
     }
   };
 
-  const getTripBadgeStyles = (status: TripStatus) => {
+  const getTripBadgeStyles = (status: TripStatusType) => {
     switch (status) {
       case 'In Transit': return 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-900/65 dark:text-blue-300 dark:border-blue-800/50';
       case 'Completed': return 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/65 dark:text-emerald-300 dark:border-emerald-800/50';
@@ -662,6 +684,56 @@ const TripList: React.FC<TripListProps> = ({
 
   return (
     <div className="p-8 h-full bg-navy-50 dark:bg-carbon-950 overflow-y-auto relative transition-colors duration-300">
+      
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/70 dark:bg-carbon-950/70 backdrop-blur-[2px] flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="w-8 h-8 animate-spin text-navy-800 dark:text-white" />
+            <span className="text-xs font-semibold text-navy-600 dark:text-carbon-400">Loading telemetry registers...</span>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 rounded-lg flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-red-850 dark:text-red-450 text-sm">System Alert</h4>
+            <p className="text-xs text-red-650 dark:text-red-350/80 mt-1">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {cancelTripConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4">
+          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-lg p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-navy-900 dark:text-white flex items-center gap-2 mb-2 font-sans">
+              <AlertTriangle className="w-5 h-5 text-red-500 animate-pulse" /> Confirm Trip Cancellation
+            </h3>
+            <p className="text-sm text-navy-600 dark:text-carbon-450 mb-6 leading-relaxed">
+              Are you sure you want to cancel Trip <strong className="font-mono text-xs bg-navy-50 dark:bg-carbon-800 px-1.5 py-0.5 rounded text-navy-900 dark:text-white font-bold">{cancelTripConfirm.trip.trip_code}</strong>? This action will release assigned drivers and vehicles.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button 
+                onClick={() => setCancelTripConfirm(null)}
+                className="bg-navy-50 hover:bg-navy-100 dark:bg-carbon-800 dark:hover:bg-carbon-700 text-navy-800 dark:text-white px-4 py-2 rounded text-xs font-medium transition-colors"
+              >
+                No, Keep Trip
+              </button>
+              <button 
+                onClick={() => {
+                  cancelTripConfirm.onConfirm();
+                  setCancelTripConfirm(null);
+                }}
+                className="bg-red-600 hover:bg-red-750 text-white px-4 py-2 rounded text-xs font-semibold shadow-md transition-colors"
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-navy-900 dark:text-white">Trip Schedule</h1>
@@ -1243,7 +1315,7 @@ const TripList: React.FC<TripListProps> = ({
                            <select 
                               className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2.5 text-navy-900 dark:text-white focus:outline-none"
                               value={formData.status}
-                              onChange={(e) => setFormData({...formData, status: e.target.value as TripStatus})}
+                              onChange={(e) => setFormData({...formData, status: e.target.value as TripStatusType})}
                             >
                               <option value="Scheduled">Scheduled</option>
                               <option value="In Transit">In Transit</option>

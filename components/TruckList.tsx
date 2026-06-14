@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Truck, TruckStatus } from '../types';
+import { Truck, TruckStatusType } from '../types';
 import { Plus, Edit2, Trash2, X, AlertTriangle, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface TruckListProps {
@@ -24,7 +24,7 @@ const TruckList: React.FC<TruckListProps> = ({
     license_plate: '',
     vin: '',
     tonner_capacity: 4,
-    status: 'Available' as TruckStatus
+    status: 'Available' as TruckStatusType
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -61,7 +61,7 @@ const TruckList: React.FC<TruckListProps> = ({
     setIsModalOpen(false);
   };
 
-  const getStatusIcon = (status: TruckStatus) => {
+  const getStatusIcon = (status: TruckStatusType) => {
     switch (status) {
       case 'Available': return <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500" />;
       case 'In Use': return <AlertCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-500" />;
@@ -285,7 +285,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Status Code</label>
                   <select 
                     value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value as TruckStatus})}
+                    onChange={(e) => setFormData({...formData, status: e.target.value as TruckStatusType})}
                     className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-sm text-navy-900 dark:text-white focus:outline-none cursor-pointer"
                   >
                     <option value="Available">Available</option>

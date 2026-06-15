@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { Trip, TripStatusType, Employee, Customer, Location, Truck, LoadType, Theme, TripStop } from '../types';
+import { 
+  Trip, TripStatusType, Employee, Customer, Location, Truck, LoadType, Theme, TripStop, 
+  Branch, Consignee, InternalClientCode, TripEvent, TripFuelLog, DriverProfile, TripStatus 
+} from '../types';
 import { 
   Plus, MapPin, User, FileText, Truck as TruckIcon, Settings, X, 
   Calendar as CalendarIcon, List as ListIcon, ChevronLeft, ChevronRight,
@@ -184,18 +187,19 @@ function calculateRoutePoints(origin: Location, dest: Location): [number, number
 const TripList: React.FC<TripListProps> = ({ 
   trips, setTrips, employees, customers, locations, trucks, theme, isLoading = false, error = null, userRole, currentView, initialEditingId, onClearInitialEditingId
 }) => {
-  const [branchesState, setBranchesState] = useState<any[]>([]);
-  const [consigneesState, setConsigneesState] = useState<any[]>([]);
-  const [internalClientCodesState, setInternalClientCodesState] = useState<any[]>([]);
-  const [loadTypesState, setLoadTypesState] = useState<any[]>([]);
-  const [tripStopsState, setTripStopsState] = useState<any[]>([]);
-  const [tripEventsState, setTripEventsState] = useState<any[]>([]);
-  const [tripFuelLogsState, setTripFuelLogsState] = useState<any[]>([]);
-  const [driversState, setDriversState] = useState<any[]>([]);
+  const [branchesState, setBranchesState] = useState<Branch[]>([]);
+  const [consigneesState, setConsigneesState] = useState<Consignee[]>([]);
+  const [internalClientCodesState, setInternalClientCodesState] = useState<InternalClientCode[]>([]);
+  const [loadTypesState, setLoadTypesState] = useState<LoadType[]>([]);
+  const [tripStopsState, setTripStopsState] = useState<TripStop[]>([]);
+  const [tripEventsState, setTripEventsState] = useState<TripEvent[]>([]);
+  const [tripFuelLogsState, setTripFuelLogsState] = useState<TripFuelLog[]>([]);
+  const [driversState, setDriversState] = useState<DriverProfile[]>([]);
+  const [tripStatusesState, setTripStatusesState] = useState<TripStatus[]>([]);
 
   const loadTripResources = async () => {
     try {
-      const [br, cons, icc, lt, ts, te, tfl, dr] = await Promise.all([
+      const [br, cons, icc, lt, ts, te, tfl, dr, tst] = await Promise.all([
         api.getBranches(),
         api.getConsignees(),
         api.getInternalClientCodes(),
@@ -203,7 +207,8 @@ const TripList: React.FC<TripListProps> = ({
         api.getTripStops(),
         api.getTripEvents(),
         api.getFuelLogs(),
-        api.getDrivers()
+        api.getDrivers(),
+        api.getTripStatuses()
       ]);
       setBranchesState(br);
       setConsigneesState(cons);
@@ -213,6 +218,7 @@ const TripList: React.FC<TripListProps> = ({
       setTripEventsState(te);
       setTripFuelLogsState(tfl);
       setDriversState(dr);
+      setTripStatusesState(tst);
     } catch (err) {
       console.error('Error loading resources in TripList:', err);
     }
@@ -230,6 +236,7 @@ const TripList: React.FC<TripListProps> = ({
   const MOCK_TRIP_EVENTS = tripEventsState;
   const MOCK_TRIP_FUEL_LOGS = tripFuelLogsState;
   const MOCK_DRIVERS = driversState;
+  const MOCK_TRIP_STATUSES = tripStatusesState;
 
   const isSuperAdminOrAdmin = userRole === 'SuperAdmin' || userRole === 'Admin';
   const isEncoder = userRole === 'Encoder';
@@ -482,10 +489,10 @@ const TripList: React.FC<TripListProps> = ({
       const dest = locations.find(l => l.location_id === trip.destination_location_id);
       if (!dest?.latitude || !dest?.longitude) return;
 
-      let pinColor = '#f59e0b'; // Amber Scheduled
-      if (trip.status === 'In Transit') pinColor = '#3b82f6'; // Blue
-      if (trip.status === 'Completed') pinColor = '#10b981'; // Emerald
-      if (trip.status === 'Cancelled') pinColor = '#ef4444'; // Red
+      let pinColor = '#3b82f6'; // Blue Scheduled
+      if (trip.status === 'In Progress') pinColor = '#f59e0b'; // Amber In Progress
+      if (trip.status === 'Completed') pinColor = '#10b981'; // Green Completed
+      if (trip.status === 'Cancelled') pinColor = '#ef4444'; // Red Cancelled
 
       const isSelected = activeMapTripId === trip.trip_id;
       const sizeClass = isSelected ? 'h-6 w-6 border-2 ring-2 ring-blue-400' : 'h-4 w-4 border-2';
@@ -508,8 +515,8 @@ const TripList: React.FC<TripListProps> = ({
       const driver = employees.find(e => e.employee_id === trip.driver_id);
       const getStatusCSS = (status: string) => {
         if (status === 'Completed') return 'background-color:#d1fae5; color:#065f46; border-color:#a7f3d0;';
-        if (status === 'In Transit') return 'background-color:#dbeafe; color:#1e40af; border-color:#bfdbfe;';
-        if (status === 'Scheduled') return 'background-color:#fef3c7; color:#92400e; border-color:#fde68a;';
+        if (status === 'In Progress') return 'background-color:#fef3c7; color:#92400e; border-color:#fde68a;'; // Amber
+        if (status === 'Scheduled') return 'background-color:#dbeafe; color:#1e40af; border-color:#bfdbfe;'; // Blue
         return 'background-color:#fee2e2; color:#991b1b; border-color:#fca5a5;';
       };
 
@@ -1005,18 +1012,24 @@ const TripList: React.FC<TripListProps> = ({
 
   const getStatusColor = (status: TripStatusType) => {
     switch (status) {
-      case 'In Transit': return 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 border-blue-200 dark:border-blue-400/20';
-      case 'Completed': return 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20';
-      case 'Cancelled': return 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-400/10 border-red-200 dark:border-red-400/20';
-      case 'Scheduled': return 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-400/10 border-amber-200 dark:border-amber-400/20';
+      case 'In Progress': return 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-400/10 border-amber-200 dark:border-amber-400/20'; // Amber
+      case 'Completed': return 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20'; // Green
+      case 'Cancelled': return 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-400/10 border-red-200 dark:border-red-400/20'; // Red
+      case 'Scheduled': return 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 border-blue-200 dark:border-blue-400/20'; // Blue
+      case 'Rescue': return 'text-red-700 dark:text-red-400 bg-rose-50 dark:bg-rose-400/10 border-rose-200 dark:border-rose-400/20'; // Red
+      case 'Backload': return 'text-slate-700 dark:text-slate-400 bg-slate-50 dark:bg-slate-400/10 border-slate-200 dark:border-slate-400/20'; // Gray
       default: return 'text-navy-600 dark:text-carbon-400 bg-navy-100 dark:bg-carbon-800 border-navy-200 dark:border-carbon-700';
     }
-  };  const getTripBadgeStyles = (status: TripStatusType) => {
+  };
+
+  const getTripBadgeStyles = (status: TripStatusType) => {
     switch (status) {
-      case 'In Transit': return 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-900/65 dark:text-blue-300 dark:border-blue-800/50';
+      case 'In Progress': return 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:hover:bg-amber-900/65 dark:text-amber-300 dark:border-amber-800/50';
       case 'Completed': return 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/65 dark:text-emerald-300 dark:border-emerald-800/50';
       case 'Cancelled': return 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:hover:bg-red-900/65 dark:text-red-300 dark:border-red-800/50';
-      case 'Scheduled': return 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:hover:bg-amber-900/65 dark:text-amber-300 dark:border-amber-800/50';
+      case 'Scheduled': return 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:hover:bg-blue-900/65 dark:text-blue-300 dark:border-blue-800/50';
+      case 'Rescue': return 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-900/65 dark:text-rose-300 dark:border-rose-800/50';
+      case 'Backload': return 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-950/40 dark:hover:bg-slate-900/65 dark:text-slate-300 dark:border-slate-800/50';
       default: return 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 dark:bg-carbon-800/40 dark:hover:bg-carbon-800/80 dark:text-carbon-300 dark:border-carbon-700/50';
     }
   };
@@ -1446,11 +1459,9 @@ const TripList: React.FC<TripListProps> = ({
                   className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg py-2 px-2.5 text-xs text-navy-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="All">All Statuses</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="In Transit">In Transit</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
-                  <option value="Rescue">Rescue</option>
+                  {MOCK_TRIP_STATUSES.map(st => (
+                    <option key={st.id} value={st.status_code}>{st.status_code}</option>
+                  ))}
                 </select>
               </div>
 
@@ -1975,11 +1986,9 @@ const TripList: React.FC<TripListProps> = ({
                         onChange={(e) => handleQuickStatusUpdate(selectedTripObj, e.target.value)}
                         className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
                       >
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="In Transit">In Transit</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Rescue">Rescue</option>
+                        {MOCK_TRIP_STATUSES.map(st => (
+                          <option key={st.id} value={st.status_code}>{st.status_code}</option>
+                        ))}
                       </select>
                     </div>
                   )}
@@ -2260,7 +2269,7 @@ const TripList: React.FC<TripListProps> = ({
 
             {/* Status Pills Row */}
             <div className="flex flex-wrap gap-1.5 mb-4 border-b border-navy-50 dark:border-carbon-800 pb-3">
-              {['All', 'Scheduled', 'In Transit', 'Completed'].map((status) => (
+              {['All', ...MOCK_TRIP_STATUSES.map(st => st.status_code)].map((status) => (
                 <button
                   key={status}
                   onClick={() => setMapStatusFilter(status)}
@@ -2616,17 +2625,24 @@ const TripList: React.FC<TripListProps> = ({
                           <div className="col-span-1 md:col-span-2 lg:col-span-3">
                             <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Trip Execution Status</label>
                             <div className="flex flex-wrap gap-2">
-                              {['Scheduled', 'In Transit', 'Completed', 'Cancelled', 'Rescue'].map((statusOption) => {
+                              {MOCK_TRIP_STATUSES.map((st) => {
+                                const statusOption = st.status_code;
                                 const isCurrent = formData.status === statusOption;
+                                let activeClass = 'bg-blue-600 border-blue-600 text-white shadow-xs';
+                                if (statusOption === 'Completed') activeClass = 'bg-emerald-600 border-emerald-600 text-white shadow-xs';
+                                if (statusOption === 'In Progress') activeClass = 'bg-amber-500 border-amber-500 text-white shadow-xs';
+                                if (statusOption === 'Cancelled' || statusOption === 'Rescue') activeClass = 'bg-red-600 border-red-600 text-white shadow-xs';
+                                if (statusOption === 'Backload') activeClass = 'bg-slate-500 border-slate-500 text-white shadow-xs';
+
                                 return (
                                   <button
-                                    key={statusOption}
+                                    key={st.id}
                                     type="button"
                                     onClick={() => setFormData({...formData, status: statusOption})}
                                     disabled={isReadOnly}
                                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                                       isCurrent 
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
+                                        ? activeClass 
                                         : 'bg-navy-50 dark:bg-carbon-950 hover:bg-navy-100/70 border-navy-150 text-navy-700 dark:text-carbon-400 dark:border-carbon-800'
                                     }`}
                                   >
@@ -2785,11 +2801,18 @@ const TripList: React.FC<TripListProps> = ({
                             disabled={isFormFieldsDisabled}
                           >
                             <option value="">Select Helper 1 (Optional)</option>
-                            {helperCandidates.map(h => (
-                              <option key={h.employee_id || h.id} value={h.employee_id || h.id}>
-                                {h.first_name} {h.last_name}
-                              </option>
-                            ))}
+                            {helperCandidates
+                              .filter(h => {
+                                const hId = h.employee_id || h.id;
+                                const isCurrentlySelected = String(hId) === String(formData.helper1_employee_id);
+                                const isEmployeeActive = h.is_active !== false && h.employment_status === 'Active';
+                                return isEmployeeActive || isCurrentlySelected;
+                              })
+                              .map(h => (
+                                <option key={h.employee_id || h.id} value={h.employee_id || h.id}>
+                                  {h.first_name} {h.last_name} ({h.employee_code || h.id})
+                                </option>
+                              ))}
                           </select>
                           {validationErrors.helper1 && (
                             <p className="text-red-500 text-[10.5px] mt-1 font-medium">{validationErrors.helper1}</p>
@@ -2805,11 +2828,18 @@ const TripList: React.FC<TripListProps> = ({
                             disabled={isFormFieldsDisabled}
                           >
                             <option value="">Select Helper 2 (Optional)</option>
-                            {helperCandidates.map(h => (
-                              <option key={h.employee_id || h.id} value={h.employee_id || h.id}>
-                                {h.first_name} {h.last_name}
-                              </option>
-                            ))}
+                            {helperCandidates
+                              .filter(h => {
+                                const hId = h.employee_id || h.id;
+                                const isCurrentlySelected = String(hId) === String(formData.helper2_employee_id);
+                                const isEmployeeActive = h.is_active !== false && h.employment_status === 'Active';
+                                return isEmployeeActive || isCurrentlySelected;
+                              })
+                              .map(h => (
+                                <option key={h.employee_id || h.id} value={h.employee_id || h.id}>
+                                  {h.first_name} {h.last_name} ({h.employee_code || h.id})
+                                </option>
+                              ))}
                           </select>
                           {validationErrors.helper2 && (
                             <p className="text-red-500 text-[10.5px] mt-1 font-medium">{validationErrors.helper2}</p>

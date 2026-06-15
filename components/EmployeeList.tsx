@@ -329,11 +329,21 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
         availability_status: newAvailStatus
       });
 
-      // Update parent employee if changing status
-      if (selectedEmployee && onUpdate && (newAvailStatus === 'Leave' || newAvailStatus === 'Suspended')) {
+      // Update parent employee and trigger state propagation down to Dashboard
+      if (selectedEmployee && onUpdate) {
+        let updatedStatus = selectedEmployee.employment_status;
+        if (newAvailStatus === 'Leave') {
+          updatedStatus = 'On Leave';
+        } else if (newAvailStatus === 'Suspended') {
+          updatedStatus = 'Suspended';
+        } else if (newAvailStatus === 'Available') {
+          updatedStatus = 'Active';
+        }
+
         await onUpdate({
           ...selectedEmployee,
-          employment_status: newAvailStatus === 'Leave' ? 'On Leave' : 'Suspended'
+          employment_status: updatedStatus,
+          updated_at: new Date().toISOString()
         });
       }
 
@@ -554,7 +564,13 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
         </div>
 
         {/* LOADING & EMPTY CHASSIS */}
-        {isLoading ? (
+        {error ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-red-500 p-12 max-w-sm mx-auto">
+            <AlertTriangle className="w-10 h-10 mb-3 text-red-500" />
+            <h3 className="text-base font-bold">Diagnostics Pipeline Alert</h3>
+            <p className="text-xs text-red-400 text-center mt-1">{error}</p>
+          </div>
+        ) : isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center text-navy-500 p-12">
             <Loader2 className="w-8 h-8 animate-spin mb-3 text-navy-800 dark:text-white" />
             <p className="text-sm font-medium">Synchronizing personnel directories...</p>

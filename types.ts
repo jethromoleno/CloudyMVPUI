@@ -1,7 +1,7 @@
 // Cloudy Hybrid Database Schema TypeScript Definitions
 
 export type Theme = 'light' | 'dark';
-export type UserRoleType = 'SuperAdmin' | 'Admin' | 'Dispatcher' | 'Encoder' | 'Viewer' | string;
+export type UserRoleType = 'SuperAdmin' | 'Admin' | 'Dispatcher' | 'Encoder' | 'Viewer';
 
 // For backward compatibility
 export type UserRoleLegacy = UserRoleType;

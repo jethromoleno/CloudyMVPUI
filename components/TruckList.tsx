@@ -33,6 +33,7 @@ const TruckList: React.FC<TruckListProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isMaintModalOpen, setIsMaintModalOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ title: string; body: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   // Reference tables fetched from apiService
   const [loadTypes, setLoadTypes] = useState<LoadType[]>([]);
@@ -231,11 +232,25 @@ const TruckList: React.FC<TruckListProps> = ({
         });
         return;
       }
-    }
 
+      setConfirmAction({
+        title: "Confirm Soft Deactivation",
+        message: `Are you sure you want to deactivate and mark truck ${truck.plate_number || truck.license_plate} as soft-deleted? It will be removed from operational dispatcher views.`,
+        onConfirm: async () => {
+          setConfirmAction(null);
+          await proceedToggleActiveState(truck, false);
+        }
+      });
+    } else {
+      await proceedToggleActiveState(truck, true);
+    }
+  };
+
+  const proceedToggleActiveState = async (truck: Truck, targetActive: boolean) => {
     const updated: Truck = {
       ...truck,
       is_active: targetActive,
+      is_deleted: !targetActive, // consistently set is_deleted=true when deactivating
       updated_at: new Date().toISOString()
     };
     // Also, if deactivated, we can update status to 'Inactive' as well
@@ -446,8 +461,14 @@ const TruckList: React.FC<TruckListProps> = ({
 
         {/* Scrollable List Items container */}
         <div className="flex-1 overflow-y-auto divide-y divide-navy-50 dark:divide-carbon-800/60">
-          {isLoading ? (
-            <div className="p-16 text-center text-navy-400">
+          {error ? (
+            <div className="p-16 text-center text-red-550 max-w-sm mx-auto">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500" />
+              <p className="text-sm font-semibold">System Diagnostics Alert</p>
+              <p className="text-xs text-red-400 mt-1">{error}</p>
+            </div>
+          ) : isLoading ? (
+            <div className="p-16 text-center text-navy-400 font-medium">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-navy-600" />
               <p className="text-xs">Accessing telemetry fleet logs...</p>
             </div>
@@ -958,6 +979,35 @@ const TruckList: React.FC<TruckListProps> = ({
                 className="bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-navy-950 font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
               >
                 Acknowledge Protocol
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRMATION DIALOG */}
+      {confirmAction && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-[100] p-4 animate-fade-in">
+          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400 border-b border-rose-50 dark:border-carbon-805 pb-3">
+              <AlertTriangle className="w-5 h-5" />
+              <h3 className="font-bold text-base">{confirmAction.title}</h3>
+            </div>
+            <p className="text-xs text-navy-650 dark:text-carbon-400 font-sans leading-relaxed">
+              {confirmAction.message}
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="bg-navy-100 hover:bg-navy-200 dark:bg-carbon-805 text-navy-900 dark:text-carbon-205 font-bold text-xs px-4 py-2 rounded-lg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAction.onConfirm}
+                className="bg-red-605 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
+              >
+                Confirm Deactivation
               </button>
             </div>
           </div>

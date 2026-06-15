@@ -367,14 +367,14 @@ const TruckList: React.FC<TruckListProps> = ({
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-xl font-bold text-navy-900 dark:text-white font-sans tracking-tight">Cargo Fleet Directory</h2>
-              <p className="text-xs text-navy-500 dark:text-carbon-450">Manage dynamic heavy equipment transport units.</p>
+              <p className="text-xs text-navy-500 dark:text-carbon-400">Manage dynamic heavy equipment transport units.</p>
             </div>
             
             {isWritable && (
               <button 
                 onClick={() => handleOpenModal()}
                 id="btn-register-vehicle"
-                className="bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-100 text-white dark:text-navy-950 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all shadow-sm"
+                className="bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-100 text-white dark:text-black text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all shadow-sm"
               >
                 <Plus className="w-3.5 h-3.5" /> Enlist Transporter
               </button>
@@ -400,7 +400,7 @@ const TruckList: React.FC<TruckListProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
             {/* Status Select */}
             <div>
-              <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-0.5 tracking-wider">Status</label>
+              <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-0.5 tracking-wider">Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -415,7 +415,7 @@ const TruckList: React.FC<TruckListProps> = ({
 
             {/* Branch Select */}
             <div>
-              <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-0.5 tracking-wider">Branch Hub</label>
+              <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-0.5 tracking-wider">Branch Hub</label>
               <select
                 value={branchFilter}
                 onChange={(e) => setBranchFilter(e.target.value)}
@@ -430,7 +430,7 @@ const TruckList: React.FC<TruckListProps> = ({
 
             {/* Truck Size Select */}
             <div>
-              <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-0.5 tracking-wider">Size Spec</label>
+              <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-0.5 tracking-wider">Size Spec</label>
               <select
                 value={sizeFilter}
                 onChange={(e) => setSizeFilter(e.target.value)}
@@ -462,7 +462,7 @@ const TruckList: React.FC<TruckListProps> = ({
         {/* Scrollable List Items container */}
         <div className="flex-1 overflow-y-auto divide-y divide-navy-50 dark:divide-carbon-800/60">
           {error ? (
-            <div className="p-16 text-center text-red-550 max-w-sm mx-auto">
+            <div className="p-16 text-center text-red-600 max-w-sm mx-auto">
               <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-500" />
               <p className="text-sm font-semibold">System Diagnostics Alert</p>
               <p className="text-xs text-red-400 mt-1">{error}</p>
@@ -476,7 +476,7 @@ const TruckList: React.FC<TruckListProps> = ({
             <div className="p-16 text-center max-w-sm mx-auto">
               <AlertCircle className="w-10 h-10 text-navy-300 dark:text-carbon-700 mx-auto mb-3" />
               <p className="text-sm font-semibold text-navy-800 dark:text-white">No active transporters match selection</p>
-              <p className="text-xs text-navy-500 dark:text-carbon-450 mt-1">Try broadening your search query parameters or disabling the active filter presets.</p>
+              <p className="text-xs text-navy-500 dark:text-carbon-400 mt-1">Try broadening your search query parameters or disabling the active filter presets.</p>
               {expiringFilter && (
                 <button 
                   onClick={() => setExpiringFilter(false)}
@@ -500,8 +500,8 @@ const TruckList: React.FC<TruckListProps> = ({
                   onClick={() => setSelectedTruckId(truck.id)}
                   className={`p-4 transition-all cursor-pointer border-l-2 flex justify-between items-start select-none
                     ${isActiveSelection 
-                      ? 'bg-blue-50/30 dark:bg-carbon-800/40 border-l-blue-650' 
-                      : 'hover:bg-navy-50/20 dark:hover:bg-carbon-850/20 border-l-transparent'}`}
+                      ? 'bg-blue-50/30 dark:bg-carbon-800/40 border-l-blue-700' 
+                      : 'hover:bg-navy-50/20 dark:hover:bg-carbon-900/20 border-l-transparent'}`}
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -514,7 +514,7 @@ const TruckList: React.FC<TruckListProps> = ({
                         {truckStatuses.find(s => s.id === truck.truck_status_id)?.truck_status_code || truck.status || 'Available'}
                       </span>
                       {isDeactivated && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-neutral-100 dark:bg-neutral-850 text-neutral-500 dark:text-neutral-400 uppercase tracking-widest border border-dashed">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400 uppercase tracking-widest border border-dashed">
                           Deactivated
                         </span>
                       )}
@@ -526,7 +526,7 @@ const TruckList: React.FC<TruckListProps> = ({
                       <span>{truck.truck_size}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[10px] text-navy-450 dark:text-carbon-500">
+                    <div className="flex items-center gap-2 text-[10px] text-navy-500 dark:text-carbon-500">
                       <MapPin className="w-3 h-3 shrink-0" />
                       <span>{matchingBranch?.branch_name || 'Global HQ Operations'}</span>
                     </div>
@@ -572,11 +572,11 @@ const TruckList: React.FC<TruckListProps> = ({
                         ${currentTruck.truck_status_id === 'ts-avail' ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20' : 
                           currentTruck.truck_status_id === 'ts-use' ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-200/50 dark:border-blue-500/20' : 
                           currentTruck.truck_status_id === 'ts-maint' ? 'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-500/20' : 
-                          'bg-neutral-100 dark:bg-neutral-850 text-neutral-650 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800'}`}>
+                          'bg-neutral-100 dark:bg-neutral-900 text-neutral-700 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800'}`}>
                       {truckStatuses.find(s => s.id === currentTruck.truck_status_id)?.truck_status_code || currentTruck.status || 'Available'}
                     </span>
                   </div>
-                  <p className="text-xs text-navy-500 dark:text-carbon-450 font-mono tracking-wide uppercase">VIN SERIAL KEY: {currentTruck.vin || 'N/A'}</p>
+                  <p className="text-xs text-navy-500 dark:text-carbon-400 font-mono tracking-wide uppercase">VIN SERIAL KEY: {currentTruck.vin || 'N/A'}</p>
                 </div>
 
                 <div className="flex gap-2">
@@ -595,12 +595,12 @@ const TruckList: React.FC<TruckListProps> = ({
                           onClick={() => handleToggleActiveState(currentTruck, false)}
                           className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200/40 rounded-lg p-2 transition-colors text-xs font-semibold flex items-center gap-1"
                         >
-                          <ShieldCheck className="w-3.5 h-3.5 text-red-550 shrink-0" /> Soft Deactivate
+                          <ShieldCheck className="w-3.5 h-3.5 text-red-600 shrink-0" /> Soft Deactivate
                         </button>
                       ) : (
                         <button
                           onClick={() => handleToggleActiveState(currentTruck, true)}
-                          className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-250/30 rounded-lg p-2 transition-colors text-xs font-semibold flex items-center gap-1"
+                          className="bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/30 rounded-lg p-2 transition-colors text-xs font-semibold flex items-center gap-1"
                         >
                           <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> Reactivate Unit
                         </button>
@@ -611,13 +611,13 @@ const TruckList: React.FC<TruckListProps> = ({
               </div>
 
               {/* Dynamic Tabs selectors */}
-              <div className="flex gap-4 mt-6 border-b border-navy-100 dark:border-carbon-850/40 text-sm">
+              <div className="flex gap-4 mt-6 border-b border-navy-100 dark:border-carbon-900/40 text-sm">
                 <button
                   onClick={() => setActiveTab('details')}
                   className={`pb-2.5 font-semibold text-xs uppercase tracking-wider relative transition-all
                     ${activeTab === 'details' 
                       ? 'text-navy-900 dark:text-white border-b-2 border-blue-600' 
-                      : 'text-navy-450 dark:text-carbon-450 hover:text-navy-800 dark:hover:text-white'}`}
+                      : 'text-navy-500 dark:text-carbon-400 hover:text-navy-800 dark:hover:text-white'}`}
                 >
                   Specifications Dashboard
                 </button>
@@ -626,16 +626,16 @@ const TruckList: React.FC<TruckListProps> = ({
                   className={`pb-2.5 font-semibold text-xs uppercase tracking-wider relative transition-all flex items-center gap-1.5
                     ${activeTab === 'maintenance' 
                       ? 'text-navy-900 dark:text-white border-b-2 border-blue-600' 
-                      : 'text-navy-450 dark:text-carbon-450 hover:text-navy-800 dark:hover:text-white'}`}
+                      : 'text-navy-500 dark:text-carbon-400 hover:text-navy-800 dark:hover:text-white'}`}
                 >
-                  <Wrench className="w-3.5 h-3.5 text-amber-505" /> Maintenance History
+                  <Wrench className="w-3.5 h-3.5 text-amber-500" /> Maintenance History
                 </button>
                 <button
                   onClick={() => setActiveTab('status_logs')}
                   className={`pb-2.5 font-semibold text-xs uppercase tracking-wider relative transition-all flex items-center gap-1.5
                     ${activeTab === 'status_logs' 
                       ? 'text-navy-900 dark:text-white border-b-2 border-blue-600' 
-                      : 'text-navy-450 dark:text-carbon-450 hover:text-navy-800 dark:hover:text-white'}`}
+                      : 'text-navy-500 dark:text-carbon-400 hover:text-navy-800 dark:hover:text-white'}`}
                 >
                   <History className="w-3.5 h-3.5 text-blue-500" /> Vehicle Status Log
                 </button>
@@ -661,31 +661,31 @@ const TruckList: React.FC<TruckListProps> = ({
                   )}
 
                   {/* Specification list Grid */}
-                  <div className="grid grid-cols-2 gap-4 bg-white dark:bg-carbon-900/45 p-4 rounded-xl border border-navy-150 dark:border-carbon-900 shadow-sm text-xs">
+                  <div className="grid grid-cols-2 gap-4 bg-white dark:bg-carbon-900/45 p-4 rounded-xl border border-navy-200 dark:border-carbon-900 shadow-sm text-xs">
                     <div>
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">License Plate Code</span>
-                      <p className="font-bold text-sm text-navy-850 dark:text-white mt-1 uppercase">{currentTruck.plate_number || currentTruck.license_plate}</p>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">License Plate Code</span>
+                      <p className="font-bold text-sm text-navy-900 dark:text-white mt-1 uppercase">{currentTruck.plate_number || currentTruck.license_plate}</p>
                     </div>
 
                     <div>
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">VIN Chassis Serial</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">VIN Chassis Serial</span>
                       <p className="font-mono text-xs text-navy-800 dark:text-carbon-300 mt-1">{currentTruck.vin || 'UNASSIGNED CHASSIS'}</p>
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">Size & Weight Capacity</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">Size & Weight Capacity</span>
                       <p className="font-semibold text-navy-800 dark:text-carbon-300 mt-1">{currentTruck.truck_size || 'Heavy Wings Carrier'}</p>
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">Category Capacity (Tons equivalent)</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">Category Capacity (Tons equivalent)</span>
                       <p className="font-semibold text-navy-800 dark:text-carbon-300 mt-1">
                         {currentTruck.tonner_capacity || (currentTruck.truck_size ? parseInt(currentTruck.truck_size) || 10 : 10)} Tonner
                       </p>
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3 col-span-2">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">Load capability classification</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">Load capability classification</span>
                       <div className="flex flex-wrap gap-2 mt-1.5">
                         {loadTypes.map(lt => {
                           const isAssigned = currentTruck.load_type_id === lt.id;
@@ -695,7 +695,7 @@ const TruckList: React.FC<TruckListProps> = ({
                               className={`text-[9.5px] font-semibold px-2 py-0.5 rounded border flex items-center gap-1
                                 ${isAssigned 
                                   ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-800 dark:text-blue-400 border-blue-200 dark:border-blue-500/20' 
-                                  : 'bg-navy-50/20 dark:bg-carbon-900 border-dashed border-navy-150 dark:border-carbon-800 text-navy-400 dark:text-carbon-500 opacity-60'}`}
+                                  : 'bg-navy-50/20 dark:bg-carbon-900 border-dashed border-navy-200 dark:border-carbon-800 text-navy-400 dark:text-carbon-500 opacity-60'}`}
                             >
                               {isAssigned && <Check className="w-2.5 h-2.5" />}
                               {lt.label}
@@ -706,7 +706,7 @@ const TruckList: React.FC<TruckListProps> = ({
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">Base Operations Hub</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">Base Operations Hub</span>
                       <p className="font-semibold text-navy-800 dark:text-carbon-300 mt-1 flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
                         {branches.find(b => b.id === currentTruck.branch_id)?.branch_name || 'Unassigned Hub'}
@@ -714,9 +714,9 @@ const TruckList: React.FC<TruckListProps> = ({
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">LTO Registration expiry</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">LTO Registration expiry</span>
                       <p className={`font-semibold mt-1 font-mono
-                        ${isExpired(currentTruck.registration_expiry) ? 'text-red-550 font-bold' : 
+                        ${isExpired(currentTruck.registration_expiry) ? 'text-red-600 font-bold' : 
                           isExpiringWithin30Days(currentTruck.registration_expiry) ? 'text-amber-500 font-bold' : 
                           'text-navy-800 dark:text-carbon-300'}`}>
                         {currentTruck.registration_expiry || 'No Record'}
@@ -724,11 +724,11 @@ const TruckList: React.FC<TruckListProps> = ({
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3 col-span-2">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide font-sans">Active Scheduler Status Flag</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide font-sans">Active Scheduler Status Flag</span>
                       <div className="flex items-center gap-4 mt-1.5">
                         <div className="flex items-center gap-1.5">
                           <div className={`w-3 h-3 rounded-full ${currentTruck.is_active !== false ? 'bg-emerald-500' : 'bg-red-400 animate-pulse'}`}></div>
-                          <span className="font-bold text-navy-850 dark:text-white uppercase tracking-wider text-[11px]">
+                          <span className="font-bold text-navy-900 dark:text-white uppercase tracking-wider text-[11px]">
                             {currentTruck.is_active !== false ? 'Commissioned / Active' : 'Deactivated / Soft Locked'}
                           </span>
                         </div>
@@ -736,7 +736,7 @@ const TruckList: React.FC<TruckListProps> = ({
                     </div>
 
                     <div className="border-t border-navy-50 dark:border-carbon-800/80 pt-3 col-span-2">
-                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-455 uppercase tracking-wide">Corporate / Mechanical Remarks</span>
+                      <span className="text-[9.5px] font-bold text-navy-400 dark:text-carbon-400 uppercase tracking-wide">Corporate / Mechanical Remarks</span>
                       <p className="text-navy-600 dark:text-carbon-400 mt-1 italic font-sans break-words bg-navy-50/30 dark:bg-carbon-900/60 p-2 rounded-lg">
                         {currentTruck.remarks || 'No remarks recorded for this fleet container transporter.'}
                       </p>
@@ -747,9 +747,9 @@ const TruckList: React.FC<TruckListProps> = ({
                   {isWritable && (
                     <div className="bg-amber-50 dark:bg-amber-950/10 p-4 rounded-xl border border-amber-200/50 dark:border-amber-900/30 space-y-3">
                       <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <SlidersHorizontal className="w-3.5 h-3.5 text-amber-505" /> Quick Dispatch Operational Control
+                        <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" /> Quick Dispatch Operational Control
                       </h4>
-                      <p className="text-[11px] text-amber-700 dark:text-amber-450">Mutate the active dispatch availability status immediately. Any changes will register in the Audit Vehicle Status Logs for maintenance and tracking.</p>
+                      <p className="text-[11px] text-amber-700 dark:text-amber-400">Mutate the active dispatch availability status immediately. Any changes will register in the Audit Vehicle Status Logs for maintenance and tracking.</p>
                       <div className="flex gap-2">
                         {truckStatuses.map(statusObj => {
                           const isActive = currentTruck.truck_status_id === statusObj.id;
@@ -771,7 +771,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   )}
 
                   {/* Logistics active trips details */}
-                  <div className="bg-white dark:bg-carbon-900/40 p-4 rounded-xl border border-navy-150 dark:border-carbon-850/60 space-y-3">
+                  <div className="bg-white dark:bg-carbon-900/40 p-4 rounded-xl border border-navy-200 dark:border-carbon-900/60 space-y-3">
                     <h4 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                       <Layers className="w-4 h-4 text-blue-500 shrink-0" />
                       Trip scheduling allocation
@@ -791,7 +791,7 @@ const TruckList: React.FC<TruckListProps> = ({
                         );
                       }
                       return (
-                        <p className="text-xs text-navy-500 dark:text-carbon-450 italic">No Active "In Progress" heavy cargo trips allocated to this truck right now.</p>
+                        <p className="text-xs text-navy-500 dark:text-carbon-400 italic">No Active "In Progress" heavy cargo trips allocated to this truck right now.</p>
                       );
                     })()}
                   </div>
@@ -803,13 +803,13 @@ const TruckList: React.FC<TruckListProps> = ({
                 <div className="space-y-4 animate-fade-in">
                   <div className="flex justify-between items-center bg-navy-100/50 dark:bg-carbon-900/30 p-2.5 rounded-lg border border-navy-200/40 dark:border-carbon-800">
                     <div>
-                      <h4 className="text-xs font-bold text-navy-850 dark:text-white uppercase tracking-wider">Historical Repair & Service Tickets</h4>
+                      <h4 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider">Historical Repair & Service Tickets</h4>
                       <p className="text-[10px] text-navy-500 mt-0.5">Logs of diagnostic overhaul, PPM, and inspections.</p>
                     </div>
                     {isWritable && (
                       <button 
                         onClick={() => setIsMaintModalOpen(true)}
-                        className="bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-navy-950 font-bold text-[10.5px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all"
+                        className="bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-black font-bold text-[10.5px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all"
                       >
                         <Plus className="w-3 h-3" /> Log Work Order
                       </button>
@@ -822,19 +822,19 @@ const TruckList: React.FC<TruckListProps> = ({
                       Loading maintenance histories...
                     </div>
                   ) : maintenanceLogs.length === 0 ? (
-                    <div className="text-center py-12 p-4 bg-white dark:bg-carbon-900/30 border-2 border-dashed border-navy-150 dark:border-carbon-800 rounded-xl">
+                    <div className="text-center py-12 p-4 bg-white dark:bg-carbon-900/30 border-2 border-dashed border-navy-200 dark:border-carbon-800 rounded-xl">
                       <Wrench className="w-8 h-8 text-navy-300 dark:text-carbon-700 mx-auto mb-2" />
                       <h5 className="font-bold text-xs text-navy-800 dark:text-white uppercase">Clean Telemetry</h5>
-                      <p className="text-[10.5px] text-navy-500 dark:text-carbon-450 mt-1">No preventive/repair log indexes created for this transporter.</p>
+                      <p className="text-[10.5px] text-navy-500 dark:text-carbon-400 mt-1">No preventive/repair log indexes created for this transporter.</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {maintenanceLogs.map(log => (
-                        <div key={log.id} className="bg-white dark:bg-carbon-900 p-4 rounded-lg border border-navy-150 dark:border-carbon-800/60 text-xs shadow-xs space-y-2">
+                        <div key={log.id} className="bg-white dark:bg-carbon-900 p-4 rounded-lg border border-navy-200 dark:border-carbon-800/60 text-xs shadow-sm space-y-2">
                           <div className="flex justify-between items-start">
                             <span className={`text-[9.5px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border
                               ${log.maintenance_type === 'Repair' ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border-rose-100' :
-                                log.maintenance_type === 'Inspection' ? 'bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-450 border-sky-100' :
+                                log.maintenance_type === 'Inspection' ? 'bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border-sky-100' :
                                 log.maintenance_type === 'Preventive' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-100' :
                                 'bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-100'}`}>
                               {log.maintenance_type}
@@ -846,7 +846,7 @@ const TruckList: React.FC<TruckListProps> = ({
                             <div>
                               <span className="text-[9px] font-bold text-navy-400 uppercase tracking-widest block">Work Status</span>
                               <span className={`font-semibold inline-flex items-center gap-1 text-[10.5px] mt-0.5
-                                ${log.status === 'Completed' ? 'text-emerald-600' : 'text-amber-505 font-bold animate-pulse'}`}>
+                                ${log.status === 'Completed' ? 'text-emerald-600' : 'text-amber-500 font-bold animate-pulse'}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${log.status === 'Completed' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
                                 {log.status}
                               </span>
@@ -863,7 +863,7 @@ const TruckList: React.FC<TruckListProps> = ({
                             {log.cost_amount !== undefined && (
                               <div>
                                 <span className="text-[9px] font-bold text-navy-400 uppercase tracking-widest block">Cost Amount</span>
-                                <span className="font-bold text-navy-850 dark:text-emerald-400 inline-flex items-center gap-0.5">
+                                <span className="font-bold text-navy-900 dark:text-emerald-400 inline-flex items-center gap-0.5">
                                   ₱{log.cost_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </span>
                               </div>
@@ -887,7 +887,7 @@ const TruckList: React.FC<TruckListProps> = ({
                           </div>
 
                           {log.notes && (
-                            <div className="bg-navy-55/10 dark:bg-carbon-950/40 p-2.5 rounded text-navy-650 dark:text-carbon-400 italic break-words mt-1 border-l-2 border-amber-400">
+                            <div className="bg-navy-50/10 dark:bg-carbon-950/40 p-2.5 rounded text-navy-700 dark:text-carbon-400 italic break-words mt-1 border-l-2 border-amber-400">
                               {log.notes}
                             </div>
                           )}
@@ -902,7 +902,7 @@ const TruckList: React.FC<TruckListProps> = ({
               {activeTab === 'status_logs' && (
                 <div className="space-y-4 animate-fade-in">
                   <div>
-                    <h4 className="text-xs font-bold text-navy-850 dark:text-white uppercase tracking-wider">Chronological Status Audit Trail</h4>
+                    <h4 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider">Chronological Status Audit Trail</h4>
                     <p className="text-[10px] text-navy-500 mt-0.5">Audit log of telemetry and administrative transitions.</p>
                   </div>
 
@@ -912,9 +912,9 @@ const TruckList: React.FC<TruckListProps> = ({
                       Loading status log trail...
                     </div>
                   ) : statusLogs.length === 0 ? (
-                    <div className="text-center py-12 p-3 bg-white dark:bg-carbon-900/30 border-2 border-dashed border-navy-150 dark:border-carbon-800 rounded-xl">
+                    <div className="text-center py-12 p-3 bg-white dark:bg-carbon-900/30 border-2 border-dashed border-navy-200 dark:border-carbon-800 rounded-xl">
                       <History className="w-8 h-8 text-navy-300 dark:text-carbon-700 mx-auto mb-2" />
-                      <p className="text-[10.5px] text-navy-500 dark:text-carbon-450">No status adjustments logged for this equipment.</p>
+                      <p className="text-[10.5px] text-navy-500 dark:text-carbon-400">No status adjustments logged for this equipment.</p>
                     </div>
                   ) : (
                     <div className="relative pl-6 border-l-2 border-navy-100 dark:border-carbon-800 space-y-6 pt-2">
@@ -934,13 +934,13 @@ const TruckList: React.FC<TruckListProps> = ({
                             <span className="text-[10px] font-mono text-zinc-400 block">{new Date(log.changed_at).toLocaleString()}</span>
                             
                             <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                              <span className="font-semibold text-navy-500 dark:text-carbon-450">{oldMatch}</span>
+                              <span className="font-semibold text-navy-500 dark:text-carbon-400">{oldMatch}</span>
                               <span className="text-zinc-400 text-[10px]">➔</span>
-                              <span className="font-bold text-navy-900 dark:text-white bg-blue-50/50 dark:bg-blue-950/10 px-1.5 py-0.5 rounded border border-blue-105/30">{newMatch}</span>
+                              <span className="font-bold text-navy-900 dark:text-white bg-blue-50/50 dark:bg-blue-950/10 px-1.5 py-0.5 rounded border border-blue-100/30">{newMatch}</span>
                             </div>
 
                             {log.reason && (
-                              <p className="mt-1.5 text-navy-600 dark:text-carbon-400 font-sans text-[11px] bg-white dark:bg-carbon-900/40 p-2 rounded border border-navy-100/40 dark:border-carbon-805/40">
+                              <p className="mt-1.5 text-navy-600 dark:text-carbon-400 font-sans text-[11px] bg-white dark:bg-carbon-900/40 p-2 rounded border border-navy-100/40 dark:border-carbon-800/40">
                                 {log.reason}
                               </p>
                             )}
@@ -970,13 +970,13 @@ const TruckList: React.FC<TruckListProps> = ({
               <AlertTriangle className="w-5 h-5" />
               <h3 className="font-bold text-base">{alertMessage.title}</h3>
             </div>
-            <p className="text-xs text-navy-650 dark:text-carbon-400 font-sans leading-relaxed">
+            <p className="text-xs text-navy-700 dark:text-carbon-400 font-sans leading-relaxed">
               {alertMessage.body}
             </p>
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setAlertMessage(null)}
-                className="bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-navy-950 font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
+                className="bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-black font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
               >
                 Acknowledge Protocol
               </button>
@@ -989,23 +989,23 @@ const TruckList: React.FC<TruckListProps> = ({
       {confirmAction && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-[100] p-4 animate-fade-in">
           <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400 border-b border-rose-50 dark:border-carbon-805 pb-3">
+            <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400 border-b border-rose-50 dark:border-carbon-800 pb-3">
               <AlertTriangle className="w-5 h-5" />
               <h3 className="font-bold text-base">{confirmAction.title}</h3>
             </div>
-            <p className="text-xs text-navy-650 dark:text-carbon-400 font-sans leading-relaxed">
+            <p className="text-xs text-navy-700 dark:text-carbon-400 font-sans leading-relaxed">
               {confirmAction.message}
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setConfirmAction(null)}
-                className="bg-navy-100 hover:bg-navy-200 dark:bg-carbon-805 text-navy-900 dark:text-carbon-205 font-bold text-xs px-4 py-2 rounded-lg transition-all"
+                className="bg-navy-100 hover:bg-navy-200 dark:bg-carbon-800 text-navy-900 dark:text-carbon-200 font-bold text-xs px-4 py-2 rounded-lg transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmAction.onConfirm}
-                className="bg-red-605 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
+                className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
               >
                 Confirm Deactivation
               </button>
@@ -1018,11 +1018,11 @@ const TruckList: React.FC<TruckListProps> = ({
       {isMaintModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-[90] p-4">
           <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden animate-zoom-in">
-            <div className="p-4 border-b border-navy-100 dark:border-carbon-805 flex justify-between items-center bg-navy-50/50 dark:bg-carbon-950">
+            <div className="p-4 border-b border-navy-100 dark:border-carbon-800 flex justify-between items-center bg-navy-50/50 dark:bg-carbon-950">
               <h3 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                <Wrench className="w-4 h-4 text-amber-505" /> Log Maintenance Work Order
+                <Wrench className="w-4 h-4 text-amber-500" /> Log Maintenance Work Order
               </h3>
-              <button onClick={() => setIsMaintModalOpen(false)} className="text-navy-400 hover:text-navy-850 dark:text-carbon-400 dark:hover:text-white">
+              <button onClick={() => setIsMaintModalOpen(false)} className="text-navy-400 hover:text-navy-900 dark:text-carbon-400 dark:hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1034,7 +1034,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   <select
                     value={maintFormData.maintenance_type}
                     onChange={(e) => setMaintFormData({...maintFormData, maintenance_type: e.target.value})}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                   >
                     <option value="Preventive">Preventive</option>
                     <option value="Repair">Repair</option>
@@ -1048,7 +1048,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   <select
                     value={maintFormData.status}
                     onChange={(e) => setMaintFormData({...maintFormData, status: e.target.value})}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                   >
                     <option value="In Progress">In Progress</option>
                     <option value="Completed">Completed</option>
@@ -1065,7 +1065,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   value={maintFormData.scheduled_date}
                   onChange={(e) => setMaintFormData({...maintFormData, scheduled_date: e.target.value})}
                   required
-                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
+                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
                 />
               </div>
 
@@ -1077,7 +1077,7 @@ const TruckList: React.FC<TruckListProps> = ({
                     value={maintFormData.cost_amount}
                     onChange={(e) => setMaintFormData({...maintFormData, cost_amount: e.target.value})}
                     placeholder="e.g. 15000"
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
                   />
                 </div>
 
@@ -1088,7 +1088,7 @@ const TruckList: React.FC<TruckListProps> = ({
                     value={maintFormData.odometer}
                     onChange={(e) => setMaintFormData({...maintFormData, odometer: e.target.value})}
                     placeholder="e.g. 182740"
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
                   />
                 </div>
               </div>
@@ -1100,7 +1100,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   value={maintFormData.vendor_mechanic}
                   onChange={(e) => setMaintFormData({...maintFormData, vendor_mechanic: e.target.value})}
                   placeholder="e.g. Cummins Service Center, Cebu"
-                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                 />
               </div>
 
@@ -1111,7 +1111,7 @@ const TruckList: React.FC<TruckListProps> = ({
                   onChange={(e) => setMaintFormData({...maintFormData, notes: e.target.value})}
                   placeholder="Describe repair logs, diagnostic fault codes, parts replaced..."
                   rows={3}
-                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-255 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-300 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                 />
               </div>
 
@@ -1125,7 +1125,7 @@ const TruckList: React.FC<TruckListProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-navy-950 font-bold py-2 rounded-lg shadow-md transition-all"
+                  className="flex-1 bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-black font-bold py-2 rounded-lg shadow-md transition-all"
                 >
                   Write Log Index
                 </button>
@@ -1138,12 +1138,12 @@ const TruckList: React.FC<TruckListProps> = ({
       {/* CREATE / EDIT TRANSPORTER MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-[90] p-4">
-          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-805 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden animate-zoom-in">
-            <div className="p-4 border-b border-navy-100 dark:border-carbon-805 flex justify-between items-center bg-navy-50/50 dark:bg-carbon-950">
+          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl w-full max-w-sm shadow-2xl overflow-hidden animate-zoom-in">
+            <div className="p-4 border-b border-navy-100 dark:border-carbon-800 flex justify-between items-center bg-navy-50/50 dark:bg-carbon-950">
               <h3 className="text-xs font-bold text-navy-900 dark:text-white uppercase tracking-wider">
                 {editingId ? 'Modify Fleet Transporter specs' : 'Register Vehicle Asset'}
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-navy-400 hover:text-navy-850 dark:text-carbon-400 dark:hover:text-white">
+              <button onClick={() => setIsModalOpen(false)} className="text-navy-400 hover:text-navy-900 dark:text-carbon-400 dark:hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -1151,37 +1151,37 @@ const TruckList: React.FC<TruckListProps> = ({
             <form onSubmit={handleSubmit} className="p-4 space-y-4 text-xs font-sans">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">License Plate Code</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">License Plate Code</label>
                   <input
                     type="text"
                     value={formData.plate_number}
                     onChange={(e) => setFormData({...formData, plate_number: e.target.value.toUpperCase()})}
                     required
                     placeholder="GKL-9012"
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white uppercase font-mono"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white uppercase font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">Chassis (VIN)</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">Chassis (VIN)</label>
                   <input
                     type="text"
                     value={formData.vin}
                     onChange={(e) => setFormData({...formData, vin: e.target.value.toUpperCase()})}
                     required
                     placeholder="17-DIGIT CHASSIS KEY"
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white uppercase font-mono"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white uppercase font-mono"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">Transporter Size Spec</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">Transporter Size Spec</label>
                   <select
                     value={formData.truck_size}
                     onChange={(e) => setFormData({...formData, truck_size: e.target.value})}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                   >
                     <option value="10-Wheeler Wing">10-Wheeler Wing</option>
                     <option value="6-Wheeler Closed">6-Wheeler Closed</option>
@@ -1192,11 +1192,11 @@ const TruckList: React.FC<TruckListProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">Operational Branch</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">Operational Branch</label>
                   <select
                     value={formData.branch_id}
                     onChange={(e) => setFormData({...formData, branch_id: e.target.value})}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                   >
                     {branches.map(b => (
                       <option key={b.id} value={b.id}>{b.branch_name}</option>
@@ -1207,22 +1207,22 @@ const TruckList: React.FC<TruckListProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">LTO Registry Expiry</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">LTO Registry Expiry</label>
                   <input
                     type="date"
                     value={formData.registration_expiry}
                     onChange={(e) => setFormData({...formData, registration_expiry: e.target.value})}
                     required
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">Load Capability</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">Load Capability</label>
                   <select
                     value={formData.load_type_id}
                     onChange={(e) => setFormData({...formData, load_type_id: e.target.value})}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                   >
                     {loadTypes.map(lt => (
                       <option key={lt.id} value={lt.id}>{lt.label}</option>
@@ -1233,11 +1233,11 @@ const TruckList: React.FC<TruckListProps> = ({
 
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">Initial status</label>
+                  <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">Initial status</label>
                   <select
                     value={formData.truck_status_id}
                     onChange={(e) => setFormData({...formData, truck_status_id: e.target.value})}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-205 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                   >
                     {truckStatuses.map(s => (
                       <option key={s.id} value={s.id}>{s.truck_status_code}</option>
@@ -1253,20 +1253,20 @@ const TruckList: React.FC<TruckListProps> = ({
                     onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
                     className="w-4 h-4 rounded text-blue-500 border-navy-200 focus:ring-1 focus:ring-blue-500 cursor-pointer"
                   />
-                  <label htmlFor="is_active_chk" className="font-bold text-navy-800 dark:text-carbon-350 cursor-pointer select-none">
+                  <label htmlFor="is_active_chk" className="font-bold text-navy-800 dark:text-carbon-300 cursor-pointer select-none">
                     Asset is Active
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold text-navy-500 uppercase mb-1 tracking-wider">Transporter Remarks & Details</label>
+                <label className="block text-[9px] font-bold text-navy-500 dark:text-carbon-300 uppercase mb-1 tracking-wider">Transporter Remarks & Details</label>
                 <textarea
                   value={formData.remarks}
                   onChange={(e) => setFormData({...formData, remarks: e.target.value})}
                   placeholder="Record custom administrative or mechanic logs regarding tires, engines..."
                   rows={2}
-                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-255 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
+                  className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-300 dark:border-carbon-800 rounded-md p-2 text-xs focus:outline-none dark:text-white"
                 />
               </div>
 
@@ -1280,7 +1280,7 @@ const TruckList: React.FC<TruckListProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-navy-950 font-bold py-2 rounded-lg shadow-md transition-all"
+                  className="flex-1 bg-navy-900 hover:bg-navy-800 dark:bg-white text-white dark:text-black font-bold py-2 rounded-lg shadow-md transition-all"
                 >
                   Enlist Transporter
                 </button>

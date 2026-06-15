@@ -136,7 +136,7 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
                 </div>
 
                 <div className="flex items-center justify-between mt-8 pt-6 border-t border-navy-100 dark:border-carbon-800/50">
-                  <span className={`text-xs font-semibold uppercase tracking-wider ${allowed ? 'text-navy-900 dark:text-white' : 'text-navy-450 dark:text-carbon-600'}`}>
+                  <span className={`text-xs font-semibold uppercase tracking-wider ${allowed ? 'text-navy-900 dark:text-white' : 'text-navy-500 dark:text-carbon-600'}`}>
                     {allowed ? 'Launch Workspace' : 'Placeholder Module'}
                   </span>
                   {!allowed ? (

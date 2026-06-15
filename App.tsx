@@ -210,8 +210,8 @@ const App: React.FC = () => {
 
               return (
                 <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-navy-50 dark:bg-carbon-950 transition-colors duration-300">
-                  <div className="p-8 bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-2xl shadow-xl max-w-md w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-350">
-                    <div className="p-4 bg-navy-100/50 dark:bg-carbon-800 text-navy-600 dark:text-carbon-455 rounded-full mb-6">
+                  <div className="p-8 bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-2xl shadow-xl max-w-md w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-350">
+                    <div className="p-4 bg-navy-100/50 dark:bg-carbon-800 text-navy-600 dark:text-carbon-400 rounded-full mb-6">
                       <IconComp className="w-12 h-12" />
                     </div>
                     <h2 className="text-2xl font-bold text-navy-900 dark:text-white mb-2 font-sans tracking-tight">
@@ -314,7 +314,7 @@ const App: React.FC = () => {
                       </svg>
                     </div>
                     <h2 className="text-lg font-bold text-navy-900 dark:text-white mb-2">Access Restricted</h2>
-                    <p className="text-sm text-navy-500 dark:text-carbon-450">
+                    <p className="text-sm text-navy-500 dark:text-carbon-400">
                       Standard settings and user directories are limited to administrators. Your role is configured as <span className="font-semibold text-navy-700 dark:text-white">{currentUser.role}</span>.
                     </p>
                   </div>

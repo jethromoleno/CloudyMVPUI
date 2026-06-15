@@ -463,7 +463,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
         )}
 
         {/* OMNI-FILTER CONTROL CENTER */}
-        <div className="bg-white dark:bg-carbon-900 border border-navy-100 dark:border-carbon-805 rounded-xl p-4 mb-6 shadow-xs flex flex-col gap-4">
+        <div className="bg-white dark:bg-carbon-900 border border-navy-100 dark:border-carbon-800 rounded-xl p-4 mb-6 shadow-sm flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-3">
             {/* SEARCH STRAP */}
             <div className="flex-1 relative">
@@ -473,7 +473,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                 placeholder="Search by name, phone, email, license..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 text-xs rounded-lg pl-9 pr-4 py-2.5 text-navy-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-navy-500"
+                className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 text-xs rounded-lg pl-9 pr-4 py-2.5 text-navy-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-navy-500"
               />
             </div>
             
@@ -486,14 +486,14 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1 border-t border-navy-50 dark:border-carbon-805">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1 border-t border-navy-50 dark:border-carbon-800">
             {/* ROLE PICKER */}
             <div>
-              <label className="block text-[9.5px] font-bold text-navy-450 dark:text-carbon-500 mb-1 uppercase tracking-wider">Role</label>
+              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Role</label>
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
               >
                 <option value="All">All Roles</option>
                 {MOCK_EMPLOYEE_ROLES.map(r => (
@@ -504,11 +504,11 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
             {/* BRANCH PICKER */}
             <div>
-              <label className="block text-[9.5px] font-bold text-navy-450 dark:text-carbon-500 mb-1 uppercase tracking-wider">Branch</label>
+              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Branch</label>
               <select
                 value={branchFilter}
                 onChange={(e) => setBranchFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
               >
                 <option value="All">All Branches</option>
                 {MOCK_BRANCHES.map(b => (
@@ -519,11 +519,11 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
             {/* STATUS FILTER */}
             <div>
-              <label className="block text-[9.5px] font-bold text-navy-450 dark:text-carbon-500 mb-1 uppercase tracking-wider">Status</label>
+              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Status</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 <option value="Active">Active Only</option>
@@ -533,11 +533,11 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
             {/* DRIVER AVAILABILITY FILTER */}
             <div>
-              <label className="block text-[9.5px] font-bold text-navy-450 dark:text-carbon-500 mb-1 uppercase tracking-wider">Availability</label>
+              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Availability</label>
               <select
                 value={availabilityFilter}
                 onChange={(e) => setAvailabilityFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
               >
                 <option value="All">All Driver Status</option>
                 <option value="Available">Available</option>
@@ -554,9 +554,9 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                 id="expiringLicense"
                 checked={expiringLicenseOnly}
                 onChange={(e) => setExpiringLicenseOnly(e.target.checked)}
-                className="w-3.5 h-3.5 text-navy-850 border-navy-300 rounded cursor-pointer accent-navy-900"
+                className="w-3.5 h-3.5 text-navy-900 border-navy-300 rounded cursor-pointer accent-navy-900"
               />
-              <label htmlFor="expiringLicense" className="text-[10.5px] font-semibold text-red-650 dark:text-red-400 select-none cursor-pointer flex items-center gap-1">
+              <label htmlFor="expiringLicense" className="text-[10.5px] font-semibold text-red-700 dark:text-red-400 select-none cursor-pointer flex items-center gap-1">
                 <ShieldAlert className="w-3 h-3 text-red-500 shrink-0" /> Expiring License
               </label>
             </div>
@@ -576,10 +576,10 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
             <p className="text-sm font-medium">Synchronizing personnel directories...</p>
           </div>
         ) : filteredEmployees.length === 0 ? (
-          <div className="flex-1 p-16 text-center border-2 border-dashed border-navy-200 dark:border-carbon-800 rounded-2xl bg-white dark:bg-carbon-900 max-w-xl mx-auto shadow-xs flex flex-col items-center justify-center h-full">
+          <div className="flex-1 p-16 text-center border-2 border-dashed border-navy-200 dark:border-carbon-800 rounded-2xl bg-white dark:bg-carbon-900 max-w-xl mx-auto shadow-sm flex flex-col items-center justify-center h-full">
             <User className="w-10 h-10 text-navy-300 dark:text-carbon-600 mb-3" />
             <h3 className="text-base font-bold text-navy-800 dark:text-white mb-1">No Personnel Matches</h3>
-            <p className="text-xs text-navy-500 dark:text-carbon-450 mb-5 max-w-sm">No employee directories fit the specified filters. Try resetting the search terms or adding a new operator record.</p>
+            <p className="text-xs text-navy-500 dark:text-carbon-400 mb-5 max-w-sm">No employee directories fit the specified filters. Try resetting the search terms or adding a new operator record.</p>
             <button 
               onClick={handleResetFilters}
               className="bg-navy-900 dark:bg-white text-white dark:text-black py-2 px-4 rounded text-xs font-semibold"
@@ -605,19 +605,19 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                   <div 
                     key={emp.id} 
                     onClick={() => setSelectedEmployeeId(emp.id)}
-                    className={`border rounded-xl p-4.5 transition-all cursor-pointer relative flex flex-col justify-between h-[154px] shadow-xs active:scale-[0.99] ${
+                    className={`border rounded-xl p-4 transition-all cursor-pointer relative flex flex-col min-h-[172px] shadow-sm active:scale-[0.99] ${
                       isSelected 
                         ? 'bg-navy-900 text-white border-navy-900 dark:bg-carbon-800 dark:border-carbon-700' 
                         : 'bg-white dark:bg-carbon-900 border-navy-100 dark:border-carbon-800 hover:border-navy-300 dark:hover:border-carbon-700'
                     }`}
                   >
-                    <div>
-                      <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start gap-2 min-h-[30px]">
                         {/* BADGE LABELS */}
-                        <div className="flex flex-wrap gap-1">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border text-[10px] ${
+                        <div className="flex items-start gap-1 min-w-0 flex-1 overflow-hidden">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border truncate max-w-[128px] ${
                             isSelected
-                              ? 'bg-white/11 text-white border-white/20'
+                              ? 'bg-white/10 text-white border-white/20'
                               : emp.employee_role_id === 'er-1'
                                 ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border-purple-100 dark:border-purple-900/30'
                                 : emp.employee_role_id === 'er-2'
@@ -628,14 +628,14 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                           </span>
 
                           {!isEmpActive ? (
-                            <span className="bg-red-50 dark:bg-red-950/30 text-red-650 dark:text-red-400 border border-red-100 dark:border-red-900/30 px-1.5 py-0.5 rounded text-[8.5px] font-bold tracking-wider uppercase">
+                            <span className="bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/30 px-1.5 py-0.5 rounded text-[8.5px] font-bold tracking-wider uppercase shrink-0">
                               Inactive
                             </span>
                           ) : (
-                            <span className={`border px-1.5 py-0.5 rounded text-[8.5px] font-bold tracking-wider uppercase ${
+                            <span className={`border px-1.5 py-0.5 rounded text-[8.5px] font-bold tracking-wider uppercase shrink-0 ${
                               isSelected 
                                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/20' 
-                                : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-450 border-emerald-100'
+                                : 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-100'
                             }`}>
                               Active
                             </span>
@@ -643,25 +643,25 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                         </div>
 
                         {/* ID CODE */}
-                        <span className={`font-mono text-[9px] tracking-widest ${isSelected ? 'text-navy-300' : 'text-navy-400'}`}>
+                        <span className={`font-mono text-[9px] tracking-widest shrink-0 pt-1 ${isSelected ? 'text-navy-300' : 'text-navy-400 dark:text-carbon-400'}`}>
                           {emp.employee_code || `EMP-${emp.id.substring(4, 8).toUpperCase()}`}
                         </span>
                       </div>
 
-                      <h3 className="text-sm font-bold mt-2.5 truncate leading-snug">
+                      <h3 className={`text-sm font-bold mt-3 truncate leading-snug ${isSelected ? 'text-white' : 'text-navy-900 dark:text-white'}`}>
                         {emp.first_name} {emp.last_name}
                       </h3>
                       
-                      <div className="flex items-center gap-1 text-[10.5px] mt-1 opacity-80">
+                      <div className={`flex items-center gap-1 text-[10.5px] mt-1 min-w-0 ${isSelected ? 'text-navy-200' : 'text-navy-500 dark:text-carbon-400'}`}>
                         <MapPin className="w-3 h-3 shrink-0" />
                         <span className="truncate">{branchDef?.branch_name || 'Unassigned Hub'}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-gray-100 dark:border-gray-800">
-                      <div className="flex gap-2">
+                    <div className="flex items-center justify-between gap-3 mt-4 pt-3 min-h-[38px] border-t border-dashed border-gray-100 dark:border-gray-800">
+                      <div className="flex gap-2 min-w-0 flex-1">
                         {emp.employee_role_id === 'er-1' && dProf && (
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
                             {isLicenseExpired ? (
                               <span className="bg-red-600 text-white text-[8.5px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide flex items-center gap-0.5 animate-pulse">
                                 <ShieldAlert className="w-2.5 h-2.5" /> Expired License
@@ -671,7 +671,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                                 Expiring &lt; 30d
                               </span>
                             ) : (
-                              <span className={`text-[10px] font-mono ${isSelected ? 'text-white' : 'text-gray-500'}`}>
+                              <span className={`text-[10px] font-mono truncate ${isSelected ? 'text-white' : 'text-gray-500 dark:text-carbon-400'}`}>
                                 Lic: {dProf.license_number}
                               </span>
                             )}
@@ -679,7 +679,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                         )}
                       </div>
 
-                      <span className={`text-[10px] font-mono ${isSelected ? 'text-navy-200' : 'text-navy-450 dark:text-carbon-450'}`}>
+                      <span className={`text-[10px] font-mono shrink-0 ${isSelected ? 'text-navy-200' : 'text-navy-500 dark:text-carbon-400'}`}>
                         {emp.contact_no || 'No phone'}
                       </span>
                     </div>
@@ -692,7 +692,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
       </div>
 
       {/* COLUMN 2: SPLIT PANEL PERSISTENT PROFILE VIEW & DETAILS */}
-      <div className="w-full lg:w-[410px] bg-white dark:bg-carbon-900 border-t lg:border-t-0 lg:border-l border-navy-150 dark:border-carbon-805 h-full flex flex-col overflow-hidden relative shadow-md">
+      <div className="w-full lg:w-[410px] bg-white dark:bg-carbon-900 border-t lg:border-t-0 lg:border-l border-navy-200 dark:border-carbon-800 h-full flex flex-col overflow-hidden relative shadow-md">
         {selectedEmployee ? (
           <div className="flex flex-col h-full overflow-hidden">
             
@@ -724,7 +724,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                   <button 
                     onClick={() => handleDeactivateTrigger(selectedEmployee.id)}
                     title="Soft Deactivate personnel"
-                    className="p-1 px-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-650 dark:text-red-400 text-xs font-semibold cursor-pointer"
+                    className="p-1 px-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-semibold cursor-pointer"
                   >
                     Deactivate
                   </button>
@@ -737,21 +737,21 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               
               {/* PRIMARY CONTACT SPEC CLUSTER */}
               <div>
-                <h4 className="text-[10px] font-extrabold text-navy-450 dark:text-carbon-500 uppercase tracking-wider mb-2">Personnel Details</h4>
-                <div className="space-y-2 bg-navy-50/20 dark:bg-carbon-950/10 p-3 rounded-lg border border-navy-100/30 dark:border-carbon-805 text-xs">
+                <h4 className="text-[10px] font-extrabold text-navy-500 dark:text-carbon-500 uppercase tracking-wider mb-2">Personnel Details</h4>
+                <div className="space-y-2 bg-navy-50/20 dark:bg-carbon-950/10 p-3 rounded-lg border border-navy-100/30 dark:border-carbon-800 text-xs">
                   
                   {/* BRANCH */}
                   <div className="flex justify-between">
-                    <span className="text-navy-500 dark:text-carbon-450">Branch Terminal</span>
-                    <span className="font-semibold text-navy-850 dark:text-white">
+                    <span className="text-navy-500 dark:text-carbon-400">Branch Terminal</span>
+                    <span className="font-semibold text-navy-900 dark:text-white">
                       {MOCK_BRANCHES.find(b => b.id === selectedEmployee.branch_id)?.branch_name || 'Global Terminal'}
                     </span>
                   </div>
 
                   {/* TELEPHONE */}
                   <div className="flex justify-between items-center">
-                    <span className="text-navy-500 dark:text-carbon-450">Contact Phone</span>
-                    <span className="font-mono text-navy-850 dark:text-white flex items-center gap-1">
+                    <span className="text-navy-500 dark:text-carbon-400">Contact Phone</span>
+                    <span className="font-mono text-navy-900 dark:text-white flex items-center gap-1">
                       <Phone className="w-3 h-3 text-navy-400 shrink-0" />
                       {selectedEmployee.contact_no || 'Not Configured'}
                     </span>
@@ -759,8 +759,8 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
                   {/* EMAIL */}
                   <div className="flex justify-between items-center">
-                    <span className="text-navy-550 dark:text-carbon-450">Work Email</span>
-                    <span className="font-mono text-navy-850 dark:text-white flex items-center gap-1 text-[11px]">
+                    <span className="text-navy-500 dark:text-carbon-400">Work Email</span>
+                    <span className="font-mono text-navy-900 dark:text-white flex items-center gap-1 text-[11px]">
                       <Mail className="w-3 h-3 text-navy-400 shrink-0" />
                       {selectedEmployee.email || `${selectedEmployee.first_name.toLowerCase()}@cloudy.ph`}
                     </span>
@@ -768,7 +768,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
                   {/* SYSTEM ACTIVE INDICATOR */}
                   <div className="flex justify-between">
-                    <span className="text-navy-500 dark:text-carbon-450">Employment Status</span>
+                    <span className="text-navy-500 dark:text-carbon-400">Employment Status</span>
                     <span className="font-semibold text-navy-800 dark:text-white flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${selectedEmployee.is_active !== false && selectedEmployee.employment_status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                       {selectedEmployee.employment_status || 'Active'}
@@ -779,16 +779,16 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
               {/* DRIVER SPECIALIZED SUB-PANEL */}
               {selectedEmployee.employee_role_id === 'er-1' && (
-                <div className="border-t border-navy-100 dark:border-carbon-805 pt-5 space-y-4">
+                <div className="border-t border-navy-100 dark:border-carbon-800 pt-5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h4 className="text-[10px] font-extrabold text-purple-700 dark:text-purple-400 uppercase tracking-widest flex items-center gap-1">
                       <IdCard className="w-4 h-4" /> Driver Fleet Credentials
                     </h4>
                     {selectedDriverProfile && (
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        selectedDriverProfile.availability_status === 'Available' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-450' : 
+                        selectedDriverProfile.availability_status === 'Available' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400' : 
                         selectedDriverProfile.availability_status === 'Assigned' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400' : 
-                        'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-450'
+                        'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400'
                       }`}>
                         {selectedDriverProfile.availability_status}
                       </span>
@@ -809,7 +809,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                           <p className="font-semibold text-navy-900 dark:text-white mt-0.5">{selectedDriverProfile.license_expiry || '2028-12-31'}</p>
                           
                           {checkLicenseExpired(selectedDriverProfile.license_expiry) && (
-                            <p className="text-[9px] text-red-650 font-bold mt-1 uppercase animate-bounce">🚨 Expired License</p>
+                            <p className="text-[9px] text-red-700 font-bold mt-1 uppercase animate-bounce">🚨 Expired License</p>
                           )}
                           {checkLicenseExpiringIn30Days(selectedDriverProfile.license_expiry) && (
                             <p className="text-[9px] text-amber-600 font-bold mt-1 uppercase">⚠️ Expiring &lt; 30d</p>
@@ -827,7 +827,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                       {/* DRIVER AVAILABILITY HISTORY/ROWS */}
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <h5 className="text-[10px] font-extrabold text-navy-450 dark:text-carbon-500 uppercase tracking-wider">Availability overrides</h5>
+                          <h5 className="text-[10px] font-extrabold text-navy-500 dark:text-carbon-500 uppercase tracking-wider">Availability overrides</h5>
                           <button 
                             onClick={() => setShowAddAvailBlock(!showAddAvailBlock)}
                             className="text-[10.5px] font-extrabold text-navy-900 dark:text-white hover:underline uppercase flex items-center gap-0.5"
@@ -887,18 +887,18 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
                         {/* AVAILABILITY LOG DATA TABLE */}
                         {selectedDriverAvailability.length === 0 ? (
-                          <p className="text-[11px] text-navy-450 dark:text-carbon-500 italic">No specific scheduling overrides recorded. Operator defaults to Available status.</p>
+                          <p className="text-[11px] text-navy-500 dark:text-carbon-500 italic">No specific scheduling overrides recorded. Operator defaults to Available status.</p>
                         ) : (
                           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                             {selectedDriverAvailability.map(da => (
-                              <div key={da.id} className="bg-white dark:bg-carbon-850 p-2.5 rounded border border-navy-100 dark:border-carbon-805 text-[11.5px] relative flex justify-between items-start">
+                              <div key={da.id} className="bg-white dark:bg-carbon-900 p-2.5 rounded border border-navy-100 dark:border-carbon-800 text-[11.5px] relative flex justify-between items-start">
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <span className="font-bold text-navy-800 dark:text-white">{da.availability_date}</span>
                                     <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-bold ${
-                                      da.status === 'Available' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-450' : 
+                                      da.status === 'Available' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400' : 
                                       da.status === 'Assigned' ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400' : 
-                                      'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-450'
+                                      'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400'
                                     }`}>
                                       {da.status}
                                     </span>
@@ -927,7 +927,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               )}
 
               {/* TIMESTAMPS / DATABASE INLINE METADATA */}
-              <div className="border-t border-navy-100 dark:border-carbon-805 pt-5 text-[10px] text-navy-450 dark:text-carbon-500 space-y-1 font-mono">
+              <div className="border-t border-navy-100 dark:border-carbon-800 pt-5 text-[10px] text-navy-500 dark:text-carbon-500 space-y-1 font-mono">
                 <div className="flex justify-between">
                   <span>Record Created Date</span>
                   <span>{selectedEmployee.created_at ? new Date(selectedEmployee.created_at).toLocaleString() : '2026-06-15 05:10:22'}</span>
@@ -943,7 +943,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
         ) : (
           <div className="flex flex-col items-center justify-center p-8 h-full bg-navy-50/50 text-center">
             <User className="w-9 h-9 text-navy-300 dark:text-carbon-600 mb-2" />
-            <h3 className="font-bold text-sm text-navy-850 dark:text-white">Profile Detail Panel</h3>
+            <h3 className="font-bold text-sm text-navy-900 dark:text-white">Profile Detail Panel</h3>
             <p className="text-xs text-navy-500 max-w-xs mt-1">Select any employee from the directory menu to explore license status, metadata, and manage availability logs.</p>
           </div>
         )}
@@ -961,7 +961,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               Are you sure you want to deactivate <strong className="text-black dark:text-white">{employees.find(e => e.id === confirmDeactivateId)?.full_name}</strong>?
             </p>
             
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-250 p-3 rounded text-[11px] text-amber-700 dark:text-amber-400 mb-6 leading-normal">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 p-3 rounded text-[11px] text-amber-700 dark:text-amber-400 mb-6 leading-normal">
               <strong>OFFLINE DIRECTORY WARNING:</strong> Deactivated operators will instantly be disabled in all Trip Scheduling dropdown options across the board.
             </div>
 
@@ -974,7 +974,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               </button>
               <button 
                 onClick={executeDeactivate}
-                className="bg-red-650 hover:bg-red-700 text-white px-4 py-2 rounded text-xs font-bold shadow cursor-pointer"
+                className="bg-red-700 hover:bg-red-700 text-white px-4 py-2 rounded text-xs font-bold shadow cursor-pointer"
               >
                 Deactivate Employee
               </button>
@@ -986,7 +986,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
       {/* CREATE / ENROLL & EDIT OPERATOR DIALOG */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-navy-900/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-carbon-900 rounded-xl border border-navy-150 dark:border-carbon-800 w-full max-w-md shadow-2xl overflow-hidden my-8">
+          <div className="bg-white dark:bg-carbon-900 rounded-xl border border-navy-200 dark:border-carbon-800 w-full max-w-md shadow-2xl overflow-hidden my-8">
             
             {/* MODAL HEADER */}
             <div className="p-5 border-b border-navy-100 dark:border-carbon-800 flex justify-between items-center bg-navy-50/70 dark:bg-carbon-950">
@@ -1006,7 +1006,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                 <div className={`p-3 border text-xs rounded flex items-center gap-2 ${
                   alertMessage.type === 'error' 
                     ? 'bg-red-50 text-red-700 border-red-200' 
-                    : 'bg-emerald-50 text-emerald-800 border-emerald-250'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 }`}>
                   <p className="font-semibold">{alertMessage.text}</p>
                 </div>
@@ -1015,7 +1015,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               {/* FIRST & LAST NAME */}
               <div className="grid grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">First Name</label>
+                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">First Name</label>
                   <input 
                     type="text" 
                     value={formData.first_name}
@@ -1025,7 +1025,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Last Name</label>
+                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Last Name</label>
                   <input 
                     type="text" 
                     value={formData.last_name}
@@ -1039,7 +1039,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               {/* CONTACT INFO */}
               <div className="grid grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Contact Phone</label>
+                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Contact Phone</label>
                   <input 
                     type="text" 
                     value={formData.contact_no}
@@ -1050,7 +1050,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Work Email</label>
+                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Work Email</label>
                   <input 
                     type="email" 
                     value={formData.email}
@@ -1064,7 +1064,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
               {/* ROLE PICKER */}
               <div>
-                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Employee Role Mapped Code</label>
+                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Employee Role Mapped Code</label>
                 <select 
                   value={formData.employee_role_id}
                   onChange={(e) => setFormData({...formData, employee_role_id: e.target.value})}
@@ -1078,7 +1078,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
               {/* BRANCH PICKER */}
               <div>
-                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Operations Branch Hub</label>
+                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Operations Branch Hub</label>
                 <select 
                   value={formData.branch_id}
                   onChange={(e) => setFormData({...formData, branch_id: e.target.value})}
@@ -1091,9 +1091,9 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               </div>
 
               {/* STATUS & IS ACTIVE CONFIGS */}
-              <div className="grid grid-cols-2 gap-3.5 pt-1.5 border-t border-navy-50 dark:border-carbon-805">
+              <div className="grid grid-cols-2 gap-3.5 pt-1.5 border-t border-navy-50 dark:border-carbon-800">
                 <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-455 uppercase mb-1 tracking-wider">Employment Status</label>
+                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Employment Status</label>
                   <select 
                     value={formData.employment_status}
                     onChange={(e) => setFormData({
@@ -1120,7 +1120,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                       is_active: e.target.checked,
                       employment_status: e.target.checked ? 'Active' : 'Inactive'
                     })}
-                    className="w-4 h-4 text-navy-850 accent-navy-900 border-navy-350 dark:border-carbon-700 rounded cursor-pointer"
+                    className="w-4 h-4 text-navy-900 accent-navy-900 border-navy-400 dark:border-carbon-700 rounded cursor-pointer"
                   />
                   <label htmlFor="isActiveCheck" className="text-xs font-semibold text-navy-800 dark:text-carbon-300 cursor-pointer select-none">
                     Active System Access
@@ -1142,7 +1142,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                         type="text" 
                         value={formData.license_number}
                         onChange={(e) => setFormData({...formData, license_number: e.target.value})}
-                        className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-450"
+                        className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-500"
                         placeholder="DL-NCR-123456"
                         required={formData.employee_role_id === 'er-1'}
                       />
@@ -1189,7 +1189,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               )}
 
               {/* FORMS CTA */}
-              <div className="pt-4 flex gap-3 border-t border-navy-50 dark:border-carbon-805">
+              <div className="pt-4 flex gap-3 border-t border-navy-50 dark:border-carbon-800">
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)}

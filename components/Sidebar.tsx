@@ -105,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                         ? 'opacity-40 cursor-not-allowed text-navy-400 dark:text-carbon-600'
                         : app.id === activeModule 
                           ? 'bg-navy-50 dark:bg-carbon-800 text-navy-900 dark:text-white font-semibold' 
-                          : 'hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-600 dark:text-carbon-455'
+                          : 'hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-600 dark:text-carbon-400'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -131,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">Navigation</p>
             <button
               onClick={() => onSelectModule('hub')}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-navy-950 dark:bg-white text-white dark:text-black font-semibold shadow-md"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-navy-900 dark:bg-white text-white dark:text-black font-semibold shadow-md"
             >
               <Grid className="w-5 h-5 shrink-0" />
               <span>Back to Hub</span>

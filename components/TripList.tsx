@@ -1177,8 +1177,8 @@ const TripList: React.FC<TripListProps> = ({
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 rounded-lg flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-semibold text-red-850 dark:text-red-450 text-sm">System Alert</h4>
-            <p className="text-xs text-red-650 dark:text-red-350/80 mt-1">{error}</p>
+            <h4 className="font-semibold text-red-900 dark:text-red-400 text-sm">System Alert</h4>
+            <p className="text-xs text-red-700 dark:text-red-400/80 mt-1">{error}</p>
           </div>
         </div>
       )}
@@ -1189,7 +1189,7 @@ const TripList: React.FC<TripListProps> = ({
             <h3 className="text-lg font-bold text-navy-900 dark:text-white flex items-center gap-2 mb-2 font-sans">
               <AlertTriangle className="w-5 h-5 text-red-500 animate-pulse" /> Confirm Trip Cancellation
             </h3>
-            <p className="text-sm text-navy-600 dark:text-carbon-450 mb-6 leading-relaxed">
+            <p className="text-sm text-navy-600 dark:text-carbon-400 mb-6 leading-relaxed">
               Are you sure you want to cancel Trip <strong className="font-mono text-xs bg-navy-50 dark:bg-carbon-800 px-1.5 py-0.5 rounded text-navy-900 dark:text-white font-bold">{cancelTripConfirm.trip.trip_code}</strong>? This action will release assigned drivers and vehicles.
             </p>
             <div className="flex gap-3 justify-end">
@@ -1204,7 +1204,7 @@ const TripList: React.FC<TripListProps> = ({
                   cancelTripConfirm.onConfirm();
                   setCancelTripConfirm(null);
                 }}
-                className="bg-red-600 hover:bg-red-750 text-white px-4 py-2 rounded text-xs font-semibold shadow-md transition-colors"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-xs font-semibold shadow-md transition-colors"
               >
                 Confirm Cancellation
               </button>
@@ -1261,7 +1261,7 @@ const TripList: React.FC<TripListProps> = ({
           {!isReadOnly && (
             <button 
               onClick={() => handleOpenModal()}
-              className="bg-navy-950 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-200 text-white dark:text-black px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-navy-100 text-sm font-medium"
+              className="bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-200 text-white dark:text-black px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-navy-100 text-sm font-medium"
             >
               <Plus className="w-4 h-4" /> New Trip Advice
             </button>
@@ -1287,20 +1287,20 @@ const TripList: React.FC<TripListProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={handlePrevMonth}
-                className="p-2 border border-navy-100 dark:border-carbon-800 bg-white dark:bg-carbon-800 hover:bg-navy-50 dark:hover:bg-carbon-705 text-navy-600 dark:text-carbon-300 rounded-lg transition-colors"
+                className="p-2 border border-navy-100 dark:border-carbon-800 bg-white dark:bg-carbon-800 hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-600 dark:text-carbon-300 rounded-lg transition-colors"
                 title="Previous Month"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={handleToday}
-                className="px-3 py-2 border border-navy-100 dark:border-carbon-800 bg-white dark:bg-carbon-800 hover:bg-navy-50 dark:hover:bg-carbon-705 text-navy-600 dark:text-carbon-300 rounded-lg text-xs font-semibold transition-colors"
+                className="px-3 py-2 border border-navy-100 dark:border-carbon-800 bg-white dark:bg-carbon-800 hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-600 dark:text-carbon-300 rounded-lg text-xs font-semibold transition-colors"
               >
                 Today
               </button>
               <button
                 onClick={handleNextMonth}
-                className="p-2 border border-navy-100 dark:border-carbon-800 bg-white dark:bg-carbon-800 hover:bg-navy-50 dark:hover:bg-carbon-705 text-navy-600 dark:text-carbon-300 rounded-lg transition-colors"
+                className="p-2 border border-navy-100 dark:border-carbon-800 bg-white dark:bg-carbon-800 hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-600 dark:text-carbon-300 rounded-lg transition-colors"
                 title="Next Month"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -1400,7 +1400,7 @@ const TripList: React.FC<TripListProps> = ({
       {viewMode === 'list' && (
         <div className="space-y-4">
           {/* Detailed Advanced Filters Panel */}
-          <div className="bg-white dark:bg-carbon-900 rounded-xl border border-navy-150 dark:border-carbon-800 p-4 shadow-sm">
+          <div className="bg-white dark:bg-carbon-900 rounded-xl border border-navy-200 dark:border-carbon-800 p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3 border-b border-navy-50 dark:border-carbon-950 pb-2">
               <span className="text-sm font-bold text-navy-900 dark:text-white flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-blue-500" />
@@ -1430,7 +1430,7 @@ const TripList: React.FC<TripListProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
               {/* Filter: Search */}
               <div className="col-span-1 md:col-span-2">
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Search Dispatch Registry</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Search Dispatch Registry</label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-3.5 w-3.5 text-navy-400 dark:text-carbon-500" />
@@ -1452,7 +1452,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Status */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Trip Status</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Trip Status</label>
                 <select
                   value={listStatus}
                   onChange={(e) => setListStatus(e.target.value)}
@@ -1467,7 +1467,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Pickup Date From */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Scheduled From</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Scheduled From</label>
                 <input
                   type="date"
                   value={listStartDate}
@@ -1478,7 +1478,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Pickup Date To */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Scheduled To</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Scheduled To</label>
                 <input
                   type="date"
                   value={listEndDate}
@@ -1489,7 +1489,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Branch */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Origin Branch</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Origin Branch</label>
                 <select
                   value={listBranch}
                   onChange={(e) => setListBranch(e.target.value)}
@@ -1504,7 +1504,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Load Type */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Load Type</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Load Type</label>
                 <select
                   value={listLoadType}
                   onChange={(e) => setListLoadType(e.target.value)}
@@ -1520,7 +1520,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Truck */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Assigned Truck</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Assigned Truck</label>
                 <select
                   value={listTruck}
                   onChange={(e) => setListTruck(e.target.value)}
@@ -1535,7 +1535,7 @@ const TripList: React.FC<TripListProps> = ({
 
               {/* Filter: Driver */}
               <div>
-                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-450 uppercase mb-1 tracking-wider">Assigned Driver</label>
+                <label className="block text-[11px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-1 tracking-wider">Assigned Driver</label>
                 <select
                   value={listDriver}
                   onChange={(e) => setListDriver(e.target.value)}
@@ -1566,11 +1566,11 @@ const TripList: React.FC<TripListProps> = ({
 
           <div className="flex flex-col xl:flex-row gap-5 items-stretch">
             {/* Left Panel: High Density Table Listing with Horizontal Scroll */}
-            <div className={`transition-all duration-300 ${selectedTripId ? 'xl:w-2/3 w-full' : 'w-full'} bg-white dark:bg-carbon-900 rounded-xl border border-navy-150 dark:border-carbon-800 overflow-hidden shadow-sm flex flex-col`}>
+            <div className={`transition-all duration-300 ${selectedTripId ? 'xl:w-2/3 w-full' : 'w-full'} bg-white dark:bg-carbon-900 rounded-xl border border-navy-200 dark:border-carbon-800 overflow-hidden shadow-sm flex flex-col`}>
               <div className="overflow-x-auto select-none">
                 <table className="w-full text-left border-collapse min-w-[1400px]">
                   <thead>
-                    <tr className="bg-navy-50 dark:bg-carbon-900/80 border-b border-navy-155 dark:border-carbon-800 text-[11px] uppercase tracking-wider font-bold text-navy-600 dark:text-carbon-400">
+                    <tr className="bg-navy-50 dark:bg-carbon-900/80 border-b border-navy-200 dark:border-carbon-800 text-[11px] uppercase tracking-wider font-bold text-navy-600 dark:text-carbon-400">
                       <th className="p-3 pl-4 min-w-[120px]">Trip Advice Code</th>
                       <th className="p-3 min-w-[110px]">Status</th>
                       <th className="p-3 min-w-[150px]">Client</th>
@@ -1586,10 +1586,10 @@ const TripList: React.FC<TripListProps> = ({
                       <th className="p-3 min-w-[100px] text-right">Net Weight</th>
                       <th className="p-3 min-w-[180px]">Route Summary</th>
                       <th className="p-3 min-w-[120px]">Last Updated</th>
-                      <th className="p-3 text-center min-w-[180px] sticky right-0 bg-navy-50 dark:bg-carbon-900 border-l border-navy-155 dark:border-carbon-800 shadow-[-4px_0_12px_rgba(0,0,0,0.04)] z-10">Row Operations</th>
+                      <th className="p-3 text-center min-w-[180px] sticky right-0 bg-navy-50 dark:bg-carbon-900 border-l border-navy-200 dark:border-carbon-800 shadow-[-4px_0_12px_rgba(0,0,0,0.04)] z-10">Row Operations</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-navy-50 dark:divide-carbon-850 text-xs">
+                  <tbody className="divide-y divide-navy-50 dark:divide-carbon-900 text-xs">
                     {(() => {
                       const computedFilteredTrips = trips.filter(trip => {
                         if (trip.is_deleted) return false;
@@ -1663,7 +1663,7 @@ const TripList: React.FC<TripListProps> = ({
                         return (
                           <tr>
                             <td colSpan={16} className="text-center py-16 text-navy-500 dark:text-carbon-400">
-                              <BadgeAlert className="w-8 h-8 text-navy-400 dark:text-carbon-650 mx-auto mb-2.5" />
+                              <BadgeAlert className="w-8 h-8 text-navy-400 dark:text-carbon-700 mx-auto mb-2.5" />
                               <p className="text-sm font-bold">No dispatch records found matching active filter set.</p>
                               <p className="text-xs text-navy-400 dark:text-carbon-500 mt-1">Try resetting dates or clearing search query.</p>
                             </td>
@@ -1695,14 +1695,14 @@ const TripList: React.FC<TripListProps> = ({
                           <tr 
                             key={trip.trip_id || trip.id} 
                             onClick={() => setSelectedTripId(String(trip.id || trip.trip_id))}
-                            className={`border-b border-navy-50 dark:border-carbon-850 hover:bg-navy-50/50 dark:hover:bg-carbon-800/40 transition-colors cursor-pointer group ${
-                              selectedTripId === String(trip.id || trip.trip_id) ? 'bg-blue-50/30 dark:bg-blue-550/10' : ''
+                            className={`border-b border-navy-50 dark:border-carbon-900 hover:bg-navy-50/50 dark:hover:bg-carbon-800/40 transition-colors cursor-pointer group ${
+                              selectedTripId === String(trip.id || trip.trip_id) ? 'bg-blue-50/30 dark:bg-blue-500/10' : ''
                             } ${isCancelled ? 'opacity-65 grayscale-[30%] bg-red-50/10 dark:bg-red-950/5' : ''}`}
                           >
                             {/* Trip Advice Code */}
                             <td className="p-3 pl-4">
                               <div className="flex flex-col gap-1">
-                                <div className={`font-mono font-bold tracking-tight ${isCancelled ? 'line-through text-red-500 dark:text-red-400' : 'text-navy-950 dark:text-white'}`}>
+                                <div className={`font-mono font-bold tracking-tight ${isCancelled ? 'line-through text-red-500 dark:text-red-400' : 'text-navy-900 dark:text-white'}`}>
                                   {trip.trip_advise_code || trip.trip_code}
                                 </div>
                                 <div className="text-[10px] text-navy-400 dark:text-carbon-500 flex items-center gap-1">
@@ -1729,14 +1729,14 @@ const TripList: React.FC<TripListProps> = ({
                             </td>
 
                             {/* Client */}
-                            <td className="p-3 font-semibold text-navy-800 dark:text-carbon-350">
+                            <td className="p-3 font-semibold text-navy-800 dark:text-carbon-300">
                               <div className="max-w-[140px] truncate" title={customer?.client_name || customer?.name}>
                                 {customer?.client_name || customer?.name || 'No Client Specified'}
                               </div>
                             </td>
 
                             {/* Internal Code */}
-                            <td className="p-3 font-mono text-navy-500 dark:text-carbon-450 uppercase">
+                            <td className="p-3 font-mono text-navy-500 dark:text-carbon-400 uppercase">
                               {internalCode?.code || 'N/A'}
                             </td>
 
@@ -1752,7 +1752,7 @@ const TripList: React.FC<TripListProps> = ({
                               <div className="font-semibold text-navy-900 dark:text-white">
                                 {trip.pickup_date}
                               </div>
-                              <div className="text-[10px] text-navy-450 dark:text-carbon-500 mt-0.5 truncate max-w-[140px]">
+                              <div className="text-[10px] text-navy-500 dark:text-carbon-500 mt-0.5 truncate max-w-[140px]">
                                 {trip.pickup_time_window || 'Standard window'}
                               </div>
                             </td>
@@ -1773,7 +1773,7 @@ const TripList: React.FC<TripListProps> = ({
                             </td>
 
                             {/* Helper(s) */}
-                            <td className="p-3 text-navy-500 dark:text-carbon-450 text-[11px] truncate max-w-[130px]" title={`H1: ${helper1?.full_name || ''}, H2: ${helper2?.full_name || ''}`}>
+                            <td className="p-3 text-navy-500 dark:text-carbon-400 text-[11px] truncate max-w-[130px]" title={`H1: ${helper1?.full_name || ''}, H2: ${helper2?.full_name || ''}`}>
                               {helper1 || helper2 ? (
                                 <div className="space-y-0.5">
                                   {helper1 && <div className="truncate">👋 {helper1.first_name} {helper1.last_name}</div>}
@@ -1786,7 +1786,7 @@ const TripList: React.FC<TripListProps> = ({
 
                             {/* Load Type */}
                             <td className="p-3">
-                              <span className="text-navy-650 dark:text-carbon-400 bg-navy-50 dark:bg-carbon-950 px-1.5 py-0.5 rounded border border-navy-100 dark:border-carbon-805">
+                              <span className="text-navy-700 dark:text-carbon-400 bg-navy-50 dark:bg-carbon-950 px-1.5 py-0.5 rounded border border-navy-100 dark:border-carbon-800">
                                 {trip.load_type || 'Dry Goods'}
                               </span>
                             </td>
@@ -1794,7 +1794,7 @@ const TripList: React.FC<TripListProps> = ({
                             {/* Transfer */}
                             <td className="p-3 text-[11px]">
                               {trip.is_transfer ? (
-                                <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-150 rounded font-semibold inline-flex items-center gap-0.5">
+                                <span className="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-200 rounded font-semibold inline-flex items-center gap-0.5">
                                   <Layers className="w-3 h-3" /> Yes
                                 </span>
                               ) : (
@@ -1821,13 +1821,13 @@ const TripList: React.FC<TripListProps> = ({
                             </td>
 
                             {/* Last Updated */}
-                            <td className="p-3 text-navy-450 dark:text-carbon-500 font-mono text-[10px]">
+                            <td className="p-3 text-navy-500 dark:text-carbon-500 font-mono text-[10px]">
                               {trip.updated_at ? new Date(trip.updated_at).toLocaleDateString() : 'N/A'}
                             </td>
 
                             {/* Actions Column (Highly stylized sticky side operations block) */}
                             <td 
-                              className="p-3 text-center sticky right-0 bg-white dark:bg-carbon-900 border-l border-navy-155 dark:border-carbon-800 shadow-[-4px_0_12px_rgba(0,0,0,0.04)] z-10"
+                              className="p-3 text-center sticky right-0 bg-white dark:bg-carbon-900 border-l border-navy-200 dark:border-carbon-800 shadow-[-4px_0_12px_rgba(0,0,0,0.04)] z-10"
                               onClick={(e) => e.stopPropagation()} // stop parent row selection
                             >
                               <div className="flex items-center justify-center gap-1.5">
@@ -1859,7 +1859,7 @@ const TripList: React.FC<TripListProps> = ({
                                     setSelectedTripId(String(trip.id || trip.trip_id));
                                     setDetailTab('stops');
                                   }}
-                                  className="text-emerald-500 hover:text-emerald-700 hover:bg-emerald-55/70 dark:hover:bg-emerald-950/20 p-1.5 rounded transition-colors"
+                                  className="text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/20 p-1.5 rounded transition-colors"
                                   title="View transit routing stops"
                                 >
                                   <MapPin className="w-4 h-4" />
@@ -1871,7 +1871,7 @@ const TripList: React.FC<TripListProps> = ({
                                     setSelectedTripId(String(trip.id || trip.trip_id));
                                     setDetailTab('events');
                                   }}
-                                  className="text-purple-500 hover:text-purple-700 hover:bg-purple-55/70 dark:hover:bg-purple-950/20 p-1.5 rounded transition-colors"
+                                  className="text-purple-500 hover:text-purple-700 hover:bg-purple-50/70 dark:hover:bg-purple-950/20 p-1.5 rounded transition-colors"
                                   title="View milestone activity events logs"
                                 >
                                   <Activity className="w-4 h-4" />
@@ -1881,7 +1881,7 @@ const TripList: React.FC<TripListProps> = ({
                                 <button
                                   onClick={() => handleDirectCancelTrip(trip)}
                                   disabled={isCancelled || isReadOnly}
-                                  className="text-red-550 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 p-1.5 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                                  className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 p-1.5 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
                                   title={isCancelled ? "Already cancelled" : "Cancel advising schedule"}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1924,23 +1924,23 @@ const TripList: React.FC<TripListProps> = ({
               const fuels = MOCK_TRIP_FUEL_LOGS.filter(f => f.trip_advise_id === selectedTripObj.id || f.trip_advise_id === selectedTripObj.trip_id).sort((a,b) => new Date(a.logged_at).getTime() - new Date(b.logged_at).getTime());
 
               return (
-                <div className="xl:w-1/3 w-full bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-xl p-5 shadow-lg flex flex-col space-y-4 self-stretch relative">
+                <div className="xl:w-1/3 w-full bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl p-5 shadow-lg flex flex-col space-y-4 self-stretch relative">
                   {/* Panel Header */}
                   <div className="flex items-start justify-between border-b border-navy-50 dark:border-carbon-950 pb-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-bold text-navy-950 dark:text-white font-mono">
+                        <h2 className="text-sm font-bold text-navy-900 dark:text-white font-mono">
                           {selectedTripObj.trip_advise_code || selectedTripObj.trip_code}
                         </h2>
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase ${getTripBadgeStyles(selectedTripObj.status)}`}>
                           {selectedTripObj.status}
                         </span>
                       </div>
-                      <p className="text-[11px] text-navy-450 dark:text-carbon-450 mt-0.5">Origin branch: {branch?.branch_name || 'Manila Port'}</p>
+                      <p className="text-[11px] text-navy-500 dark:text-carbon-400 mt-0.5">Origin branch: {branch?.branch_name || 'Manila Port'}</p>
                     </div>
                     <button 
                       onClick={() => setSelectedTripId(null)} 
-                      className="text-navy-400 hover:text-navy-900 dark:hover:text-white p-1 rounded-full hover:bg-navy-50 dark:hover:bg-carbon-850"
+                      className="text-navy-400 hover:text-navy-900 dark:hover:text-white p-1 rounded-full hover:bg-navy-50 dark:hover:bg-carbon-900"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -1948,7 +1948,7 @@ const TripList: React.FC<TripListProps> = ({
 
                   {/* Business Alerts Segment */}
                   {conflict && (
-                    <div className="bg-red-50 dark:bg-red-550/10 border border-red-200 dark:border-red-400/20 rounded-lg p-3 text-red-700 dark:text-red-400 flex gap-2">
+                    <div className="bg-red-50 dark:bg-red-600/10 border border-red-200 dark:border-red-400/20 rounded-lg p-3 text-red-700 dark:text-red-400 flex gap-2">
                       <ShieldAlert className="w-5 h-5 shrink-0 animate-bounce" />
                       <div>
                         <p className="font-bold text-[11px] uppercase tracking-wide">Double Booking Conflict Warning</p>
@@ -1958,7 +1958,7 @@ const TripList: React.FC<TripListProps> = ({
                   )}
 
                   {isCancelled && (
-                    <div className="bg-amber-50 dark:bg-amber-550/10 border border-amber-250 dark:border-amber-500/20 rounded-lg p-3 text-amber-700 dark:text-amber-400 flex gap-2">
+                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3 text-amber-700 dark:text-amber-400 flex gap-2">
                       <Info className="w-5 h-5 shrink-0" />
                       <div>
                         <p className="font-bold text-[11px] uppercase tracking-wide">Trips Schedule Cancelled</p>
@@ -1968,7 +1968,7 @@ const TripList: React.FC<TripListProps> = ({
                   )}
 
                   {isCompleted && (
-                    <div className="bg-blue-50 dark:bg-blue-550/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3 text-blue-700 dark:text-blue-400 flex gap-2 animate-pulse">
+                    <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3 text-blue-700 dark:text-blue-400 flex gap-2 animate-pulse">
                       <CheckCircle2 className="w-5 h-5 shrink-0" />
                       <div>
                         <p className="font-bold text-[11px] uppercase tracking-wide">Dispatch Run Successfully Completed</p>
@@ -1979,7 +1979,7 @@ const TripList: React.FC<TripListProps> = ({
 
                   {/* Quick Dispatch Status Selector */}
                   {!isCancelled && !isReadOnly && (
-                    <div className="bg-navy-50/50 dark:bg-carbon-950 p-3 rounded-lg border border-navy-100 dark:border-carbon-805 flex items-center justify-between">
+                    <div className="bg-navy-50/50 dark:bg-carbon-950 p-3 rounded-lg border border-navy-100 dark:border-carbon-800 flex items-center justify-between">
                       <span className="text-[11px] font-bold text-navy-600 dark:text-carbon-400 uppercase tracking-wider">Quick Status:</span>
                       <select
                         value={selectedTripObj.status}
@@ -1994,7 +1994,7 @@ const TripList: React.FC<TripListProps> = ({
                   )}
 
                   {/* Sub-Tabs Selector */}
-                  <div className="bg-navy-50 dark:bg-carbon-950 p-1 rounded-lg flex border border-navy-100 dark:border-carbon-805">
+                  <div className="bg-navy-50 dark:bg-carbon-950 p-1 rounded-lg flex border border-navy-100 dark:border-carbon-800">
                     {[
                       { key: 'overview', icon: FileText, label: 'Overview' },
                       { key: 'stops', icon: MapPin, label: `Stops (${stops.length})` },
@@ -2026,7 +2026,7 @@ const TripList: React.FC<TripListProps> = ({
                       <div className="space-y-4">
                         {/* Section: Logistics Details */}
                         <div className="space-y-2">
-                          <h3 className="text-[11px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest border-b border-navy-50 dark:border-carbon-850 pb-1">Logistics & Client Details</h3>
+                          <h3 className="text-[11px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest border-b border-navy-50 dark:border-carbon-900 pb-1">Logistics & Client Details</h3>
                           <div className="grid grid-cols-2 gap-2.5">
                             <div>
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">CLIENT NAME</p>
@@ -2042,22 +2042,22 @@ const TripList: React.FC<TripListProps> = ({
                             </div>
                             <div className="col-span-2">
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">CONSIGNEE SPECIFIC ADDRESS</p>
-                              <p className="text-navy-650 dark:text-carbon-400 leading-relaxed text-[11px]">{consignee?.address || 'No specific depot address registered'}</p>
+                              <p className="text-navy-700 dark:text-carbon-400 leading-relaxed text-[11px]">{consignee?.address || 'No specific depot address registered'}</p>
                             </div>
                             <div>
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">LOAD CLASSIFICATION</p>
-                              <p className="font-semibold text-navy-850 dark:text-white">{selectedTripObj.load_type || 'Dry Cargo'}</p>
+                              <p className="font-semibold text-navy-900 dark:text-white">{selectedTripObj.load_type || 'Dry Cargo'}</p>
                             </div>
                             <div>
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">NET REGISTRY WEIGHT</p>
-                              <p className="font-semibold text-navy-850 dark:text-white font-mono text-xs">{selectedTripObj.net_weight ? `${selectedTripObj.net_weight.toLocaleString()} kg` : '0 kg'}</p>
+                              <p className="font-semibold text-navy-900 dark:text-white font-mono text-xs">{selectedTripObj.net_weight ? `${selectedTripObj.net_weight.toLocaleString()} kg` : '0 kg'}</p>
                             </div>
                           </div>
                         </div>
 
                         {/* Section: Asset Assignments */}
                         <div className="space-y-2">
-                          <h3 className="text-[11px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest border-b border-navy-50 dark:border-carbon-850 pb-1">Asset Assignments</h3>
+                          <h3 className="text-[11px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest border-b border-navy-50 dark:border-carbon-900 pb-1">Asset Assignments</h3>
                           <div className="grid grid-cols-2 gap-2.5">
                             <div>
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">VEHICLE PLATE NUMBER</p>
@@ -2073,25 +2073,25 @@ const TripList: React.FC<TripListProps> = ({
                             </div>
                             <div>
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">DRIVER LICENSE DETAILS</p>
-                              <p className="font-mono text-navy-500 dark:text-carbon-450 text-[11px]">{MOCK_DRIVERS.find(d => d.id === selectedTripObj.driver_id || d.employee_id === selectedTripObj.driver_id)?.license_number || 'N/A'}</p>
+                              <p className="font-mono text-navy-500 dark:text-carbon-400 text-[11px]">{MOCK_DRIVERS.find(d => d.id === selectedTripObj.driver_id || d.employee_id === selectedTripObj.driver_id)?.license_number || 'N/A'}</p>
                             </div>
                             <div className="col-span-2">
                               <p className="text-[10px] text-navy-400 dark:text-carbon-500">ASSISTING CREW HELPERS</p>
                               {helper1 || helper2 ? (
                                 <div className="flex gap-1.5 mt-1">
                                   {helper1 && (
-                                    <span className="bg-navy-50 dark:bg-carbon-805 px-2 py-1 rounded border border-navy-100 dark:border-carbon-700 font-semibold text-navy-700 dark:text-carbon-300">
+                                    <span className="bg-navy-50 dark:bg-carbon-800 px-2 py-1 rounded border border-navy-100 dark:border-carbon-700 font-semibold text-navy-700 dark:text-carbon-300">
                                       {helper1.first_name} {helper1.last_name}
                                     </span>
                                   )}
                                   {helper2 && (
-                                    <span className="bg-navy-50 dark:bg-carbon-805 px-2 py-1 rounded border border-navy-100 dark:border-carbon-700 font-semibold text-navy-700 dark:text-carbon-300">
+                                    <span className="bg-navy-50 dark:bg-carbon-800 px-2 py-1 rounded border border-navy-100 dark:border-carbon-700 font-semibold text-navy-700 dark:text-carbon-300">
                                       {helper2.first_name} {helper2.last_name}
                                     </span>
                                   )}
                                 </div>
                               ) : (
-                                <p className="italic text-navy-450 dark:text-carbon-500 font-medium text-[11px]">No helping personnel attached to this run.</p>
+                                <p className="italic text-navy-500 dark:text-carbon-500 font-medium text-[11px]">No helping personnel attached to this run.</p>
                               )}
                             </div>
                           </div>
@@ -2099,18 +2099,18 @@ const TripList: React.FC<TripListProps> = ({
 
                         {/* Section: Audit Information */}
                         <div className="space-y-2">
-                          <h3 className="text-[11px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest border-b border-navy-50 dark:border-carbon-850 pb-1">System Audit Logs</h3>
+                          <h3 className="text-[11px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest border-b border-navy-50 dark:border-carbon-900 pb-1">System Audit Logs</h3>
                           <div className="grid grid-cols-2 gap-2 text-[11px]">
                             <div>
-                              <p className="text-[10px] text-navy-405 dark:text-carbon-500">REGISTERED CREATED AT</p>
+                              <p className="text-[10px] text-navy-400 dark:text-carbon-500">REGISTERED CREATED AT</p>
                               <p className="font-mono text-navy-600 dark:text-carbon-400">{selectedTripObj.created_at ? new Date(selectedTripObj.created_at).toLocaleString() : 'N/A'}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] text-navy-405 dark:text-carbon-500">LAST LOGGED MODIFICATION</p>
+                              <p className="text-[10px] text-navy-400 dark:text-carbon-500">LAST LOGGED MODIFICATION</p>
                               <p className="font-mono text-navy-600 dark:text-carbon-400">{selectedTripObj.updated_at ? new Date(selectedTripObj.updated_at).toLocaleString() : 'N/A'}</p>
                             </div>
                             <div className="col-span-2">
-                              <p className="text-[10px] text-navy-405 dark:text-carbon-500 font-bold">DIGITAL ENCODER GOB-CLERK</p>
+                              <p className="text-[10px] text-navy-400 dark:text-carbon-500 font-bold">DIGITAL ENCODER GOB-CLERK</p>
                               <p className="font-medium text-navy-800 dark:text-carbon-300">
                                 🧑‍💻 {employees.find(e => e.id === selectedTripObj.encoder_employee_id || e.employee_id === selectedTripObj.encoder_employee_id)?.full_name || 'System Auto dispatcher'}
                               </p>
@@ -2124,13 +2124,13 @@ const TripList: React.FC<TripListProps> = ({
                     {detailTab === 'stops' && (
                       <div className="space-y-4">
                         {stops.length === 0 ? (
-                          <div className="bg-amber-50 dark:bg-amber-550/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 text-center">
+                          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 text-center">
                             <AlertTriangle className="w-5 h-5 text-amber-500 mx-auto mb-2 animate-pulse" />
                             <p className="text-xs font-bold text-amber-700 dark:text-amber-400">No scheduled stops defined for this trip advice.</p>
-                            <p className="text-[10.5px] text-amber-600 dark:text-carbon-450 mt-1">Please add routing nodes to avoid dispatch errors.</p>
+                            <p className="text-[10.5px] text-amber-600 dark:text-carbon-400 mt-1">Please add routing nodes to avoid dispatch errors.</p>
                           </div>
                         ) : (
-                          <div className="relative pl-6 border-l border-navy-150 dark:border-carbon-800 space-y-4 ml-2.5 mt-2 select-none">
+                          <div className="relative pl-6 border-l border-navy-200 dark:border-carbon-800 space-y-4 ml-2.5 mt-2 select-none">
                             {stops.map((stop, idx) => {
                               const loc = getLocationObject(stop.location_id);
                               const isPickup = stop.stop_type === 'Pickup';
@@ -2146,12 +2146,12 @@ const TripList: React.FC<TripListProps> = ({
                                     <div className="flex items-center gap-1.5">
                                       <span className="font-bold text-navy-900 dark:text-white">{loc?.location_name || loc?.name || 'Hub Terminal'}</span>
                                       <span className={`text-[8.5px] px-1.5 rounded-full font-bold uppercase ${
-                                        isPickup ? 'bg-blue-50 text-blue-700 border border-blue-150 dark:bg-blue-950/20 dark:text-blue-300' : 'bg-rose-50 text-rose-700 border border-rose-150 dark:bg-rose-950/20 dark:text-rose-300'
+                                        isPickup ? 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-300' : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/20 dark:text-rose-300'
                                       }`}>
                                         {stop.stop_type}
                                       </span>
                                     </div>
-                                    <p className="text-[10.5px] text-navy-450 dark:text-carbon-450 mt-0.5">{stop.specific_address || loc?.address_line_1}</p>
+                                    <p className="text-[10.5px] text-navy-500 dark:text-carbon-400 mt-0.5">{stop.specific_address || loc?.address_line_1}</p>
                                     <p className="font-mono text-[9.5px] text-navy-400 dark:text-carbon-500 mt-1">
                                       ⏰ Scheduled: {stop.scheduled_at ? new Date(stop.scheduled_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}
                                       {stop.actual_at && ` | Actual: ${new Date(stop.actual_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`}
@@ -2174,7 +2174,7 @@ const TripList: React.FC<TripListProps> = ({
                             <p>No event historical events compiled for this run advice.</p>
                           </div>
                         ) : (
-                          <div className="relative pl-6 border-l border-navy-100 dark:border-carbon-805 space-y-4 ml-2.5 mt-2">
+                          <div className="relative pl-6 border-l border-navy-100 dark:border-carbon-800 space-y-4 ml-2.5 mt-2">
                             {events.map((evt) => (
                               <div key={evt.id} className="relative">
                                 <span className="absolute -left-[30px] top-1.5 w-2 h-2 rounded-full bg-blue-500 ring-4 ring-white dark:ring-carbon-900 shadow-sm" />
@@ -2183,9 +2183,9 @@ const TripList: React.FC<TripListProps> = ({
                                     <p className="font-bold text-navy-900 dark:text-white uppercase tracking-wider">{evt.event_type}</p>
                                     <span className="font-mono text-[9px] text-navy-400 dark:text-carbon-500">{new Date(evt.event_timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                   </div>
-                                  <p className="text-navy-500 dark:text-carbon-450 mt-0.5 leading-relaxed">{evt.remarks || 'No remarks recorded'}</p>
+                                  <p className="text-navy-500 dark:text-carbon-400 mt-0.5 leading-relaxed">{evt.remarks || 'No remarks recorded'}</p>
                                   {evt.document_no && (
-                                    <p className="font-mono text-[9px] text-blue-550 dark:text-blue-400 mt-1">Doc Code Ref: {evt.document_no}</p>
+                                    <p className="font-mono text-[9px] text-blue-500 dark:text-blue-400 mt-1">Doc Code Ref: {evt.document_no}</p>
                                   )}
                                 </div>
                               </div>
@@ -2199,18 +2199,18 @@ const TripList: React.FC<TripListProps> = ({
                     {detailTab === 'fuel' && (
                       <div className="space-y-4">
                         {fuels.length === 0 ? (
-                          <div className="text-center py-10 text-navy-450 dark:text-carbon-500 bg-navy-50/30 dark:bg-carbon-950 p-4 rounded-xl border border-navy-100 dark:border-carbon-850 select-none">
-                            <Fuel className="w-7 h-7 mx-auto mb-1.5 text-navy-405 dark:text-carbon-600" />
+                          <div className="text-center py-10 text-navy-500 dark:text-carbon-500 bg-navy-50/30 dark:bg-carbon-950 p-4 rounded-xl border border-navy-100 dark:border-carbon-900 select-none">
+                            <Fuel className="w-7 h-7 mx-auto mb-1.5 text-navy-400 dark:text-carbon-600" />
                             <p className="font-bold">No fueling receipts exist for this dispatch.</p>
                             <p className="text-[10px] mt-0.5">Refuel requests can be logged inside fleet logistics module.</p>
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            <div className="bg-blue-50/50 dark:bg-blue-950/10 p-3 rounded-lg border border-blue-150 text-blue-800 dark:text-blue-300 flex justify-between font-mono text-[11px]">
-                              <span>Total Liters: <strong className="text-navy-950 dark:text-white font-bold">{fuels.reduce((sum, f) => sum + f.liters, 0).toFixed(1)} L</strong></span>
-                              <span>Total Expenses: <strong className="text-navy-950 dark:text-white font-bold">₱{fuels.reduce((sum, f) => sum + f.total_amount, 0).toLocaleString()}</strong></span>
+                            <div className="bg-blue-50/50 dark:bg-blue-950/10 p-3 rounded-lg border border-blue-200 text-blue-800 dark:text-blue-300 flex justify-between font-mono text-[11px]">
+                              <span>Total Liters: <strong className="text-navy-900 dark:text-white font-bold">{fuels.reduce((sum, f) => sum + f.liters, 0).toFixed(1)} L</strong></span>
+                              <span>Total Expenses: <strong className="text-navy-900 dark:text-white font-bold">₱{fuels.reduce((sum, f) => sum + f.total_amount, 0).toLocaleString()}</strong></span>
                             </div>
-                            <div className="divide-y divide-navy-50 dark:divide-carbon-850">
+                            <div className="divide-y divide-navy-50 dark:divide-carbon-900">
                               {fuels.map((fuel) => (
                                 <div key={fuel.id} className="py-2.5 flex items-center justify-between text-[11px]">
                                   <div>
@@ -2218,7 +2218,7 @@ const TripList: React.FC<TripListProps> = ({
                                     <p className="font-mono text-[10px] text-navy-400 dark:text-carbon-500 mt-0.5">Logged: {new Date(fuel.logged_at).toLocaleDateString()}</p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="font-mono font-bold text-navy-850 dark:text-white">{fuel.liters} L</p>
+                                    <p className="font-mono font-bold text-navy-900 dark:text-white">{fuel.liters} L</p>
                                     <p className="font-mono text-navy-400 dark:text-carbon-400 text-[10px]">₱{fuel.total_amount.toLocaleString()}</p>
                                   </div>
                                 </div>
@@ -2260,7 +2260,7 @@ const TripList: React.FC<TripListProps> = ({
               {mapSearch && (
                 <button
                   onClick={() => setMapSearch('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-navy-400 hover:text-navy-950 dark:hover:text-white"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-navy-400 hover:text-navy-900 dark:hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -2351,7 +2351,7 @@ const TripList: React.FC<TripListProps> = ({
                       className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-2 relative ${
                         isActive
                           ? 'bg-blue-50/45 dark:bg-blue-950/15 border-blue-400 dark:border-blue-500/45 ring-1 ring-blue-400 dark:ring-blue-500/30'
-                          : 'bg-white dark:bg-carbon-900 border-navy-100 dark:border-carbon-805 hover:bg-navy-50/30 dark:hover:bg-carbon-800/10 hover:border-navy-200 dark:hover:border-carbon-700'
+                          : 'bg-white dark:bg-carbon-900 border-navy-100 dark:border-carbon-800 hover:bg-navy-50/30 dark:hover:bg-carbon-800/10 hover:border-navy-200 dark:hover:border-carbon-700'
                       }`}
                     >
                       {/* Top bar with Trip Code and Status Badge */}
@@ -2383,7 +2383,7 @@ const TripList: React.FC<TripListProps> = ({
                       </div>
 
                       {/* Assets detail */}
-                      <div className="flex items-center justify-between text-[10px] text-navy-500 dark:text-carbon-400 border-t border-navy-50/50 dark:border-carbon-805 pt-2 mt-1">
+                      <div className="flex items-center justify-between text-[10px] text-navy-500 dark:text-carbon-400 border-t border-navy-50/50 dark:border-carbon-800 pt-2 mt-1">
                         <span className="flex items-center gap-1 font-semibold">
                           <TruckIcon className="w-3 h-3 text-navy-400 dark:text-carbon-500" />
                           {truck?.license_plate || 'Unassigned'}
@@ -2423,7 +2423,7 @@ const TripList: React.FC<TripListProps> = ({
                 <h2 className="text-lg font-bold text-navy-900 dark:text-white">
                   {editingId ? 'Modify Trip Details' : 'Create New Trip Advice'}
                 </h2>
-                <p className="text-[11px] text-navy-450 dark:text-carbon-450 mt-1 font-medium">
+                <p className="text-[11px] text-navy-500 dark:text-carbon-400 mt-1 font-medium">
                   Configure assignment variables, sequence multi-drop route stops, and log references.
                 </p>
               </div>
@@ -2507,7 +2507,7 @@ const TripList: React.FC<TripListProps> = ({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Trip Advice Code</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Trip Advice Code</label>
                           <input 
                             type="text" 
                             placeholder="e.g. TRIP-2024-001"
@@ -2523,7 +2523,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Dispatch Branch</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Dispatch Branch</label>
                           <select
                             className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.branch_id || ''}
@@ -2541,7 +2541,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Client / Customer</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Client / Customer</label>
                           <select 
                             className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.customer_id || ''}
@@ -2567,7 +2567,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase flex items-center justify-between">
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase flex items-center justify-between">
                             <span>Internal Client Code</span>
                             {!formData.customer_id && <span className="text-[9px] text-amber-600 font-normal italic">Requires Customer</span>}
                           </label>
@@ -2587,7 +2587,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase flex items-center justify-between">
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase flex items-center justify-between">
                             <span>Consignee</span>
                             {!formData.customer_id && <span className="text-[9px] text-amber-600 font-normal italic">Requires Customer</span>}
                           </label>
@@ -2607,7 +2607,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Pickup Date & Time</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Pickup Date & Time</label>
                           <input 
                             type="datetime-local" 
                             className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:ring-1 focus:ring-blue-500 focus:outline-none"
@@ -2623,16 +2623,16 @@ const TripList: React.FC<TripListProps> = ({
 
                         {editingId && (
                           <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                            <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Trip Execution Status</label>
+                            <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Trip Execution Status</label>
                             <div className="flex flex-wrap gap-2">
                               {MOCK_TRIP_STATUSES.map((st) => {
                                 const statusOption = st.status_code;
                                 const isCurrent = formData.status === statusOption;
-                                let activeClass = 'bg-blue-600 border-blue-600 text-white shadow-xs';
-                                if (statusOption === 'Completed') activeClass = 'bg-emerald-600 border-emerald-600 text-white shadow-xs';
-                                if (statusOption === 'In Progress') activeClass = 'bg-amber-500 border-amber-500 text-white shadow-xs';
-                                if (statusOption === 'Cancelled' || statusOption === 'Rescue') activeClass = 'bg-red-600 border-red-600 text-white shadow-xs';
-                                if (statusOption === 'Backload') activeClass = 'bg-slate-500 border-slate-500 text-white shadow-xs';
+                                let activeClass = 'bg-blue-600 border-blue-600 text-white shadow-sm';
+                                if (statusOption === 'Completed') activeClass = 'bg-emerald-600 border-emerald-600 text-white shadow-sm';
+                                if (statusOption === 'In Progress') activeClass = 'bg-amber-500 border-amber-500 text-white shadow-sm';
+                                if (statusOption === 'Cancelled' || statusOption === 'Rescue') activeClass = 'bg-red-600 border-red-600 text-white shadow-sm';
+                                if (statusOption === 'Backload') activeClass = 'bg-slate-500 border-slate-500 text-white shadow-sm';
 
                                 return (
                                   <button
@@ -2643,7 +2643,7 @@ const TripList: React.FC<TripListProps> = ({
                                     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                                       isCurrent 
                                         ? activeClass 
-                                        : 'bg-navy-50 dark:bg-carbon-950 hover:bg-navy-100/70 border-navy-150 text-navy-700 dark:text-carbon-400 dark:border-carbon-800'
+                                        : 'bg-navy-50 dark:bg-carbon-950 hover:bg-navy-100/70 border-navy-200 text-navy-700 dark:text-carbon-400 dark:border-carbon-800'
                                     }`}
                                   >
                                     {statusOption}
@@ -2665,7 +2665,7 @@ const TripList: React.FC<TripListProps> = ({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Truck Size Requirement</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Truck Size Requirement</label>
                           <select 
                             className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.truck_size || ''}
@@ -2680,7 +2680,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Assign Transport Unit (Truck)</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Assign Transport Unit (Truck)</label>
                           <select 
                             className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.truck_id || ''}
@@ -2734,7 +2734,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Assign Primary Helmsman (Driver)</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Assign Primary Helmsman (Driver)</label>
                           <select 
                             className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.driver_id || ''}
@@ -2793,7 +2793,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Helper Assistant Crew 1</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Helper Assistant Crew 1</label>
                           <select 
                             className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.helper1_employee_id || ''}
@@ -2820,7 +2820,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Helper Assistant Crew 2</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Helper Assistant Crew 2</label>
                           <select 
                             className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.helper2_employee_id || ''}
@@ -2847,7 +2847,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Load Commodity Category</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Load Commodity Category</label>
                           <select 
                             className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                             value={formData.load_type || 'Dry'}
@@ -2897,7 +2897,7 @@ const TripList: React.FC<TripListProps> = ({
                               const isConfirmingDelete = confirmDeleteStopId === stop.id;
 
                               return (
-                                <div key={stop.id} className="relative bg-navy-50/15 dark:bg-carbon-950/25 border border-navy-100 dark:border-carbon-800 rounded-lg p-3.5 grid grid-cols-1 md:grid-cols-12 gap-3 transition-shadow hover:shadow-xs border-l-4 border-l-blue-500">
+                                <div key={stop.id} className="relative bg-navy-50/15 dark:bg-carbon-950/25 border border-navy-100 dark:border-carbon-800 rounded-lg p-3.5 grid grid-cols-1 md:grid-cols-12 gap-3 transition-shadow hover:shadow-sm border-l-4 border-l-blue-500">
                                   
                                   {/* Delete inline visual overlay check */}
                                   {isConfirmingDelete && (
@@ -2908,21 +2908,21 @@ const TripList: React.FC<TripListProps> = ({
                                         </div>
                                         <div>
                                           <p className="text-xs font-bold text-navy-900 dark:text-white">Delete routing node #{index + 1} from sequence?</p>
-                                          <p className="text-[10px] text-navy-450 dark:text-carbon-450 mt-0.5">This deletes the scheduled stop variables irreversibly.</p>
+                                          <p className="text-[10px] text-navy-500 dark:text-carbon-400 mt-0.5">This deletes the scheduled stop variables irreversibly.</p>
                                         </div>
                                       </div>
                                       <div className="flex gap-2">
                                         <button 
                                           type="button" 
                                           onClick={() => handleCancelRemoveStop()}
-                                          className="px-2.5 py-1 text-[10px] font-bold bg-navy-50 hover:bg-navy-100 dark:bg-carbon-800 dark:hover:bg-carbon-750 text-navy-700 dark:text-carbon-300 rounded border border-navy-150"
+                                          className="px-2.5 py-1 text-[10px] font-bold bg-navy-50 hover:bg-navy-100 dark:bg-carbon-800 dark:hover:bg-carbon-700 text-navy-700 dark:text-carbon-300 rounded border border-navy-200"
                                         >
                                           Cancel
                                         </button>
                                         <button 
                                           type="button" 
                                           onClick={() => handleExecuteRemoveStop(stop.id)}
-                                          className="px-2.5 py-1 text-[10px] font-bold bg-red-650 text-white rounded hover:bg-red-700"
+                                          className="px-2.5 py-1 text-[10px] font-bold bg-red-700 text-white rounded hover:bg-red-700"
                                         >
                                           Confirm Delete
                                         </button>
@@ -2931,8 +2931,8 @@ const TripList: React.FC<TripListProps> = ({
                                   )}
 
                                   {/* Sequence Indicator and Node Toggle */}
-                                  <div className="md:col-span-2 flex flex-row md:flex-col justify-between md:justify-center items-start border-r border-navy-50 dark:border-carbon-850/30 pr-1 gap-2">
-                                    <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-navy-550 dark:text-carbon-400">
+                                  <div className="md:col-span-2 flex flex-row md:flex-col justify-between md:justify-center items-start border-r border-navy-50 dark:border-carbon-900/30 pr-1 gap-2">
+                                    <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-navy-500 dark:text-carbon-400">
                                       <span className="flex items-center justify-center w-5 h-5 rounded-full bg-navy-900 dark:bg-carbon-800 text-white font-mono text-[10px]">
                                         {index + 1}
                                       </span>
@@ -2955,9 +2955,9 @@ const TripList: React.FC<TripListProps> = ({
 
                                   {/* Base location picker */}
                                   <div className="md:col-span-3">
-                                    <label className="block text-[10px] uppercase font-semibold text-navy-450 dark:text-carbon-500 mb-1">Logistics Core Terminal</label>
+                                    <label className="block text-[10px] uppercase font-semibold text-navy-500 dark:text-carbon-500 mb-1">Logistics Core Terminal</label>
                                     <select
-                                      className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white focus:outline-none"
+                                      className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white focus:outline-none"
                                       value={stop.location_id || ''}
                                       onChange={(e) => handleStopChange(stop.id, 'location_id', e.target.value)}
                                       disabled={isFormFieldsDisabled}
@@ -2977,10 +2977,10 @@ const TripList: React.FC<TripListProps> = ({
 
                                   {/* Specific Customer Address */}
                                   <div className="md:col-span-3">
-                                    <label className="block text-[10px] uppercase font-semibold text-navy-450 dark:text-carbon-500 mb-1">Site / Specific Address</label>
+                                    <label className="block text-[10px] uppercase font-semibold text-navy-500 dark:text-carbon-500 mb-1">Site / Specific Address</label>
                                     <input
                                       type="text"
-                                      className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white focus:outline-none"
+                                      className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white focus:outline-none"
                                       placeholder="e.g. Warehouse Gate 3 / Store Site"
                                       value={stop.specific_address || ''}
                                       onChange={(e) => handleStopChange(stop.id, 'specific_address', e.target.value)}
@@ -2990,10 +2990,10 @@ const TripList: React.FC<TripListProps> = ({
 
                                   {/* District City Area */}
                                   <div className="md:col-span-2">
-                                    <label className="block text-[10px] uppercase font-semibold text-navy-450 dark:text-carbon-500 mb-1">City / Catchment Area</label>
+                                    <label className="block text-[10px] uppercase font-semibold text-navy-500 dark:text-carbon-500 mb-1">City / Catchment Area</label>
                                     <input
                                       type="text"
-                                      className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-150 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white focus:outline-none"
+                                      className="w-full bg-navy-50/55 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded px-2 py-1 text-xs text-navy-900 dark:text-white focus:outline-none"
                                       placeholder="e.g. Mandaue City"
                                       value={stop.city_area || ''}
                                       onChange={(e) => handleStopChange(stop.id, 'city_area', e.target.value)}
@@ -3010,7 +3010,7 @@ const TripList: React.FC<TripListProps> = ({
                                           title="Move Node Sequence Up"
                                           disabled={index === 0}
                                           onClick={() => handleMoveStop(index, 'up')}
-                                          className="p-1 border border-navy-150 dark:border-carbon-800 bg-white dark:bg-carbon-900 rounded hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-500 disabled:opacity-30 self-center md:self-end"
+                                          className="p-1 border border-navy-200 dark:border-carbon-800 bg-white dark:bg-carbon-900 rounded hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-500 disabled:opacity-30 self-center md:self-end"
                                         >
                                           <ArrowUp className="w-3.5 h-3.5" />
                                         </button>
@@ -3019,7 +3019,7 @@ const TripList: React.FC<TripListProps> = ({
                                           title="Move Node Sequence Down"
                                           disabled={index === formStops.length - 1}
                                           onClick={() => handleMoveStop(index, 'down')}
-                                          className="p-1 border border-navy-150 dark:border-carbon-800 bg-white dark:bg-carbon-900 rounded hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-500 disabled:opacity-30 self-center md:self-end"
+                                          className="p-1 border border-navy-200 dark:border-carbon-800 bg-white dark:bg-carbon-900 rounded hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-500 disabled:opacity-30 self-center md:self-end"
                                         >
                                           <ArrowDown className="w-3.5 h-3.5" />
                                         </button>
@@ -3027,7 +3027,7 @@ const TripList: React.FC<TripListProps> = ({
                                           type="button"
                                           title="Delete Node Stop"
                                           onClick={() => handleConfirmRemoveStop(stop.id)}
-                                          className="p-1 border border-red-200 dark:border-red-950 bg-red-50 dark:bg-red-950/20 rounded hover:bg-red-100 text-red-650 self-center md:self-end"
+                                          className="p-1 border border-red-200 dark:border-red-950 bg-red-50 dark:bg-red-950/20 rounded hover:bg-red-100 text-red-700 self-center md:self-end"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
                                         </button>
@@ -3057,7 +3057,7 @@ const TripList: React.FC<TripListProps> = ({
 
                       {/* Stops list structural validation alerts */}
                       {(validationErrors.stops || validationErrors.stops_drop) && (
-                        <div className="p-3 bg-red-50/40 dark:bg-red-950/20 border border-red-150 rounded-lg text-xs text-red-700 space-y-1.5 font-medium">
+                        <div className="p-3 bg-red-50/40 dark:bg-red-950/20 border border-red-200 rounded-lg text-xs text-red-700 space-y-1.5 font-medium">
                           {validationErrors.stops && <p className="flex items-center gap-1">❌ {validationErrors.stops}</p>}
                           {validationErrors.stops_drop && <p className="flex items-center gap-1">❌ {validationErrors.stops_drop}</p>}
                         </div>
@@ -3073,7 +3073,7 @@ const TripList: React.FC<TripListProps> = ({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Loading Reference Number</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Loading Reference Number</label>
                           <input 
                             type="text" 
                             className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
@@ -3085,7 +3085,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">Net Weight Cargo (kg)</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Net Weight Cargo (kg)</label>
                           <input 
                             type="number" 
                             className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
@@ -3102,12 +3102,12 @@ const TripList: React.FC<TripListProps> = ({
 
                         {/* Cargo transfer logs structure */}
                         <div className="col-span-1 md:col-span-2">
-                          <div className="p-3 bg-navy-50/40 dark:bg-carbon-950/20 border border-navy-150 dark:border-carbon-850 rounded-lg">
+                          <div className="p-3 bg-navy-50/40 dark:bg-carbon-950/20 border border-navy-200 dark:border-carbon-900 rounded-lg">
                             <div className="flex items-center gap-2">
                               <input
                                 id="is_transfer_trigger"
                                 type="checkbox"
-                                className="rounded border-navy-300 text-blue-605 focus:ring-blue-500 h-4 w-4 bg-white dark:bg-carbon-900 cursor-pointer"
+                                className="rounded border-navy-300 text-blue-600 focus:ring-blue-500 h-4 w-4 bg-white dark:bg-carbon-900 cursor-pointer"
                                 checked={!!formData.is_transfer}
                                 onChange={(e) => setFormData({
                                   ...formData, 
@@ -3116,14 +3116,14 @@ const TripList: React.FC<TripListProps> = ({
                                 })}
                                 disabled={isFormFieldsDisabled}
                               />
-                              <label htmlFor="is_transfer_trigger" className="text-xs font-semibold text-navy-750 dark:text-carbon-300 cursor-pointer select-none">
+                              <label htmlFor="is_transfer_trigger" className="text-xs font-semibold text-navy-700 dark:text-carbon-300 cursor-pointer select-none">
                                 This trip represents a transfer shipment from another source trip advice (Inter-run cargo transfer)
                               </label>
                             </div>
 
                             {formData.is_transfer && (
                               <div className="mt-3 animate-in slide-in-from-top-1.5 duration-200">
-                                <label className="block text-[10.5px] font-bold text-navy-550 dark:text-carbon-400 mb-1.5 uppercase">Select Originating (Source) Trip Advice Run</label>
+                                <label className="block text-[10.5px] font-bold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">Select Originating (Source) Trip Advice Run</label>
                                 <select
                                   className="w-full bg-white dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none"
                                   value={formData.transfer_from_id || ''}
@@ -3146,7 +3146,7 @@ const TripList: React.FC<TripListProps> = ({
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
-                          <label className="block text-[11px] font-semibold text-navy-550 dark:text-carbon-450 mb-1.5 uppercase">General Dispatch Instructions / Remarks</label>
+                          <label className="block text-[11px] font-semibold text-navy-500 dark:text-carbon-400 mb-1.5 uppercase">General Dispatch Instructions / Remarks</label>
                           <textarea
                             className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-2 text-xs text-navy-900 dark:text-white focus:outline-none min-h-[75px]"
                             placeholder="Specify general carrier instructions, contact milestones, or general client demands assigned to this logistics route advice..."
@@ -3173,7 +3173,7 @@ const TripList: React.FC<TripListProps> = ({
                           <button 
                             type="button" 
                             onClick={() => setIsModalOpen(false)}
-                            className="px-4 py-2.5 bg-white border border-navy-200 hover:bg-navy-50 dark:bg-carbon-800 dark:border-carbon-700 dark:hover:bg-carbon-750 text-navy-700 dark:text-white rounded-lg transition-colors text-xs font-semibold"
+                            className="px-4 py-2.5 bg-white border border-navy-200 hover:bg-navy-50 dark:bg-carbon-800 dark:border-carbon-700 dark:hover:bg-carbon-700 text-navy-700 dark:text-white rounded-lg transition-colors text-xs font-semibold"
                           >
                             Cancel & Clear Variables
                           </button>
@@ -3183,7 +3183,7 @@ const TripList: React.FC<TripListProps> = ({
                             <button 
                               type="button" 
                               onClick={() => handleSave(true)}
-                              className="px-4 py-2.5 bg-navy-100 hover:bg-navy-150 dark:bg-carbon-800 dark:hover:bg-carbon-700 text-navy-900 dark:text-white rounded-lg transition-colors text-xs font-semibold"
+                              className="px-4 py-2.5 bg-navy-100 hover:bg-navy-200 dark:bg-carbon-800 dark:hover:bg-carbon-700 text-navy-900 dark:text-white rounded-lg transition-colors text-xs font-semibold"
                             >
                               Save Draft Advice
                             </button>

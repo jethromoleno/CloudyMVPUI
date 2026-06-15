@@ -272,7 +272,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           <AlertTriangle className="w-8 h-8" />
         </div>
         <h2 className="text-xl font-bold text-navy-900 dark:text-white mb-2">Failed to Load Dashboard</h2>
-        <p className="text-sm text-navy-500 dark:text-carbon-450 mb-6">{error}</p>
+        <p className="text-sm text-navy-500 dark:text-carbon-400 mb-6">{error}</p>
         <button 
           onClick={() => window.location.reload()} 
           className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg uppercase tracking-wider transition-all"
@@ -287,7 +287,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     <div className="h-full overflow-y-auto bg-navy-50 dark:bg-carbon-950 p-6 space-y-6 transition-colors duration-300">
       
       {/* HEADER SECTION */}
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-navy-150 dark:border-carbon-800">
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-navy-200 dark:border-carbon-800">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-navy-900 dark:text-white font-sans">Trip Scheduling Dashboard</h1>
           <p className="text-navy-500 dark:text-carbon-400 mt-1 text-sm">
@@ -296,7 +296,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
         <div className="mt-4 md:mt-0 flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-lg text-xs font-mono text-navy-600 dark:text-carbon-400 shadow-sm shadow-navy-100/10">
-            <Clock className="w-3.5 h-3.5 text-navy-400 dark:text-carbon-450" />
+            <Clock className="w-3.5 h-3.5 text-navy-400 dark:text-carbon-400" />
             05:26 AM MDT
           </div>
           <span className="flex h-2.5 w-2.5 relative">
@@ -310,7 +310,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       {/* KPI STRIP */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* KPI 1 */}
-        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-150 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-250 dark:hover:border-carbon-700 transition-all">
+        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-300 dark:hover:border-carbon-700 transition-all">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-navy-500 dark:text-carbon-400 uppercase tracking-wider">Trips Today</span>
             <div className="p-1 px-1.5 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded text-[10px] font-bold">Today</div>
@@ -322,7 +322,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* KPI 2 */}
-        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-150 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-250 dark:hover:border-carbon-700 transition-all">
+        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-300 dark:hover:border-carbon-700 transition-all">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-navy-500 dark:text-carbon-400 uppercase tracking-wider">Scheduled</span>
             <CalendarClock className="w-3.5 h-3.5 text-blue-500" />
@@ -334,7 +334,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* KPI 3 */}
-        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-150 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-250 dark:hover:border-carbon-700 transition-all">
+        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-300 dark:hover:border-carbon-700 transition-all">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-navy-500 dark:text-carbon-400 uppercase tracking-wider">In Progress</span>
             <Activity className="w-3.5 h-3.5 text-yellow-500 animate-pulse" />
@@ -346,7 +346,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* KPI 4 */}
-        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-150 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-250 dark:hover:border-carbon-700 transition-all">
+        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-300 dark:hover:border-carbon-700 transition-all">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-navy-500 dark:text-carbon-400 uppercase tracking-wider">Completed</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
@@ -358,7 +358,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* KPI 5 */}
-        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-150 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-250 dark:hover:border-carbon-700 transition-all">
+        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-300 dark:hover:border-carbon-700 transition-all">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-navy-500 dark:text-carbon-400 uppercase tracking-wider">Ready Trucks</span>
             <TruckIcon className="w-3.5 h-3.5 text-emerald-500" />
@@ -370,7 +370,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* KPI 6 */}
-        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-150 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-250 dark:hover:border-carbon-700 transition-all">
+        <div className="bg-white dark:bg-carbon-900 p-4 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-sm hover:border-navy-300 dark:hover:border-carbon-700 transition-all">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-navy-500 dark:text-carbon-400 uppercase tracking-wider">Ready Drivers</span>
             <Users className="w-3.5 h-3.5 text-emerald-500" />
@@ -386,14 +386,14 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* RECENT TRIPS TABLE (LEFT COLUMN 8/12) */}
-        <div className="lg:col-span-8 bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-2xl shadow-sm flex flex-col overflow-hidden">
+        <div className="lg:col-span-8 bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-2xl shadow-sm flex flex-col overflow-hidden">
           
-          <div className="p-5 border-b border-navy-150 dark:border-carbon-850 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="p-5 border-b border-navy-200 dark:border-carbon-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-navy-900 dark:text-white font-sans flex items-center gap-2">
                 <Milestone className="w-4 h-4 text-navy-500" /> Active Dispatch logs
               </h2>
-              <p className="text-xs text-navy-450 dark:text-carbon-400 mt-0.5">Click any record row to open or focus details inside the editor workspace.</p>
+              <p className="text-xs text-navy-500 dark:text-carbon-400 mt-0.5">Click any record row to open or focus details inside the editor workspace.</p>
             </div>
             
             <div className="relative max-w-xs w-full sm:w-64">
@@ -427,7 +427,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             ) : (
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-navy-50/50 dark:bg-carbon-850/40 text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase tracking-widest border-b border-navy-200 dark:border-carbon-800">
+                  <tr className="bg-navy-50/50 dark:bg-carbon-900/40 text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase tracking-widest border-b border-navy-200 dark:border-carbon-800">
                     <th className="py-3 px-4">Trip Code</th>
                     <th className="py-3 px-4">Client</th>
                     <th className="py-3 px-4">Pickup window</th>
@@ -437,7 +437,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     <th className="py-3 px-4 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-navy-100 dark:divide-carbon-850/30 text-xs">
+                <tbody className="divide-y divide-navy-100 dark:divide-carbon-900/30 text-xs">
                   {searchedTrips.map(trip => {
                     const tk = getTruckDetails(trip.truck_id);
                     const driver = getDriverName(trip.driver_id);
@@ -451,7 +451,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       <tr 
                         key={trip.id}
                         onClick={() => onViewTripDetail && onViewTripDetail(trip.id)}
-                        className="hover:bg-navy-100/50 dark:hover:bg-carbon-850/25 cursor-pointer transition-colors duration-150 group"
+                        className="hover:bg-navy-100/50 dark:hover:bg-carbon-900/25 cursor-pointer transition-colors duration-150 group"
                       >
                         <td className="py-3 px-4 font-mono font-bold text-navy-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1.5">
                           {trip.trip_advise_code || trip.trip_code}
@@ -463,16 +463,16 @@ const Dashboard: React.FC<DashboardProps> = ({
                         <td className="py-3 px-4">
                           <div className="flex flex-col">
                             <span className="font-semibold text-navy-800 dark:text-zinc-200">{trip.pickup_date}</span>
-                            <span className="text-[10px] text-navy-450 dark:text-carbon-500 font-mono">{trip.pickup_time_window || 'N/A'}</span>
+                            <span className="text-[10px] text-navy-500 dark:text-carbon-500 font-mono">{trip.pickup_time_window || 'N/A'}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-navy-600 dark:text-carbon-350">
+                        <td className="py-3 px-4 text-navy-600 dark:text-carbon-300">
                           <div className="flex flex-col">
                             <span className="font-mono text-xs font-bold text-navy-800 dark:text-zinc-200">{tk.plate}</span>
-                            <span className="text-[10px] text-navy-450 dark:text-carbon-500">{tk.size}</span>
+                            <span className="text-[10px] text-navy-500 dark:text-carbon-500">{tk.size}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-navy-600 dark:text-carbon-350">
+                        <td className="py-3 px-4 text-navy-600 dark:text-carbon-300">
                           {driver}
                         </td>
                         <td className="py-3 px-4">
@@ -483,7 +483,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                               <span className="text-navy-700 dark:text-carbon-300 font-medium truncate max-w-[90px]">{dest}</span>
                             </div>
                           ) : (
-                            <span className="text-navy-400 dark:text-carbon-550 italic">Cebu Depot Shuttle</span>
+                            <span className="text-navy-400 dark:text-carbon-500 italic">Cebu Depot Shuttle</span>
                           )}
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -504,8 +504,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="lg:col-span-4 space-y-6">
           
           {/* OPERATIONAL ALERTS PANEL */}
-          <div className="bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-navy-100 dark:border-carbon-850">
+          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-navy-100 dark:border-carbon-900">
               <h2 className="text-sm font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-red-500" /> Operational Alerts
               </h2>
@@ -537,7 +537,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                   <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                   <div className="text-xs">
                     <p className="font-bold text-red-800 dark:text-red-400 group-hover:underline">Overdue Scheduled Pickup</p>
-                    <p className="text-red-700 dark:text-red-450 mt-0.5">
+                    <p className="text-red-700 dark:text-red-400 mt-0.5">
                       Trip <span className="font-mono font-bold">{trip.trip_advise_code || trip.trip_code}</span> was slated for <span className="font-semibold">{trip.pickup_date}</span> but remains pending.
                     </p>
                   </div>
@@ -552,7 +552,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 >
                   <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <div className="text-xs">
-                    <p className="font-bold text-amber-800 dark:text-amber-450">Vehicle fleet Maintenance</p>
+                    <p className="font-bold text-amber-800 dark:text-amber-400">Vehicle fleet Maintenance</p>
                     <p className="text-amber-700 dark:text-amber-500 mt-0.5">
                       Truck <span className="font-mono font-bold text-amber-900 dark:text-zinc-200">{tk.plate_number}</span> is entered as active Maintenance and unavailable for dispatch.
                     </p>
@@ -564,12 +564,12 @@ const Dashboard: React.FC<DashboardProps> = ({
               {expiringLicenses.map((lic, idx) => lic && (
                 <div 
                   key={idx}
-                  className="p-3 bg-blue-50/50 dark:bg-blue-955/10 border border-blue-100 dark:border-blue-900/25 rounded-xl flex items-start gap-2.5"
+                  className="p-3 bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/25 rounded-xl flex items-start gap-2.5"
                 >
                   <BadgeInfo className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                   <div className="text-xs">
                     <p className="font-bold text-blue-800 dark:text-blue-400">License Expiration Warning</p>
-                    <p className="text-blue-700 dark:text-blue-450 mt-0.5">
+                    <p className="text-blue-700 dark:text-blue-400 mt-0.5">
                       Driver <span className="font-semibold">{lic.driverName}</span>'s license ({lic.licenseNo}) expires in <span className="font-bold text-blue-600 dark:text-blue-400">{lic.daysLeft} days</span> ({lic.expiryDate}).
                     </p>
                   </div>
@@ -579,8 +579,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* FLEET AVAILABILITY SNAPSHOT */}
-          <div className="bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-2xl p-5 shadow-sm space-y-4">
-            <h2 className="text-sm font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-2 border-b border-navy-100 dark:border-carbon-855 pb-2">
+          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-2xl p-5 shadow-sm space-y-4">
+            <h2 className="text-sm font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-2 border-b border-navy-100 dark:border-carbon-800 pb-2">
               <TruckIcon className="w-4 h-4 text-navy-500" /> Vehicle fleet Snapshot
             </h2>
 
@@ -652,8 +652,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* DRIVER AVAILABILITY SNAPSHOT */}
-          <div className="bg-white dark:bg-carbon-900 border border-navy-150 dark:border-carbon-800 rounded-2xl p-5 shadow-sm space-y-4">
-            <h2 className="text-sm font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-2 border-b border-navy-100 dark:border-carbon-855 pb-2">
+          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-2xl p-5 shadow-sm space-y-4">
+            <h2 className="text-sm font-bold text-navy-900 dark:text-white uppercase tracking-wider flex items-center gap-2 border-b border-navy-100 dark:border-carbon-800 pb-2">
               <Users className="w-4 h-4 text-navy-500" /> Driver Availability Snapshot
             </h2>
 

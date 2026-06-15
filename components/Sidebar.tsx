@@ -17,6 +17,14 @@ interface SidebarProps {
   activeModule?: AppModule | 'hub';
 }
 
+const ALLOWED_VIEWS_BY_ROLE: Record<string, string[]> = {
+  SuperAdmin: ['dashboard', 'trip-management', 'trips', 'trucks', 'employees', 'settings'],
+  Admin: ['dashboard', 'trip-management', 'trips', 'trucks', 'employees', 'settings'],
+  Dispatcher: ['dashboard', 'trip-management', 'trips', 'trucks', 'employees'],
+  Encoder: ['dashboard', 'trip-management', 'trips'],
+  Viewer: ['dashboard', 'trip-management', 'trucks', 'employees']
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ 
   currentView, setCurrentView, onLogout, username, userRole, theme, onSelectModule, activeModule 
 }) => {
@@ -48,6 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   const currentApp = apps.find(app => app.id === activeModule) || { id: 'trip_scheduling', label: 'LogiTrack AI', icon: Map };
+  const allowedViews = ALLOWED_VIEWS_BY_ROLE[userRole] || ['dashboard', 'trip-management'];
+  const filteredMenuItems = menuItems.filter(item => allowedViews.includes(item.id));
 
   return (
     <div className="w-64 bg-white dark:bg-carbon-950 h-screen border-r border-navy-100 dark:border-carbon-800 flex flex-col text-navy-600 dark:text-carbon-300 transition-colors duration-300 shrink-0 z-50">
@@ -83,20 +93,33 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div className="p-2 space-y-1">
               <p className="px-3 py-1 text-[10px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest">Switch App</p>
-              {apps.map((app) => (
-                <button
-                  key={app.id}
-                  onClick={() => { onSelectModule(app.id as AppModule); setIsAppMenuOpen(false); }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                    app.id === activeModule 
-                    ? 'bg-navy-50 dark:bg-carbon-800 text-navy-900 dark:text-white font-semibold' 
-                    : 'hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-600 dark:text-carbon-455'
-                  }`}
-                >
-                  <app.icon className="w-4 h-4" />
-                  <span className="text-sm font-medium">{app.label}</span>
-                </button>
-              ))}
+              {apps.map((app) => {
+                const isDisabled = app.id === 'inventory' || app.id === 'billing';
+                return (
+                  <button
+                    key={app.id}
+                    disabled={isDisabled}
+                    onClick={() => { if (!isDisabled) { onSelectModule(app.id as AppModule); setIsAppMenuOpen(false); } }}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors text-left ${
+                      isDisabled
+                        ? 'opacity-40 cursor-not-allowed text-navy-400 dark:text-carbon-600'
+                        : app.id === activeModule 
+                          ? 'bg-navy-50 dark:bg-carbon-800 text-navy-900 dark:text-white font-semibold' 
+                          : 'hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-600 dark:text-carbon-455'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <app.icon className="w-4 h-4" />
+                      <span className="text-sm font-medium">{app.label}</span>
+                    </div>
+                    {isDisabled && (
+                      <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border border-amber-100 dark:border-amber-500/20 rounded scale-[0.85] select-none">
+                        Soon
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -126,7 +149,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div>
               <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">Trip Scheduling</p>
               <div className="space-y-1">
-                {menuItems.map((item) => {
+                {filteredMenuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = currentView === item.id;
                   return (
@@ -149,20 +172,22 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="flex-1"></div>
 
-            <div className="mt-4">
-              <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">System</p>
-              <button
-                onClick={() => setCurrentView('settings')}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  currentView === 'settings'
-                    ? 'bg-navy-900 dark:bg-carbon-800 text-white dark:text-white font-semibold shadow-md dark:shadow-none'
-                    : 'hover:bg-navy-50 dark:hover:bg-carbon-900 hover:text-navy-900 dark:hover:text-white text-navy-500 dark:text-carbon-400'
-                }`}
-              >
-                <Settings className={`w-5 h-5 ${currentView === 'settings' ? 'text-white' : 'text-navy-400 dark:text-carbon-500'}`} />
-                <span className="">Settings</span>
-              </button>
-            </div>
+            {allowedViews.includes('settings') && (
+              <div className="mt-4">
+                <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">System</p>
+                <button
+                  onClick={() => setCurrentView('settings')}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    currentView === 'settings'
+                      ? 'bg-navy-900 dark:bg-carbon-800 text-white dark:text-white font-semibold shadow-md dark:shadow-none'
+                      : 'hover:bg-navy-50 dark:hover:bg-carbon-900 hover:text-navy-900 dark:hover:text-white text-navy-500 dark:text-carbon-400'
+                  }`}
+                >
+                  <Settings className={`w-5 h-5 ${currentView === 'settings' ? 'text-white' : 'text-navy-400 dark:text-carbon-500'}`} />
+                  <span className="">Settings</span>
+                </button>
+              </div>
+            )}
           </>
         )}
       </nav>

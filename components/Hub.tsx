@@ -11,7 +11,8 @@ interface HubProps {
 }
 
 const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onToggleTheme }) => {
-  const hasPermission = (module: AppModule) => user.permissions.includes(module);
+  // Trip Scheduling (LogiTrack) is active. Inventory and Billing are placeholder / coming soon.
+  const hasPermission = (module: AppModule) => module === 'trip_scheduling';
 
   const modules = [
     {
@@ -28,7 +29,8 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
       darkBg: 'dark:bg-carbon-900',
       darkBorder: 'dark:border-carbon-800',
       darkIconBg: 'dark:bg-emerald-500/10 dark:text-emerald-500',
-      darkText: 'dark:text-white'
+      darkText: 'dark:text-white',
+      isPlaceholder: true
     },
     {
       id: 'trip_scheduling' as AppModule,
@@ -42,7 +44,8 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
       darkBg: 'dark:bg-carbon-900',
       darkBorder: 'dark:border-carbon-800',
       darkIconBg: 'dark:bg-blue-500/10 dark:text-blue-500',
-      darkText: 'dark:text-white'
+      darkText: 'dark:text-white',
+      isPlaceholder: false
     },
     {
       id: 'billing' as AppModule,
@@ -56,7 +59,8 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
       darkBg: 'dark:bg-carbon-900',
       darkBorder: 'dark:border-carbon-800',
       darkIconBg: 'dark:bg-purple-500/10 dark:text-purple-500',
-      darkText: 'dark:text-white'
+      darkText: 'dark:text-white',
+      isPlaceholder: true
     }
   ];
 
@@ -65,7 +69,7 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
       {/* Background Decor - Subtle for Light Mode, Hidden/Minimal for Dark */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
          <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-navy-200 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-[120px] opacity-40 dark:opacity-10"></div>
-         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-navy-200 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-[120px] opacity-40 dark:opacity-10"></div>
+         <div className="absolute bottom-[-20%] right-[10%] w-[60%] h-[60%] bg-navy-200 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-[120px] opacity-40 dark:opacity-10"></div>
       </div>
 
       <header className="relative z-10 px-8 py-6 flex justify-between items-center border-b border-navy-100 dark:border-carbon-800 bg-white/80 dark:bg-carbon-950/50 backdrop-blur-md">
@@ -111,22 +115,37 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
                   relative group overflow-hidden rounded-xl border transition-all duration-300 text-left h-80 flex flex-col justify-between p-8
                   ${allowed 
                     ? `${mod.lightBg} ${mod.darkBg} ${mod.lightBorder} ${mod.darkBorder} hover:shadow-xl hover:shadow-navy-200/50 dark:hover:shadow-none hover:-translate-y-1` 
-                    : 'bg-navy-50 border-navy-200 dark:bg-carbon-950 dark:border-carbon-800 opacity-60 cursor-not-allowed grayscale'}
+                    : 'bg-navy-50 border-navy-100 dark:bg-carbon-950 dark:border-carbon-800/80 opacity-60 cursor-not-allowed'}
                 `}
               >
                 <div>
-                  <div className={`w-14 h-14 rounded-lg flex items-center justify-center mb-6 ${allowed ? `${mod.lightIconBg} ${mod.darkIconBg}` : 'bg-navy-100 text-navy-400 dark:bg-carbon-800'}`}>
-                    <Icon className="w-7 h-7" />
+                  <div className="flex justify-between items-start">
+                    <div className={`w-14 h-14 rounded-lg flex items-center justify-center mb-6 ${allowed ? `${mod.lightIconBg} ${mod.darkIconBg}` : 'bg-navy-100 text-navy-400 dark:bg-carbon-800/80 text-navy-400/80 dark:text-carbon-600'}`}>
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    {mod.isPlaceholder && (
+                      <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border border-amber-100 dark:border-amber-500/20 rounded">
+                        Coming Soon
+                      </span>
+                    )}
                   </div>
                   <h2 className={`text-xl font-bold mb-2 ${mod.lightText} ${mod.darkText}`}>{mod.title}</h2>
-                  <p className="text-navy-500 dark:text-carbon-400 text-sm leading-relaxed">{mod.description}</p>
+                  <p className="text-navy-500 dark:text-carbon-400 text-sm leading-relaxed">
+                    {mod.isPlaceholder ? `${mod.title} is a modular extension currently in development for a future enterprise release.` : mod.description}
+                  </p>
                 </div>
 
                 <div className="flex items-center justify-between mt-8 pt-6 border-t border-navy-100 dark:border-carbon-800/50">
-                  <span className={`text-xs font-semibold uppercase tracking-wider ${allowed ? 'text-navy-900 dark:text-white' : 'text-navy-400'}`}>
-                    {allowed ? 'Launch App' : 'Restricted'}
+                  <span className={`text-xs font-semibold uppercase tracking-wider ${allowed ? 'text-navy-900 dark:text-white' : 'text-navy-450 dark:text-carbon-600'}`}>
+                    {allowed ? 'Launch Workspace' : 'Placeholder Module'}
                   </span>
-                  {!allowed ? <Lock className="w-4 h-4 text-navy-400" /> : <div className="w-6 h-6 rounded-full bg-navy-900 dark:bg-white flex items-center justify-center"><div className="w-1.5 h-1.5 bg-white dark:bg-carbon-900 rounded-full"></div></div>}
+                  {!allowed ? (
+                    <Lock className="w-4 h-4 text-navy-400 dark:text-carbon-600" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-navy-900 dark:bg-white flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-white dark:bg-carbon-900 rounded-full"></div>
+                    </div>
+                  )}
                 </div>
               </button>
             );

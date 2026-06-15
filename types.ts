@@ -24,8 +24,10 @@ export interface SystemUser {
   id: string;
   username: string;
   password?: string;
-  role: string; // role code
+  role: string; // role code / primary role
+  roles?: string[]; // assigned roles list
   permissions: string[]; // module codes
+  is_active?: boolean; // active/deactive status
 }
 
 // 2. roles
@@ -91,8 +93,8 @@ export interface AuditLog {
   action: string; // CREATE, UPDATE, DELETE, LOGIN
   table_name: string;
   record_id?: string; // UUID
-  old_values?: any; // JSONB
-  new_values?: any; // JSONB
+  old_values?: Record<string, unknown> | null; // JSONB
+  new_values?: Record<string, unknown> | null; // JSONB
   ip_address?: string;
   created_at: string;
   updated_at: string;
@@ -139,6 +141,7 @@ export interface TripAdvise {
   completion_date?: string;
   remarks?: string;
   is_deleted: boolean;
+  is_draft?: boolean;
   created_at: string;
   updated_at: string;
 
@@ -164,6 +167,8 @@ export interface TripStop {
   stop_type: string; // Pickup, Dropoff, Other
   location_id?: string; // UUID FK -> locations
   specific_address?: string;
+  city_area?: string;
+  notes?: string;
   scheduled_at?: string;
   actual_at?: string;
   created_at: string;
@@ -240,7 +245,7 @@ export interface TripStatus {
 
 // For backward compatibility
 export type TripStatusRecord = TripStatus;
-export type TripStatusType = 'Scheduled' | 'In Transit' | 'Completed' | 'Cancelled' | 'Rescue' | 'Backload' | string;
+export type TripStatusType = 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled' | 'Rescue' | 'Backload' | string;
 
 // 16. load_types
 export interface LoadType {
@@ -261,7 +266,9 @@ export interface Employee {
   last_name: string;
   full_name: string;
   employee_role_id: string; // UUID FK -> employee_roles
+  branch_id?: string;      // UUID FK -> branches
   contact_no?: string;
+  email?: string;          // Contact email
   employment_status: string; // Active, On Leave, Suspended, Terminated
   is_active: boolean;
   is_deleted: boolean;
@@ -302,7 +309,7 @@ export interface EmployeeRole {
 
 // For backward compatibility
 export type EmployeeRoleRecord = EmployeeRole;
-export type EmployeeRoleType = 'Driver' | 'Helper' | 'Encoder' | 'Dispatcher' | string;
+export type EmployeeRoleType = 'Driver' | 'Helper' | 'Encoder' | 'Dispatcher' | 'Admin Staff' | string;
 
 // 20. trucks
 export interface Truck {
@@ -313,8 +320,10 @@ export interface Truck {
   load_type_id?: string; // UUID FK -> load_types
   truck_status_id: string; // UUID FK -> truck_statuses
   registration_expiry?: string; // DATE
+  branch_id?: string;      // UUID FK -> branches
   is_active: boolean;
   is_deleted: boolean;
+  remarks?: string;        // Optional notes
   created_at: string;
   updated_at: string;
 
@@ -362,6 +371,8 @@ export interface MaintenanceLog {
   scheduled_date?: string; // DATE
   completed_at?: string;
   cost_amount?: number;
+  odometer?: number;
+  vendor_mechanic?: string;
   notes?: string;
   created_at: string;
   updated_at: string;

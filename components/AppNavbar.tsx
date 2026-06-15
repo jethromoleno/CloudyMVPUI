@@ -9,10 +9,10 @@ interface AppNavbarProps {
 
 const AppNavbar: React.FC<AppNavbarProps> = ({ activeModule, onSelectModule }) => {
   const navItems = [
-    { id: 'hub', label: 'Apps', icon: LayoutGrid },
-    { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'trip_scheduling', label: 'LogiTrack', icon: Map },
-    { id: 'billing', label: 'Billing', icon: DollarSign },
+    { id: 'hub', label: 'Apps', icon: LayoutGrid, isPlaceholder: false },
+    { id: 'inventory', label: 'Inventory (Soon)', icon: Package, isPlaceholder: true },
+    { id: 'trip_scheduling', label: 'LogiTrack', icon: Map, isPlaceholder: false },
+    { id: 'billing', label: 'Billing (Soon)', icon: DollarSign, isPlaceholder: true },
   ];
 
   return (
@@ -21,17 +21,22 @@ const AppNavbar: React.FC<AppNavbarProps> = ({ activeModule, onSelectModule }) =
         {navItems.map((item) => {
           const isActive = activeModule === item.id;
           const Icon = item.icon;
+          const isDisabled = item.isPlaceholder;
           return (
             <button
               key={item.id}
-              onClick={() => onSelectModule(item.id as any)}
+              onClick={() => !isDisabled && onSelectModule(item.id as any)}
+              disabled={isDisabled}
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
-                ${isActive 
-                  ? 'bg-navy-800 dark:bg-white text-white dark:text-carbon-900 shadow-md shadow-navy-900/10 dark:shadow-none' 
-                  : 'text-navy-500 dark:text-carbon-400 hover:text-navy-900 dark:hover:text-white hover:bg-navy-100 dark:hover:bg-carbon-800'
+                ${isDisabled 
+                  ? 'opacity-40 cursor-not-allowed text-navy-400 dark:text-carbon-600' 
+                  : isActive 
+                    ? 'bg-navy-800 dark:bg-white text-white dark:text-carbon-900 shadow-md shadow-navy-900/10 dark:shadow-none' 
+                    : 'text-navy-500 dark:text-carbon-400 hover:text-navy-900 dark:hover:text-white hover:bg-navy-100 dark:hover:bg-carbon-800'
                 }
               `}
+              title={isDisabled ? "Module extension coming soon" : ""}
             >
               <Icon className="w-4 h-4" />
               <span>{item.label}</span>

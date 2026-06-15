@@ -38,6 +38,7 @@ const App: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [trucks, setTrucks] = useState<Truck[]>([]);
   const [fuels, setFuels] = useState<TripFuel[]>([]);
+  const [focusedTripId, setFocusedTripId] = useState<string | number | null>(null);
 
   // Theme Effect
   useEffect(() => {
@@ -116,14 +117,29 @@ const App: React.FC = () => {
     setTrucks(prev => [...prev, created]);
   };
 
-  const handleDeleteTruck = async (id: number) => {
+  const handleUpdateTruck = async (updatedTruck: Truck) => {
+    const updated = await api.updateTruck(updatedTruck.id, updatedTruck);
+    setTrucks(prev => prev.map(t => t.id === updated.id ? updated : t));
+  };
+
+  const handleDeleteTruck = async (id: string | number) => {
     await api.deleteTruck(id);
-    setTrucks(prev => prev.filter(t => t.truck_id !== id));
+    setTrucks(prev => prev.filter(t => String(t.id) !== String(id) && String((t as any).truck_id) !== String(id)));
   };
 
   const handleAddEmployee = async (newEmp: Omit<Employee, 'employee_id'>) => {
     const created = await api.createEmployee(newEmp);
     setEmployees(prev => [...prev, created]);
+  };
+
+  const handleUpdateEmployee = async (updated: Employee) => {
+    const res = await api.updateEmployee(updated.id, updated);
+    setEmployees(prev => prev.map(e => e.id === updated.id ? res : e));
+  };
+
+  const handleDeleteEmployee = async (id: string) => {
+    await api.deleteEmployee(id);
+    setEmployees(prev => prev.filter(e => e.id !== id));
   };
 
   // --- USER CRUD HANDLERS ---
@@ -135,6 +151,9 @@ const App: React.FC = () => {
   const handleUpdateUser = async (updatedUser: SystemUser) => {
     // Mock update
     setSystemUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    if (currentUser && String(currentUser.id) === String(updatedUser.id)) {
+      setCurrentUser(updatedUser);
+    }
   };
 
   const handleDeleteUser = async (id: number) => {
@@ -214,7 +233,24 @@ const App: React.FC = () => {
 
             switch (currentView) {
               case 'dashboard':
-                return <Dashboard trips={trips} trucks={trucks} fuels={fuels} theme={theme} />;
+                return (
+                  <Dashboard 
+                    trips={trips} 
+                    trucks={trucks} 
+                    fuels={fuels} 
+                    theme={theme} 
+                    employees={employees}
+                    customers={customers}
+                    locations={locations}
+                    isLoading={isLoading}
+                    error={error}
+                    onViewTripDetail={(tripId) => {
+                      setFocusedTripId(tripId);
+                      setCurrentView('trip-management');
+                    }}
+                  />
+                );
+              case 'trip-management':
               case 'trips':
                 return (
                   <TripList 
@@ -227,6 +263,10 @@ const App: React.FC = () => {
                     theme={theme}
                     isLoading={isLoading}
                     error={error}
+                    userRole={currentUser.role}
+                    currentView={currentView}
+                    initialEditingId={focusedTripId}
+                    onClearInitialEditingId={() => setFocusedTripId(null)}
                   />
                 );
               case 'trucks':
@@ -234,38 +274,69 @@ const App: React.FC = () => {
                   <TruckList 
                     trucks={trucks}
                     onAdd={handleAddTruck}
-                    onUpdate={() => {}} 
+                    onUpdate={handleUpdateTruck} 
                     onDelete={handleDeleteTruck}
                     theme={theme}
                     isLoading={isLoading}
                     error={error}
+                    userRole={currentUser.role}
+                    trips={trips}
                   />
                 );
               case 'employees':
                 return (
                   <EmployeeList 
                     employees={employees}
+                    trips={trips}
                     onAdd={handleAddEmployee}
-                    onUpdate={() => {}}
-                    onDelete={() => {}}
+                    onUpdate={handleUpdateEmployee}
+                    onDelete={handleDeleteEmployee}
                     theme={theme}
                     isLoading={isLoading}
                     error={error}
+                    userRole={currentUser.role}
                   />
                 );
               case 'settings':
-                return currentUser.role === 'SuperAdmin' ? (
+                return currentUser.role === 'SuperAdmin' || currentUser.role === 'Admin' ? (
                   <UserManagement 
                     users={systemUsers}
                     onAddUser={handleAddUser}
                     onUpdateUser={handleUpdateUser}
                     onDeleteUser={handleDeleteUser}
+                    userRole={currentUser.role}
                   />
                 ) : (
-                  <div className="p-8">Settings coming soon for standard users.</div>
+                  <div className="p-8 max-w-md mx-auto bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl shadow-md text-center mt-12 animate-fade-in">
+                    <div className="w-12 h-12 bg-red-50 dark:bg-red-950/20 rounded-full flex items-center justify-center text-red-500 mx-auto mb-4 border border-red-100 dark:border-red-900/30">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m0 0v3m0-3h3m-3 0H9m12-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-navy-900 dark:text-white mb-2">Access Restricted</h2>
+                    <p className="text-sm text-navy-500 dark:text-carbon-450">
+                      Standard settings and user directories are limited to administrators. Your role is configured as <span className="font-semibold text-navy-700 dark:text-white">{currentUser.role}</span>.
+                    </p>
+                  </div>
                 );
               default:
-                return <Dashboard trips={trips} trucks={trucks} fuels={fuels} theme={theme} />;
+                return (
+                  <Dashboard 
+                    trips={trips} 
+                    trucks={trucks} 
+                    fuels={fuels} 
+                    theme={theme} 
+                    employees={employees}
+                    customers={customers}
+                    locations={locations}
+                    isLoading={isLoading}
+                    error={error}
+                    onViewTripDetail={(tripId) => {
+                      setFocusedTripId(tripId);
+                      setCurrentView('trip-management');
+                    }}
+                  />
+                );
             }
           })()}
         </div>

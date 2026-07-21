@@ -46,6 +46,7 @@ const TruckList: React.FC<TruckListProps> = ({
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
 
   // Filters State
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [branchFilter, setBranchFilter] = useState('All');
@@ -105,13 +106,6 @@ const TruckList: React.FC<TruckListProps> = ({
     };
     fetchReferences();
   }, []);
-
-  // Set default selected truck on load or state updates
-  useEffect(() => {
-    if (trucks.length > 0 && !selectedTruckId) {
-      setSelectedTruckId(trucks[0].id);
-    }
-  }, [trucks, selectedTruckId]);
 
   // Load specific logs when selection changes
   useEffect(() => {
@@ -356,11 +350,19 @@ const TruckList: React.FC<TruckListProps> = ({
   // Sizes checklist
   const sizesList = Array.from(new Set(trucks.map(t => t.truck_size).filter(Boolean)));
 
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('All');
+    setBranchFilter('All');
+    setSizeFilter('All');
+    setExpiringFilter(false);
+  };
+
   return (
     <div className="flex h-full bg-navy-50 dark:bg-carbon-950 transition-colors duration-300">
       
       {/* LEFT PORTION: FILTERS & SCROLLABLE VEHICLE LIST */}
-      <div className="w-full lg:w-1/2 flex flex-col border-r border-navy-200 dark:border-carbon-800/80 bg-white/80 dark:bg-carbon-900/50 backdrop-blur-md h-full">
+      <div className="flex-1 min-w-0 flex flex-col bg-white/80 dark:bg-carbon-900/50 backdrop-blur-md h-full">
         
         {/* Top Header Controls area */}
         <div className="p-4 border-b border-navy-100 dark:border-carbon-800/80 space-y-3 shrink-0">
@@ -394,10 +396,32 @@ const TruckList: React.FC<TruckListProps> = ({
                 className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 text-xs rounded-lg pl-9 pr-3 py-2 text-navy-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-navy-400"
               />
             </div>
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(prev => !prev)}
+              className={`border px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-xs font-semibold shrink-0 cursor-pointer ${
+                isFilterOpen
+                  ? 'bg-navy-900 dark:bg-white text-white dark:text-black border-navy-900 dark:border-white'
+                  : 'bg-navy-50 dark:bg-carbon-800 hover:bg-navy-100 dark:hover:bg-carbon-700 text-navy-700 dark:text-carbon-300 border-navy-200 dark:border-carbon-700'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" /> Filter
+            </button>
           </div>
 
           {/* Multi-parameter dynamic filtering shelf */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          {isFilterOpen && (
+          <div className="space-y-3 pt-1">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="bg-navy-50 dark:bg-carbon-800 hover:bg-navy-100 dark:hover:bg-carbon-700 text-navy-700 dark:text-carbon-300 border border-navy-200 dark:border-carbon-700 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-xs font-semibold cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" /> Clear Filters
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {/* Status Select */}
             <div>
               <label className="block text-[8.5px] font-bold text-navy-500 dark:text-carbon-400 uppercase mb-0.5 tracking-wider">Status</label>
@@ -457,6 +481,8 @@ const TruckList: React.FC<TruckListProps> = ({
               </button>
             </div>
           </div>
+          </div>
+          )}
         </div>
 
         {/* Scrollable List Items container */}
@@ -555,10 +581,10 @@ const TruckList: React.FC<TruckListProps> = ({
         </div>
       </div>
 
-      {/* RIGHT PORTION: CONSOLE DETAIL & LOGS SIDE PANEL */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col bg-navy-50 dark:bg-carbon-950 h-full overflow-hidden">
-        {currentTruck ? (
-          <div className="flex flex-col h-full overflow-hidden">
+      {/* TRUCK RIGHT-SIDE DETAIL PANEL */}
+      {currentTruck && (
+        <div className="fixed inset-0 z-40 flex justify-end bg-black/50 backdrop-blur-xs lg:static lg:z-auto lg:block lg:w-[420px] lg:shrink-0 lg:!bg-transparent lg:backdrop-blur-none">
+          <div className="w-full sm:w-[420px] lg:w-full h-full bg-navy-50 dark:bg-carbon-950 border-l border-navy-200 dark:border-carbon-800 shadow-2xl lg:shadow-md flex flex-col overflow-hidden">
             
             {/* Header detail */}
             <div className="p-6 bg-white dark:bg-carbon-900 border-b border-navy-200 dark:border-carbon-800/80 shrink-0">
@@ -607,6 +633,16 @@ const TruckList: React.FC<TruckListProps> = ({
                       )}
                     </>
                   )}
+                  <button
+                    onClick={() => {
+                      setSelectedTruckId(null);
+                      setActiveTab('details');
+                    }}
+                    className="p-2 border border-navy-200 dark:border-carbon-800 hover:bg-navy-100/50 dark:hover:bg-carbon-800 text-navy-700 dark:text-white rounded-lg transition-colors"
+                    title="Close truck details"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
@@ -953,14 +989,8 @@ const TruckList: React.FC<TruckListProps> = ({
               )}
             </div>
           </div>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-navy-400 justify-self-center p-12">
-            <Info className="w-12 h-12 text-navy-300 dark:text-carbon-700 mb-2 animate-bounce" />
-            <p className="text-sm font-semibold">No equipment index selected</p>
-            <p className="text-xs text-navy-500 max-w-xs text-center mt-1">Select a transporter from the fleet listings directory sidebar to monitor status logs and maintenance tickets.</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ALERT DIALOG (RESTRICTION BLOCK) */}
       {alertMessage && (

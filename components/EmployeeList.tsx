@@ -56,7 +56,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
   const isWritable = userRole === 'SuperAdmin' || userRole === 'Admin';
   
-  // --- Selected Employee State for Right Detail View ---
+  // --- Selected Employee State for Detail Overlay ---
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   
   // --- Modals State ---
@@ -66,6 +66,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
   const [alertMessage, setAlertMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   
   // --- Filters State ---
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [branchFilter, setBranchFilter] = useState('All');
@@ -115,13 +116,6 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
   useEffect(() => {
     loadDriversData();
-  }, [employees]);
-
-  // Sync selected employee ID if list initializes or changes
-  useEffect(() => {
-    if (employees.length > 0 && !selectedEmployeeId) {
-      setSelectedEmployeeId(employees[0].id);
-    }
   }, [employees]);
 
   const selectedEmployee = employees.find(e => e.id === selectedEmployeeId);
@@ -428,10 +422,10 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
   });
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen lg:h-[calc(100vh-64px)] overflow-hidden bg-navy-50/60 dark:bg-carbon-950 transition-colors duration-300">
+    <div className="flex h-screen lg:h-[calc(100vh-64px)] overflow-hidden bg-navy-50/60 dark:bg-carbon-950 transition-colors duration-300">
       
       {/* COLUMN 1: PERSONNEL LIST & FILTER CONTROLS */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden p-4 sm:p-6 lg:p-8">
         
         {/* HEADER SECTION */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -462,7 +456,7 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
           </div>
         )}
 
-        {/* OMNI-FILTER CONTROL CENTER */}
+        {/* SEARCH AND COLLAPSIBLE FILTER CONTROL CENTER */}
         <div className="bg-white dark:bg-carbon-900 border border-navy-100 dark:border-carbon-800 rounded-xl p-4 mb-6 shadow-sm flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-3">
             {/* SEARCH STRAP */}
@@ -477,90 +471,108 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
               />
             </div>
             
-            {/* RESET BUTTON */}
             <button 
-              onClick={handleResetFilters}
-              className="bg-navy-50 dark:bg-carbon-800 hover:bg-navy-100 dark:hover:bg-carbon-700 text-navy-700 dark:text-carbon-300 border border-navy-200/60 dark:border-carbon-700 px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-xs font-semibold shrink-0 cursor-pointer"
+              type="button"
+              onClick={() => setIsFilterOpen(prev => !prev)}
+              className={`border px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-xs font-semibold shrink-0 cursor-pointer ${
+                isFilterOpen
+                  ? 'bg-navy-900 dark:bg-white text-white dark:text-black border-navy-900 dark:border-white'
+                  : 'bg-navy-50 dark:bg-carbon-800 hover:bg-navy-100 dark:hover:bg-carbon-700 text-navy-700 dark:text-carbon-300 border-navy-200/60 dark:border-carbon-700'
+              }`}
             >
-              <RotateCcw className="w-3.5 h-3.5" /> Clear Filters
+              <SlidersHorizontal className="w-3.5 h-3.5" /> Filter
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1 border-t border-navy-50 dark:border-carbon-800">
-            {/* ROLE PICKER */}
-            <div>
-              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Role</label>
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
-              >
-                <option value="All">All Roles</option>
-                {MOCK_EMPLOYEE_ROLES.map(r => (
-                  <option key={r.id} value={r.id}>{r.label}</option>
-                ))}
-              </select>
-            </div>
+          {isFilterOpen && (
+            <>
+              <div className="flex justify-end pt-1 border-t border-navy-50 dark:border-carbon-800">
+                {/* RESET BUTTON */}
+                <button 
+                  onClick={handleResetFilters}
+                  className="bg-navy-50 dark:bg-carbon-800 hover:bg-navy-100 dark:hover:bg-carbon-700 text-navy-700 dark:text-carbon-300 border border-navy-200/60 dark:border-carbon-700 px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors text-xs font-semibold shrink-0 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Clear Filters
+                </button>
+              </div>
 
-            {/* BRANCH PICKER */}
-            <div>
-              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Branch</label>
-              <select
-                value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
-              >
-                <option value="All">All Branches</option>
-                {MOCK_BRANCHES.map(b => (
-                  <option key={b.id} value={b.id}>{b.branch_code}</option>
-                ))}
-              </select>
-            </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1">
+                {/* ROLE PICKER */}
+                <div>
+                  <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Role</label>
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                  >
+                    <option value="All">All Roles</option>
+                    {MOCK_EMPLOYEE_ROLES.map(r => (
+                      <option key={r.id} value={r.id}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* STATUS FILTER */}
-            <div>
-              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
-              >
-                <option value="All">All Statuses</option>
-                <option value="Active">Active Only</option>
-                <option value="Inactive">Deactivated Only</option>
-              </select>
-            </div>
+                {/* BRANCH PICKER */}
+                <div>
+                  <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Branch</label>
+                  <select
+                    value={branchFilter}
+                    onChange={(e) => setBranchFilter(e.target.value)}
+                    className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                  >
+                    <option value="All">All Branches</option>
+                    {MOCK_BRANCHES.map(b => (
+                      <option key={b.id} value={b.id}>{b.branch_code}</option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* DRIVER AVAILABILITY FILTER */}
-            <div>
-              <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Availability</label>
-              <select
-                value={availabilityFilter}
-                onChange={(e) => setAvailabilityFilter(e.target.value)}
-                className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
-              >
-                <option value="All">All Driver Status</option>
-                <option value="Available">Available</option>
-                <option value="Assigned">Assigned / Busy</option>
-                <option value="Leave">On Leave</option>
-                <option value="Suspended">Suspended</option>
-              </select>
-            </div>
+                {/* STATUS FILTER */}
+                <div>
+                  <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Active">Active Only</option>
+                    <option value="Inactive">Deactivated Only</option>
+                  </select>
+                </div>
 
-            {/* EXPIRING LICENSE TOGGLE */}
-            <div className="flex items-center gap-2 pt-5">
-              <input
-                type="checkbox"
-                id="expiringLicense"
-                checked={expiringLicenseOnly}
-                onChange={(e) => setExpiringLicenseOnly(e.target.checked)}
-                className="w-3.5 h-3.5 text-navy-900 border-navy-300 rounded cursor-pointer accent-navy-900"
-              />
-              <label htmlFor="expiringLicense" className="text-[10.5px] font-semibold text-red-700 dark:text-red-400 select-none cursor-pointer flex items-center gap-1">
-                <ShieldAlert className="w-3 h-3 text-red-500 shrink-0" /> Expiring License
-              </label>
-            </div>
-          </div>
+                {/* DRIVER AVAILABILITY FILTER */}
+                <div>
+                  <label className="block text-[9.5px] font-bold text-navy-500 dark:text-carbon-500 mb-1 uppercase tracking-wider">Availability</label>
+                  <select
+                    value={availabilityFilter}
+                    onChange={(e) => setAvailabilityFilter(e.target.value)}
+                    className="w-full bg-navy-50/40 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-md p-1.5 text-[11px] text-navy-800 dark:text-carbon-300 focus:outline-none focus:ring-1 focus:ring-navy-500 cursor-pointer"
+                  >
+                    <option value="All">All Driver Status</option>
+                    <option value="Available">Available</option>
+                    <option value="Assigned">Assigned / Busy</option>
+                    <option value="Leave">On Leave</option>
+                    <option value="Suspended">Suspended</option>
+                  </select>
+                </div>
+
+                {/* EXPIRING LICENSE TOGGLE */}
+                <div className="flex items-center gap-2 pt-5">
+                  <input
+                    type="checkbox"
+                    id="expiringLicense"
+                    checked={expiringLicenseOnly}
+                    onChange={(e) => setExpiringLicenseOnly(e.target.checked)}
+                    className="w-3.5 h-3.5 text-navy-900 border-navy-300 rounded cursor-pointer accent-navy-900"
+                  />
+                  <label htmlFor="expiringLicense" className="text-[10.5px] font-semibold text-red-700 dark:text-red-400 select-none cursor-pointer flex items-center gap-1">
+                    <ShieldAlert className="w-3 h-3 text-red-500 shrink-0" /> Expiring License
+                  </label>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* LOADING & EMPTY CHASSIS */}
@@ -691,10 +703,10 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
         )}
       </div>
 
-      {/* COLUMN 2: SPLIT PANEL PERSISTENT PROFILE VIEW & DETAILS */}
-      <div className="w-full lg:w-[410px] bg-white dark:bg-carbon-900 border-t lg:border-t-0 lg:border-l border-navy-200 dark:border-carbon-800 h-full flex flex-col overflow-hidden relative shadow-md">
-        {selectedEmployee ? (
-          <div className="flex flex-col h-full overflow-hidden">
+      {/* EMPLOYEE RIGHT-SIDE DETAIL PANEL */}
+      {selectedEmployee && (
+        <div className="fixed inset-0 z-40 flex justify-end bg-navy-900/35 dark:bg-black/55 backdrop-blur-xs lg:static lg:z-auto lg:block lg:w-[420px] lg:shrink-0 lg:!bg-transparent lg:backdrop-blur-none">
+          <div className="w-full sm:w-[420px] lg:w-full h-full bg-white dark:bg-carbon-900 border-l border-navy-200 dark:border-carbon-800 shadow-2xl lg:shadow-md flex flex-col overflow-hidden">
             
             {/* PANEL HERO / COVER */}
             <div className="p-5 border-b border-navy-100 dark:border-carbon-800 bg-navy-50/70 dark:bg-carbon-950 flex justify-between items-center shrink-0">
@@ -712,24 +724,36 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
                 </div>
               </div>
 
-              {isWritable && (
-                <div className="flex gap-1.5">
-                  <button 
-                    onClick={() => handleOpenModal(selectedEmployee)}
-                    title="Edit general profile and licensing info"
-                    className="p-1 px-2.5 bg-white dark:bg-carbon-800 border border-navy-200 dark:border-carbon-700 rounded-md hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-800 dark:text-white text-xs font-semibold cursor-pointer"
-                  >
-                    <Edit2 className="w-3 h-3 shrink-0 inline mr-1" /> Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDeactivateTrigger(selectedEmployee.id)}
-                    title="Soft Deactivate personnel"
-                    className="p-1 px-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-semibold cursor-pointer"
-                  >
-                    Deactivate
-                  </button>
-                </div>
-              )}
+              <div className="flex gap-1.5">
+                {isWritable && (
+                  <>
+                    <button 
+                      onClick={() => handleOpenModal(selectedEmployee)}
+                      title="Edit general profile and licensing info"
+                      className="p-1 px-2.5 bg-white dark:bg-carbon-800 border border-navy-200 dark:border-carbon-700 rounded-md hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-800 dark:text-white text-xs font-semibold cursor-pointer"
+                    >
+                      <Edit2 className="w-3 h-3 shrink-0 inline mr-1" /> Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDeactivateTrigger(selectedEmployee.id)}
+                      title="Soft Deactivate personnel"
+                      className="p-1 px-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-semibold cursor-pointer"
+                    >
+                      Deactivate
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => {
+                    setSelectedEmployeeId(null);
+                    setShowAddAvailBlock(false);
+                  }}
+                  title="Close employee details"
+                  className="p-1.5 bg-white dark:bg-carbon-800 border border-navy-200 dark:border-carbon-700 rounded-md hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-700 dark:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* SCROLLABLE SPEC PANEL */}
@@ -940,14 +964,8 @@ const EmployeeList: React.FC<EmployeeListProps> = ({
 
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-8 h-full bg-navy-50/50 text-center">
-            <User className="w-9 h-9 text-navy-300 dark:text-carbon-600 mb-2" />
-            <h3 className="font-bold text-sm text-navy-900 dark:text-white">Profile Detail Panel</h3>
-            <p className="text-xs text-navy-500 max-w-xs mt-1">Select any employee from the directory menu to explore license status, metadata, and manage availability logs.</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* CONFIRM DEACTIVATION INSTRUCTIONS DIALOG */}
       {confirmDeactivateId && (

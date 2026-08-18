@@ -63,6 +63,7 @@ const filterAllowlist = new Set<keyof TripOperationsFilters>([
   'loadType',
   'branchId',
   'transferOnly',
+  'unassignedOnly',
 ]);
 
 const throwIfAborted = (options?: RequestOptions) => {
@@ -257,6 +258,7 @@ const applyFilters = (rows: TripOperationsRow[], query: TripOperationsQuery) => 
   if (filters.loadType) filtered = filtered.filter((row) => row.loadType.code === filters.loadType);
   if (filters.branchId) filtered = filtered.filter((row) => row.branch.id === filters.branchId);
   if (filters.transferOnly) filtered = filtered.filter((row) => row.isTransfer);
+  if (filters.unassignedOnly) filtered = filtered.filter((row) => !row.driver.id || !row.truck.id);
 
   if (search) {
     filtered = filtered.filter((row) =>

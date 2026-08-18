@@ -72,6 +72,11 @@ test('search covers plate, driver, client, and consignee with combinable clearab
   await page.getByRole('button', { name: 'Clear all' }).click();
   await expect(page).not.toHaveURL(/client=/);
   await expect(page.getByText('Default active operations view')).toBeVisible();
+
+  await page.getByLabel('Unassigned resources').check();
+  await expect(page).toHaveURL(/unassigned=true/);
+  await page.getByRole('button', { name: 'Clear Unassigned resources' }).click();
+  await expect(page).not.toHaveURL(/unassigned=/);
 });
 
 test('sorting, page/limit, stable ranges, and invalid query normalization are URL backed', async ({ page }) => {
@@ -116,20 +121,22 @@ test('trip navigation, browser history, refresh, and keyboard activation preserv
   await row.focus();
   await page.keyboard.press('Enter');
   const compact = (page.viewportSize()?.width ?? 1440) < 768;
+
+  await expect(page).toHaveURL(/quick=trip-1/);
   if (compact) {
-    await expect(page).toHaveURL(/\/trip-scheduling\/trips\/trip-1\?/);
+    await expect(page.getByRole('dialog').getByRole('heading', { name: 'T-CEB-001' })).toBeVisible();
   } else {
     await expect(page).toHaveURL(/\/trip-scheduling\/trips\?/);
-    await expect(page).toHaveURL(/quick=trip-1/);
-    await expect(page.getByRole('button', { name: 'Close Quick Details' })).toBeFocused();
-
-    await page.goBack();
-    await expect(page).not.toHaveURL(/quick=/);
-    await expect(row).toBeFocused();
-    await page.goForward();
-    await expect(page).toHaveURL(/quick=trip-1/);
-    await page.getByRole('button', { name: 'Open Full Details' }).click();
+    await expect(page.getByRole('complementary', { name: 'T-CEB-001' })).toBeVisible();
   }
+  await expect(page.getByRole('button', { name: 'Close Quick Details' })).toBeFocused();
+
+  await page.goBack();
+  await expect(page).not.toHaveURL(/quick=/);
+  await expect(row).toBeFocused();
+  await page.goForward();
+  await expect(page).toHaveURL(/quick=trip-1/);
+  await page.getByRole('button', { name: 'Open Full Details' }).click();
 
   await expect(page).toHaveURL(/\/trip-scheduling\/trips\/trip-1\?/);
   await expect(page).toHaveURL(/search=T-CEB-001/);
@@ -171,16 +178,11 @@ test('responsive filter/table behavior does not clip the shell and exposes no la
   await filterButton.click();
   await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
   await expect(filterButton).toHaveAttribute('aria-expanded', 'true');
+  const filterStrip = page.locator('#trip-operations-filters');
+  await expect(filterStrip).toBeVisible();
+  expect(await filterStrip.evaluate((element) => getComputedStyle(element).position)).not.toBe('absolute');
 
   if (compact) {
-    const operationsSurface = page.locator('#main-content > div > section');
-    const scrollMetrics = await operationsSurface.evaluate((element) => ({
-      clientHeight: element.clientHeight,
-      scrollHeight: element.scrollHeight,
-    }));
-    expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
-
-    await page.getByLabel('Scrollable Trip Operations table').scrollIntoViewIfNeeded();
     await expect(page.getByLabel('Scrollable Trip Operations table')).toBeInViewport();
   }
 
@@ -191,7 +193,10 @@ test('responsive filter/table behavior does not clip the shell and exposes no la
   await expect(page.getByRole('button', { name: /Cancel trip|Delete trip|Assign driver|Change status/i })).toHaveCount(
     0,
   );
-  await expect(page.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' })).toBeVisible();
+  const tripRow = page.getByRole('row', { name: 'Open trip T-CEB-001' });
+  await expect(tripRow).toBeVisible();
+  await tripRow.click();
+  await expect(page).toHaveURL(/quick=trip-1/);
 });
 
 test('edit actions preserve the approved Driver column behavior at every viewport', async ({ page }) => {

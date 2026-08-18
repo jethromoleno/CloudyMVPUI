@@ -33,13 +33,14 @@ describe('Phase 2B Trip Details page', () => {
     vi.unstubAllGlobals();
   });
 
-  it('normalizes the legacy tab address, keeps Overview visible, and loads the selected section', async () => {
+  it('normalizes the legacy tab address, hides Overview, and loads the selected section', async () => {
     renderDetails('/trip-scheduling/trips/trip-1?search=John&tab=fuel');
 
     expect(await screen.findByRole('heading', { name: 'T-CEB-001' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Trip and client' })).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: 'Fuel' })).toBeInTheDocument();
-    expect(screen.getAllByText('120.50 L')).toHaveLength(2);
+    expect(screen.getByRole('tablist', { name: 'Trip Details sections' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Trip and client' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Fuel' })).toBeInTheDocument();
+    expect(screen.getAllByText('120.50 L').length).toBeGreaterThan(0);
     await waitFor(() => {
       const location = screen.getByTestId('detail-location').textContent ?? '';
       expect(location).toContain('search=John');
@@ -57,7 +58,8 @@ describe('Phase 2B Trip Details page', () => {
     expect(await screen.findByRole('heading', { name: 'Trip activity source unavailable' })).toBeInTheDocument();
     expect(screen.getByText(/no trip-specific audit source/i)).toBeInTheDocument();
     expect(screen.getByTestId('detail-location')).toHaveTextContent('section=activity');
-    expect(screen.getByRole('heading', { name: 'Trip and client' })).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Trip Details sections' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Trip and client' })).not.toBeInTheDocument();
   });
 
   it('supports conventional arrow-key section navigation without component-local selection state', async () => {
@@ -74,7 +76,7 @@ describe('Phase 2B Trip Details page', () => {
     expect(await screen.findByRole('tabpanel', { name: 'Stops' })).toBeInTheDocument();
   });
 
-  it('retains a safe Overview when a secondary request fails and retries without changing the address', async () => {
+  it('keeps the tablist and selected address when a secondary request fails and retries', async () => {
     const getEvents = vi.fn().mockRejectedValue(
       new ServiceError({
         status: 503,
@@ -86,9 +88,10 @@ describe('Phase 2B Trip Details page', () => {
     );
     renderDetails('/trip-scheduling/trips/trip-1?section=events', { ...services.tripDetails, getEvents });
 
-    expect(await screen.findByRole('heading', { name: 'Trip and client' })).toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: 'Events unavailable' })).toBeInTheDocument();
-    expect(screen.getByText(/safe Overview remains visible/i)).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Trip Details sections' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Trip and client' })).not.toBeInTheDocument();
+    expect(screen.getByText(/selected section address is unchanged/i)).toBeInTheDocument();
     expect(screen.getByTestId('detail-location')).toHaveTextContent('section=events');
   });
 

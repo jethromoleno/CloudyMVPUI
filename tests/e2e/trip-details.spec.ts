@@ -11,8 +11,8 @@ test('Quick Details is URL-backed on desktop/tablet and opens as a sheet on mobi
   await signIn(page);
   await expect(page.locator('#main-content').getByRole('heading', { name: 'Trip Operations' })).toBeVisible();
 
-  const quickAction = page.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' });
-  await quickAction.click();
+  const tripRow = page.getByRole('row', { name: 'Open trip T-CEB-001' });
+  await tripRow.click();
 
   if ((page.viewportSize()?.width ?? 1440) < 768) {
     await expect(page).toHaveURL(/quick=trip-1/);
@@ -43,9 +43,9 @@ test('Quick Details is URL-backed on desktop/tablet and opens as a sheet on mobi
 
   await page.keyboard.press('Escape');
   await expect(page).not.toHaveURL(/quick=/);
-  await expect(quickAction).toBeFocused();
+  await expect(tripRow).toBeFocused();
 
-  await quickAction.click();
+  await tripRow.click();
   await page.getByRole('button', { name: 'Open Full Details' }).click();
   await expect(page).toHaveURL(/\/trip-scheduling\/trips\/trip-1\?/);
   await expect(page).not.toHaveURL(/quick=/);
@@ -53,38 +53,46 @@ test('Quick Details is URL-backed on desktop/tablet and opens as a sheet on mobi
   await expect(page).toHaveURL(/ordering=client/);
 });
 
-test('Full Details keeps Overview visible while URL-backed read-only sections load truthfully', async ({ page }) => {
+test('Full Details shows one URL-backed section at a time while tabs stay visible', async ({ page }) => {
   await page.goto('/trip-scheduling/trips/trip-1?search=T-CEB-001&tab=fuel&ordering=client&page=1&limit=10');
   await signIn(page);
 
+  const tablist = page.getByRole('tablist', { name: 'Trip Details sections' });
   await expect(page.getByRole('heading', { name: 'T-CEB-001' })).toBeVisible();
   await expect(page).toHaveURL(/section=fuel/);
   await expect(page).not.toHaveURL(/tab=/);
-  await expect(page.getByRole('heading', { name: 'Trip and client' })).toBeVisible();
-  await expect(page.getByText('Global Logistics Inc.', { exact: true })).toBeVisible();
+  await expect(tablist).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Fuel' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trip and client' })).toHaveCount(0);
   await expect(page.getByRole('definition').filter({ hasText: '120.50 L' })).toBeVisible();
   await expect(page.getByText('Unavailable', { exact: true }).first()).toBeVisible();
 
   await page.getByRole('tab', { name: 'Stops' }).click();
   await expect(page).toHaveURL(/section=stops/);
+  await expect(tablist).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Stops and route' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trip and client' })).toHaveCount(0);
   await expect(page.getByText(/Manila Port → Cebu Distribution Center/)).toBeVisible();
   await expect(page.getByText('1', { exact: true }).first()).toBeVisible();
 
   await page.getByRole('tab', { name: 'Assignments' }).click();
+  await expect(tablist).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Assignment history' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trip and client' })).toHaveCount(0);
   await expect(page.getByRole('table', { name: 'Trip assignment history' })).toContainText('John Doe');
   await expect(page.getByRole('table', { name: 'Trip assignment history' })).toContainText('ABC-1234');
 
   await page.getByRole('tab', { name: 'Events' }).click();
+  await expect(tablist).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Events' })).toBeVisible();
   await expect(page.getByText('Loading Arrival', { exact: true })).toBeVisible();
 
   await page.getByRole('tab', { name: 'Activity' }).click();
   await expect(page).toHaveURL(/section=activity/);
+  await expect(tablist).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Trip activity source unavailable' })).toBeVisible();
   await expect(page.getByText(/no trip-specific audit source/i)).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Trip and client' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trip and client' })).toHaveCount(0);
 
   await expect(
     page.getByRole('button', {
@@ -109,5 +117,6 @@ test('direct selected-section reload reauthenticates and restores the permitted 
   await signIn(page, 'CebuViewer', ['viewer', '123'].join(''));
   await expect(page).toHaveURL(/\/trip-scheduling\/trips\/trip-1\?section=events/);
   await expect(page.getByRole('heading', { name: 'Events' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Trip and client' })).toBeVisible();
+  await expect(page.getByRole('tablist', { name: 'Trip Details sections' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trip and client' })).toHaveCount(0);
 });

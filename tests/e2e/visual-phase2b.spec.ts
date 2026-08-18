@@ -24,7 +24,7 @@ for (const identity of identities) {
     await page.getByRole('button', { name: 'Sign In' }).click();
     await expect(page.locator('#main-content').getByRole('heading', { name: 'Trip Operations' })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' }).click();
+    await page.getByRole('row', { name: 'Open trip T-CEB-001' }).click();
     const contextualQuick = (page.viewportSize()?.width ?? 1440) >= 768;
     if (contextualQuick) {
       await expect(page.getByRole('button', { name: 'Close Quick Details' })).toBeVisible();
@@ -45,7 +45,7 @@ for (const identity of identities) {
 
     await page.getByRole('button', { name: 'Back to Trip Operations' }).click();
     await expect(page.locator('#main-content').getByRole('heading', { name: 'Trip Operations' })).toBeVisible();
-    await page.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' }).click();
+    await page.getByRole('row', { name: 'Open trip T-CEB-001' }).click();
     if (contextualQuick) {
       await expect(page.getByRole('button', { name: 'Close Quick Details' })).toBeVisible();
     }

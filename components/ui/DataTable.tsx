@@ -26,6 +26,7 @@ export interface DataTableProps<T> {
     row: T,
     event: React.MouseEvent<HTMLTableRowElement> | React.KeyboardEvent<HTMLTableRowElement>,
   ) => void;
+  isRowSelected?: (row: T) => boolean;
   rowAriaLabel?: (row: T) => string;
   tableClassName?: string;
 }
@@ -48,9 +49,11 @@ export function DataTable<T>({
   noResultsDescription,
   onResetFilters,
   onRowClick,
+  isRowSelected,
   rowAriaLabel,
   tableClassName = '',
 }: DataTableProps<T>) {
+  const selectedRowClass = 'bg-navy-100 dark:bg-carbon-800/60';
   const colSpan = columns.length;
 
   return (
@@ -110,15 +113,18 @@ export function DataTable<T>({
           !error &&
           data.map((row) => {
             const clickable = Boolean(onRowClick);
+            const selected = isRowSelected?.(row) ?? false;
             return (
               <tr
                 key={getRowKey(row)}
                 aria-label={rowAriaLabel?.(row)}
+                aria-selected={selected || undefined}
                 className={[
                   'transition-colors motion-reduce:transition-none',
                   clickable
                     ? 'cursor-pointer hover:bg-navy-50 focus-visible:bg-navy-50 dark:hover:bg-carbon-800/40 dark:focus-visible:bg-carbon-800/40'
                     : '',
+                  selected ? selectedRowClass : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -139,7 +145,12 @@ export function DataTable<T>({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={['px-4 py-3', alignClasses[column.align ?? 'left'], column.className]
+                    className={[
+                      'px-4 py-3',
+                      alignClasses[column.align ?? 'left'],
+                      column.className,
+                      selected ? selectedRowClass : '',
+                    ]
                       .filter(Boolean)
                       .join(' ')}
                   >

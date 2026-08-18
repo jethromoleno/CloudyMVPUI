@@ -154,6 +154,20 @@ describe('Phase 2A Trip Operations table', () => {
     expect(screen.getByLabelText('Driver').querySelector('option[value="old-driver"]')).toBeNull();
   });
 
+  it('opens filters as an inline strip in document flow between chips and the table', async () => {
+    renderTable(makeService());
+    await screen.findByText('T-CEB-001');
+    expect(document.getElementById('trip-operations-filters')).toBeNull();
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /^Filters/ }));
+
+    const strip = document.getElementById('trip-operations-filters');
+    expect(strip).toBeTruthy();
+    expect(getComputedStyle(strip!).position).not.toBe('absolute');
+    expect(screen.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
+    expect(screen.getByLabelText('Scrollable Trip Operations table')).toBeVisible();
+  });
+
   it('debounces search, combines filters in URL state, clears one filter, and clears all', async () => {
     const user = userEvent.setup();
     renderTable(makeService());
@@ -181,6 +195,12 @@ describe('Phase 2A Trip Operations table', () => {
       expect(location).toContain('ordering=-pickup_date');
       expect(location).toContain('limit=25');
     });
+    expect(screen.getByText('Default active operations view')).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText('Unassigned resources'));
+    await waitFor(() => expect(screen.getByTestId('location-search')).toHaveTextContent('unassigned=true'));
+    await user.click(screen.getByRole('button', { name: /Clear Unassigned resources/i }));
+    await waitFor(() => expect(screen.getByTestId('location-search')).not.toHaveTextContent('unassigned='));
   });
 
   it('does not let a stale page result reset a newer page request', async () => {
@@ -219,23 +239,24 @@ describe('Phase 2A Trip Operations table', () => {
     expect(screen.getByTestId('location-search')).toHaveTextContent('ordering=-pickup_date&page=1&limit=25');
   });
 
-  it('uses centralized role presentation and keeps a visible keyboard-accessible Open action', async () => {
+  it('uses centralized role presentation and opens Quick Details from row click', async () => {
     const viewerOpen = vi.fn();
     const viewer = renderTable(makeService(), { role: 'Viewer', onOpenTrip: viewerOpen });
     await screen.findByText('T-CEB-001');
     expect(screen.queryByRole('button', { name: 'New trip' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Edit trip T-CEB-001' })).not.toBeInTheDocument();
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' }));
+    expect(screen.queryByRole('columnheader', { name: 'Actions' })).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole('row', { name: 'Open trip T-CEB-001' }));
     expect(await screen.findByRole('heading', { name: 'T-CEB-001' })).toBeInTheDocument();
     expect(screen.getByTestId('location-search')).toHaveTextContent('quick=trip-1');
     expect(viewer.onOpenTrip).not.toHaveBeenCalled();
   });
 
-  it('closes URL-backed Quick Details with Escape and restores focus to its trigger', async () => {
+  it('closes URL-backed Quick Details with Escape and restores focus to its trigger row', async () => {
     const user = userEvent.setup();
     renderTable(makeService());
     await screen.findByText('T-CEB-001');
-    const trigger = screen.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' });
+    const trigger = screen.getByRole('row', { name: 'Open trip T-CEB-001' });
 
     await user.click(trigger);
     const close = await screen.findByRole('button', { name: 'Close Quick Details' });
@@ -340,5 +361,104 @@ describe('Phase 2A Trip Operations table', () => {
     const newest = requests.filter((request) => request.search === 'John').at(-1);
     await act(async () => newest?.resolve(pageResult));
     expect(await screen.findByText('T-CEB-001')).toBeInTheDocument();
+  });
+
+  it('shows New trip for Dispatcher and disables edit on completed and cancelled trips', async () => {
+    const completed = {
+      ...row,
+      id: 'trip-done',
+      tripAdviceCode: 'T-CEB-DONE',
+      status: { code: 'COMPLETED' as const, label: 'Completed' },
+    };
+    const cancelled = {
+      ...row,
+      id: 'trip-cancel',
+      tripAdviceCode: 'T-CEB-CANCEL',
+      status: { code: 'CANCELLED' as const, label: 'Cancelled' },
+    };
+    renderTable(
+      makeService({
+        list: vi.fn().mockResolvedValue({ ...pageResult, count: 3, results: [row, completed, cancelled] }),
+      }),
+      { role: 'Dispatcher' },
+    );
+    expect(await screen.findByRole('button', { name: 'New trip' })).toBeEnabled();
+    expect(await screen.findByText('T-CEB-001')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit trip T-CEB-001' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Edit trip T-CEB-DONE' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Edit trip T-CEB-CANCEL' })).toBeDisabled();
+  });
+
+  it('lets Encoder edit an owned Draft and hides edit for a foreign trip', async () => {
+    const ownedDraft = {
+      ...row,
+      id: 'trip-draft',
+      tripAdviceCode: 'T-CEB-DRAFT',
+      status: { code: 'DRAFT' as const, label: 'Draft' },
+      isDraft: true,
+      encoderEmployeeId: 'emp-2',
+    };
+    const foreign = {
+      ...row,
+      id: 'trip-foreign',
+      tripAdviceCode: 'T-CEB-FOREIGN',
+      encoderEmployeeId: 'emp-99',
+    };
+    const completed = {
+      ...row,
+      id: 'trip-done',
+      tripAdviceCode: 'T-CEB-DONE',
+      status: { code: 'COMPLETED' as const, label: 'Completed' },
+    };
+    renderTable(
+      makeService({
+        list: vi.fn().mockResolvedValue({
+          ...pageResult,
+          count: 3,
+          results: [ownedDraft, foreign, completed],
+        }),
+      }),
+      { role: 'Encoder', onCreateTrip: vi.fn(), onEditTrip: vi.fn() },
+    );
+
+    expect(await screen.findByText('T-CEB-DRAFT')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'New trip' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Edit trip T-CEB-DRAFT' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Edit trip T-CEB-FOREIGN' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit trip T-CEB-DONE' })).toBeDisabled();
+  });
+
+  it('waits for lookups before listing lookup-backed URLs and drops unavailable ids', async () => {
+    let resolveLookups: ((value: TripOperationsLookups) => void) | undefined;
+    const list = vi.fn().mockResolvedValue(pageResult);
+    const service = makeService({
+      list,
+      getLookups: () =>
+        new Promise<TripOperationsLookups>((resolve) => {
+          resolveLookups = resolve;
+        }),
+    });
+    renderTable(service, { initialEntry: '/trip-scheduling/trips?client=missing' });
+
+    expect(list).not.toHaveBeenCalled();
+    await act(async () => {
+      resolveLookups?.(lookups);
+    });
+    await waitFor(() => expect(list).toHaveBeenCalled());
+    expect(screen.getByTestId('location-search')).not.toHaveTextContent('client=');
+    expect(await screen.findByText(/unavailable client filter was removed/i)).toBeInTheDocument();
+  });
+
+  it('polls the visible queue every 60 seconds', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const list = vi.fn().mockResolvedValue(pageResult);
+    renderTable(makeService({ list }));
+    expect(await screen.findByText('T-CEB-001')).toBeInTheDocument();
+    const initialCalls = list.mock.calls.length;
+    await act(async () => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(list.mock.calls.length).toBeGreaterThan(initialCalls);
+    vi.useRealTimers();
   });
 });

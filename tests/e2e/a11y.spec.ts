@@ -90,7 +90,7 @@ for (const identity of permissionReviewIdentities) {
     await firstTripRow.focus();
     await expect(firstTripRow).toBeFocused();
 
-    await page.getByRole('button', { name: 'Open Quick Details for trip T-CEB-001' }).click();
+    await firstTripRow.click();
     if ((page.viewportSize()?.width ?? 1440) >= 768) {
       await expect(page.getByRole('button', { name: 'Close Quick Details' })).toBeFocused();
       expect(seriousOrCritical((await new AxeBuilder({ page }).analyze()).violations)).toEqual([]);

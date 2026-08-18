@@ -21,7 +21,7 @@ describe('Phase 2A Trip Operations URL state', () => {
     const lookups = await services.trips.getLookups();
     const state = normalizeTripOperationsParams(
       new URLSearchParams(
-        'search=John&status=IN_PROGRESS&start=2026-06-01&end=2026-06-30&client=client-1&truck=truck-1&driver=driver-1&load=DRY&branch=branch-2&transfer=true&ordering=client&page=2&limit=10&unknown=unsafe',
+        'search=John&status=IN_PROGRESS&start=2026-06-01&end=2026-06-30&client=client-1&truck=truck-1&driver=driver-1&load=DRY&branch=branch-2&transfer=true&unassigned=true&ordering=client&page=2&limit=10&unknown=unsafe',
       ),
       lookups,
     );
@@ -41,6 +41,7 @@ describe('Phase 2A Trip Operations URL state', () => {
         loadType: 'DRY',
         branchId: 'branch-2',
         transferOnly: true,
+        unassignedOnly: true,
       },
     });
     expect(state.normalized.has('unknown')).toBe(false);
@@ -51,14 +52,14 @@ describe('Phase 2A Trip Operations URL state', () => {
     const lookups = await services.trips.getLookups();
     const state = normalizeTripOperationsParams(
       new URLSearchParams(
-        'status=UNKNOWN&start=bad&client=missing&transfer=sometimes&ordering=wrong&page=-3&limit=101',
+        'status=UNKNOWN&start=bad&client=missing&transfer=sometimes&unassigned=sometimes&ordering=wrong&page=-3&limit=101',
       ),
       lookups,
     );
 
     expect(state.query).toMatchObject({ page: 1, limit: 25, ordering: '-pickup_date' });
     expect(state.query.filters).not.toMatchObject({ status: expect.anything(), clientId: expect.anything() });
-    expect(state.issues.length).toBeGreaterThanOrEqual(6);
+    expect(state.issues.length).toBeGreaterThanOrEqual(7);
   });
 
   it('blocks a reversed valid date range instead of submitting it', () => {

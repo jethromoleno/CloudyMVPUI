@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Clock3,
   Edit3,
-  ExternalLink,
   Filter,
   Plus,
   RefreshCw,
@@ -67,7 +66,19 @@ type PendingSearchParams = {
   replace: boolean;
 };
 
-const filterControlClass = `${uiClasses.field} min-w-0`;
+const filterControlClass = `${uiClasses.field} h-10 min-h-10 min-w-0 py-1.5 text-sm`;
+
+const filterFieldLabelClass = 'flex flex-col gap-1.5 text-xs font-semibold text-navy-700 dark:text-carbon-200';
+
+const filterCheckboxLabelClass =
+  'flex h-10 min-h-10 w-full items-center gap-2 self-end rounded-lg border border-navy-200 bg-white px-3 text-xs font-semibold text-navy-700 dark:border-carbon-700 dark:bg-carbon-950 dark:text-carbon-200';
+
+const filterStripClassName = 'border-0 p-3 shadow-none';
+
+const filterStripHeaderClassName = 'mb-2 pb-2';
+
+const filterStripContentClassName =
+  'grid w-max min-w-full grid-flow-col grid-rows-2 auto-cols-[minmax(10rem,12rem)] gap-x-3 gap-y-2 xl:w-full xl:grid-flow-row xl:grid-cols-6 xl:grid-rows-2 xl:auto-cols-auto';
 
 const formatPickupDate = (value: string) => {
   const parsed = new Date(`${value}T00:00:00+08:00`);
@@ -159,7 +170,9 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
   const lookupRequestRef = useRef<AbortController | null>(null);
   const requestSequenceRef = useRef(0);
   const quickDetailsTriggerRef = useRef<HTMLElement | null>(null);
+  const filtersButtonRef = useRef<HTMLButtonElement>(null);
   const previousQuickTripRef = useRef<string | null>(null);
+  const keepNormalizationNoticeRef = useRef(false);
 
   useEffect(() => {
     pageResultRef.current = pageResult;
@@ -180,7 +193,10 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
     return listParams.toString();
   }, [normalizedUrl.normalized]);
   const query = normalizedUrl.query;
-  const requestQuery = useMemo(() => normalizeTripOperationsParams(new URLSearchParams(queryKey)).query, [queryKey]);
+  const requestQuery = useMemo(
+    () => normalizeTripOperationsParams(new URLSearchParams(queryKey), lookups).query,
+    [lookups, queryKey],
+  );
   const [searchDraft, setSearchDraft] = useState(query.search ?? '');
 
   useEffect(() => {
@@ -198,8 +214,22 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
   useEffect(() => {
     if (pendingSearchParams) return;
     if (!compareParams(searchParams, normalizedUrl.normalized)) {
-      if (normalizedUrl.issues.length > 0) setNormalizationNotice(normalizedUrl.issues.join(' '));
+      if (normalizedUrl.issues.length > 0) {
+        setNormalizationNotice(normalizedUrl.issues.join(' '));
+        keepNormalizationNoticeRef.current = true;
+      } else {
+        setNormalizationNotice(null);
+        keepNormalizationNoticeRef.current = false;
+      }
       setSearchParams(normalizedUrl.normalized, { replace: true });
+      return;
+    }
+    if (normalizedUrl.issues.length === 0) {
+      if (keepNormalizationNoticeRef.current) {
+        keepNormalizationNoticeRef.current = false;
+        return;
+      }
+      setNormalizationNotice(null);
     }
   }, [normalizedUrl.issues, normalizedUrl.normalized, pendingSearchParams, searchParams, setSearchParams]);
 
@@ -229,6 +259,17 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
     media.addEventListener('change', updateViewport);
     return () => media.removeEventListener('change', updateViewport);
   }, []);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setFiltersOpen(false);
+      filtersButtonRef.current?.focus();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [filtersOpen]);
 
   const closeQuickDetails = useCallback(() => {
     queueSearchParams((next) => next.delete('quick'), true);
@@ -339,8 +380,9 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
       setIsRefreshing(false);
       return;
     }
+    if (isLookupLoading) return;
     void performListRequest(requestQuery, queryKey, 'query', true);
-  }, [normalizedUrl.blockingError, performListRequest, queryKey, requestQuery]);
+  }, [isLookupLoading, normalizedUrl.blockingError, performListRequest, queryKey, requestQuery]);
 
   const refresh = useCallback(() => {
     if (normalizedUrl.blockingError) return;
@@ -435,8 +477,19 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
     });
   if (filters.transferOnly)
     activeFilters.push({ key: 'transfer', label: 'Transfer only', onClear: () => updateQueryParam('transfer') });
+  if (filters.unassignedOnly)
+    activeFilters.push({
+      key: 'unassigned',
+      label: 'Unassigned resources',
+      onClear: () => updateQueryParam('unassigned'),
+    });
 
   const createPresentation = permissions.present(permissionActions.create, permissionResources.tripAdvice);
+  const showActionsColumn = Boolean(
+    onEditTrip &&
+    (permissions.identity.role === 'Encoder' ||
+      permissions.present(permissionActions.update, permissionResources.tripAdvice).visible),
+  );
   const ordering = query.ordering ?? DEFAULT_TRIP_OPERATIONS_ORDERING;
 
   const sortState = useCallback(
@@ -490,8 +543,8 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
     [openQuickDetails],
   );
 
-  const columns = useMemo<DataTableColumn<TripOperationsRow>[]>(
-    () => [
+  const columns = useMemo<DataTableColumn<TripOperationsRow>[]>(() => {
+    const baseColumns: DataTableColumn<TripOperationsRow>[] = [
       {
         key: 'trip',
         header: sortHeader('trip_advise_code', 'Trip advice'),
@@ -605,12 +658,15 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
         className: 'hidden min-w-44 2xl:table-cell',
         cell: (row) => formatRefreshTime(row.updatedAt),
       },
-      {
+    ];
+
+    if (showActionsColumn) {
+      baseColumns.push({
         key: 'actions',
         header: 'Actions',
         align: 'right',
-        headerClassName: 'sticky right-0 z-20 w-28 min-w-28 max-w-28 bg-navy-50 dark:bg-carbon-900',
-        className: 'sticky right-0 z-10 w-28 min-w-28 max-w-28 bg-white dark:bg-carbon-900',
+        headerClassName: 'sticky right-0 z-20 w-12 min-w-12 max-w-12 bg-navy-50 dark:bg-carbon-900',
+        className: 'sticky right-0 z-10 w-12 min-w-12 max-w-12 bg-white dark:bg-carbon-900',
         cell: (row) => {
           const editPresentation = permissions.present(permissionActions.update, permissionResources.tripAdvice, {
             recordOwnerId: row.encoderEmployeeId,
@@ -623,34 +679,26 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
                   ? 'Cancelled trips are read-only.'
                   : null,
           });
+          if (!editPresentation.visible) return null;
           return (
-            <div className="flex justify-end gap-1" onClick={(event) => event.stopPropagation()}>
+            <div className="flex justify-end" onClick={(event) => event.stopPropagation()}>
               <Button
-                aria-label={`Open Quick Details for trip ${row.tripAdviceCode}`}
-                icon={<ExternalLink aria-hidden="true" className="h-4 w-4" />}
-                onClick={(event) => openQuickDetails(row, event.currentTarget)}
+                aria-label={`Edit trip ${row.tripAdviceCode}`}
+                disabled={editPresentation.disabled}
+                icon={<Edit3 aria-hidden="true" className="h-4 w-4" />}
+                onClick={() => onEditTrip?.(row.id)}
                 size="icon"
-                title={`Open Quick Details for trip ${row.tripAdviceCode}`}
-                variant="secondary"
+                title={editPresentation.reason ?? `Edit trip ${row.tripAdviceCode}`}
+                variant="ghost"
               />
-              {editPresentation.visible && onEditTrip && (
-                <Button
-                  aria-label={`Edit trip ${row.tripAdviceCode}`}
-                  disabled={editPresentation.disabled}
-                  icon={<Edit3 aria-hidden="true" className="h-4 w-4" />}
-                  onClick={() => onEditTrip(row.id)}
-                  size="icon"
-                  title={editPresentation.reason ?? `Edit trip ${row.tripAdviceCode}`}
-                  variant="ghost"
-                />
-              )}
             </div>
           );
         },
-      },
-    ],
-    [onEditTrip, openQuickDetails, permissions, sortHeader, sortState],
-  );
+      });
+    }
+
+    return baseColumns;
+  }, [onEditTrip, permissions, showActionsColumn, sortHeader, sortState]);
 
   const currentPage = pageResult?.page ?? query.page ?? 1;
   const currentLimit = pageResult?.limit ?? query.limit ?? DEFAULT_TRIP_OPERATIONS_LIMIT;
@@ -749,41 +797,44 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
             </div>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <div>
-              <label
-                htmlFor="trip-operations-search"
-                className="mb-1.5 block text-xs font-semibold text-navy-700 dark:text-carbon-200"
-              >
-                Search trips
-              </label>
+          <div>
+            <label
+              htmlFor="trip-operations-search"
+              className="mb-1.5 block text-xs font-semibold text-navy-700 dark:text-carbon-200"
+            >
+              Search trips
+            </label>
+            <div className="flex items-center gap-2">
               <SearchInput
                 id="trip-operations-search"
                 aria-describedby="trip-search-help"
+                className="min-w-0 flex-1"
                 onChange={setSearchDraft}
                 onClear={() => setSearchDraft('')}
                 placeholder="Search trip code, plate, driver, client, or consignee"
                 value={searchDraft}
               />
-              <p id="trip-search-help" className="mt-1 text-[11px] text-navy-500 dark:text-carbon-400">
-                Search updates after a short pause and remains in the browser address.
-              </p>
+              <Button
+                ref={filtersButtonRef}
+                aria-controls="trip-operations-filters"
+                aria-expanded={filtersOpen}
+                className="shrink-0"
+                icon={<Filter aria-hidden="true" className="h-4 w-4" />}
+                onClick={() => setFiltersOpen((value) => !value)}
+                trailingIcon={
+                  <ChevronDown
+                    aria-hidden="true"
+                    className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
+                  />
+                }
+                variant="secondary"
+              >
+                Filters {activeFilters.length > 0 ? `(${activeFilters.length})` : ''}
+              </Button>
             </div>
-            <Button
-              aria-controls="trip-operations-filters"
-              aria-expanded={filtersOpen}
-              icon={<Filter aria-hidden="true" className="h-4 w-4" />}
-              onClick={() => setFiltersOpen((value) => !value)}
-              trailingIcon={
-                <ChevronDown
-                  aria-hidden="true"
-                  className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
-                />
-              }
-              variant="secondary"
-            >
-              Filters {activeFilters.length > 0 ? `(${activeFilters.length})` : ''}
-            </Button>
+            <p id="trip-search-help" className="mt-1 text-[11px] text-navy-500 dark:text-carbon-400">
+              Search updates after a short pause and remains in the browser address.
+            </p>
           </div>
 
           {normalizationNotice && (
@@ -809,7 +860,9 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
               {activeFilters.length} active filter{activeFilters.length === 1 ? '' : 's'}
             </span>
           ) : (
-            <span className="text-xs font-semibold text-navy-600 dark:text-carbon-300">Default view</span>
+            <span className="text-xs font-semibold text-navy-600 dark:text-carbon-300">
+              Default active operations view
+            </span>
           )}
           {activeFilters.map((filter) => (
             <button
@@ -829,75 +882,78 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
           )}
         </section>
 
-        <div id="trip-operations-filters" className={filtersOpen ? 'block' : 'hidden'} hidden={!filtersOpen}>
-          {isLookupLoading ? (
-            <LoadingState className="min-h-32" label="Loading approved filter options..." />
-          ) : lookupError ? (
-            <BlockedState
-              action={
-                <Button onClick={() => void loadLookups()} variant="secondary">
-                  Retry filter options
-                </Button>
-              }
-              description={`${lookupError.message} Existing safe list data remains available, but lookup-dependent controls are blocked.`}
-              title="Filter options unavailable"
-            />
-          ) : (
-            <FilterBar hasActiveFilters={activeFilters.length > 0} onReset={clearAllFilters} title="Trip filters">
-              <label className="text-xs font-semibold text-navy-700 dark:text-carbon-200">
-                Status
-                <select
-                  className={filterControlClass}
-                  onChange={(event) => updateQueryParam('status', event.target.value)}
-                  value={filters.status ?? ''}
-                >
-                  <option value="">Active operations (excludes Cancelled)</option>
-                  {lookups?.statuses.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-xs font-semibold text-navy-700 dark:text-carbon-200">
-                Pickup start
-                <input
-                  className={filterControlClass}
-                  max={filters.pickupEnd}
-                  onChange={(event) => updateQueryParam('start', event.target.value)}
-                  type="date"
-                  value={filters.pickupStart ?? ''}
-                />
-              </label>
-              <label className="text-xs font-semibold text-navy-700 dark:text-carbon-200">
-                Pickup end
-                <input
-                  aria-invalid={Boolean(normalizedUrl.blockingError)}
-                  className={filterControlClass}
-                  min={filters.pickupStart}
-                  onChange={(event) => updateQueryParam('end', event.target.value)}
-                  type="date"
-                  value={filters.pickupEnd ?? ''}
-                />
-              </label>
-              {(
-                [
-                  ['client', 'Client', lookups?.clients, filters.clientId],
-                  ['truck', 'Truck', lookups?.trucks, filters.truckId],
-                  ['driver', 'Driver', lookups?.drivers, filters.driverId],
-                  ['load', 'Load type', lookups?.loadTypes, filters.loadType],
-                  ['branch', 'Branch', lookups?.branches, filters.branchId],
-                ] as const
-              ).map(([key, label, options, value]) => (
-                <label key={key} className="text-xs font-semibold text-navy-700 dark:text-carbon-200">
-                  {label}
+        {filtersOpen && (
+          <div
+            id="trip-operations-filters"
+            className="overflow-x-auto rounded-xl border border-navy-200 bg-white shadow-sm dark:border-carbon-800 dark:bg-carbon-900"
+          >
+            {isLookupLoading ? (
+              <LoadingState className="min-h-24 border-0 shadow-none" label="Loading approved filter options..." />
+            ) : lookupError ? (
+              <BlockedState
+                action={
+                  <Button onClick={() => void loadLookups()} variant="secondary">
+                    Retry filter options
+                  </Button>
+                }
+                className="border-0 shadow-none"
+                description={`${lookupError.message} Existing safe list data remains available, but lookup-dependent controls are blocked.`}
+                title="Filter options unavailable"
+              />
+            ) : (
+              <FilterBar
+                className={filterStripClassName}
+                contentClassName={filterStripContentClassName}
+                hasActiveFilters={activeFilters.length > 0}
+                headerClassName={filterStripHeaderClassName}
+                onReset={clearAllFilters}
+                title="Trip filters"
+              >
+                <label className={filterFieldLabelClass}>
+                  Status
                   <select
                     className={filterControlClass}
-                    onChange={(event) => updateQueryParam(key, event.target.value)}
-                    value={value ?? ''}
+                    onChange={(event) => updateQueryParam('status', event.target.value)}
+                    value={filters.status ?? ''}
                   >
-                    <option value="">All {label.toLocaleLowerCase()} values</option>
-                    {options?.map((option) => (
+                    <option value="">Active operations (excludes Cancelled)</option>
+                    {lookups?.statuses.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Pickup start
+                  <input
+                    className={filterControlClass}
+                    max={filters.pickupEnd}
+                    onChange={(event) => updateQueryParam('start', event.target.value)}
+                    type="date"
+                    value={filters.pickupStart ?? ''}
+                  />
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Pickup end
+                  <input
+                    aria-invalid={Boolean(normalizedUrl.blockingError)}
+                    className={filterControlClass}
+                    min={filters.pickupStart}
+                    onChange={(event) => updateQueryParam('end', event.target.value)}
+                    type="date"
+                    value={filters.pickupEnd ?? ''}
+                  />
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Client
+                  <select
+                    className={filterControlClass}
+                    onChange={(event) => updateQueryParam('client', event.target.value)}
+                    value={filters.clientId ?? ''}
+                  >
+                    <option value="">All client values</option>
+                    {lookups?.clients.map((option) => (
                       <option key={option.value} disabled={!option.active} value={option.value}>
                         {option.label}
                         {!option.active ? ' (Inactive)' : ''}
@@ -905,38 +961,111 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
                     ))}
                   </select>
                 </label>
-              ))}
-              <label className="text-xs font-semibold text-navy-700 dark:text-carbon-200">
-                Sort by
-                <select
-                  className={filterControlClass}
-                  onChange={(event) => updateQueryParam('ordering', event.target.value)}
-                  value={ordering}
-                >
-                  <option value="-pickup_date">Pickup date - newest first</option>
-                  <option value="pickup_date">Pickup date - oldest first</option>
-                  <option value="trip_advise_code">Trip advice - A to Z</option>
-                  <option value="-trip_advise_code">Trip advice - Z to A</option>
-                  <option value="client">Client - A to Z</option>
-                  <option value="-client">Client - Z to A</option>
-                  <option value="status">Status - lifecycle order</option>
-                  <option value="-status">Status - reverse lifecycle</option>
-                  <option value="-updated_at">Last activity - newest first</option>
-                  <option value="updated_at">Last activity - oldest first</option>
-                </select>
-              </label>
-              <label className="flex min-h-10 items-center gap-2 self-end rounded-lg border border-navy-200 bg-white px-3 text-xs font-semibold text-navy-700 dark:border-carbon-700 dark:bg-carbon-950 dark:text-carbon-200">
-                <input
-                  checked={filters.transferOnly ?? false}
-                  className="h-4 w-4"
-                  onChange={(event) => updateQueryParam('transfer', event.target.checked ? 'true' : undefined)}
-                  type="checkbox"
-                />
-                Transfer-only trips
-              </label>
-            </FilterBar>
-          )}
-        </div>
+                <label className={filterFieldLabelClass}>
+                  Truck
+                  <select
+                    className={filterControlClass}
+                    onChange={(event) => updateQueryParam('truck', event.target.value)}
+                    value={filters.truckId ?? ''}
+                  >
+                    <option value="">All truck values</option>
+                    {lookups?.trucks.map((option) => (
+                      <option key={option.value} disabled={!option.active} value={option.value}>
+                        {option.label}
+                        {!option.active ? ' (Inactive)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Driver
+                  <select
+                    className={filterControlClass}
+                    onChange={(event) => updateQueryParam('driver', event.target.value)}
+                    value={filters.driverId ?? ''}
+                  >
+                    <option value="">All driver values</option>
+                    {lookups?.drivers.map((option) => (
+                      <option key={option.value} disabled={!option.active} value={option.value}>
+                        {option.label}
+                        {!option.active ? ' (Inactive)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Load type
+                  <select
+                    className={filterControlClass}
+                    onChange={(event) => updateQueryParam('load', event.target.value)}
+                    value={filters.loadType ?? ''}
+                  >
+                    <option value="">All load type values</option>
+                    {lookups?.loadTypes.map((option) => (
+                      <option key={option.value} disabled={!option.active} value={option.value}>
+                        {option.label}
+                        {!option.active ? ' (Inactive)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Branch
+                  <select
+                    className={filterControlClass}
+                    onChange={(event) => updateQueryParam('branch', event.target.value)}
+                    value={filters.branchId ?? ''}
+                  >
+                    <option value="">All branch values</option>
+                    {lookups?.branches.map((option) => (
+                      <option key={option.value} disabled={!option.active} value={option.value}>
+                        {option.label}
+                        {!option.active ? ' (Inactive)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={filterFieldLabelClass}>
+                  Sort by
+                  <select
+                    className={filterControlClass}
+                    onChange={(event) => updateQueryParam('ordering', event.target.value)}
+                    value={ordering}
+                  >
+                    <option value="-pickup_date">Pickup date - newest first</option>
+                    <option value="pickup_date">Pickup date - oldest first</option>
+                    <option value="trip_advise_code">Trip advice - A to Z</option>
+                    <option value="-trip_advise_code">Trip advice - Z to A</option>
+                    <option value="client">Client - A to Z</option>
+                    <option value="-client">Client - Z to A</option>
+                    <option value="status">Status - lifecycle order</option>
+                    <option value="-status">Status - reverse lifecycle</option>
+                    <option value="-updated_at">Last activity - newest first</option>
+                    <option value="updated_at">Last activity - oldest first</option>
+                  </select>
+                </label>
+                <label className={filterCheckboxLabelClass}>
+                  <input
+                    checked={filters.transferOnly ?? false}
+                    className="h-4 w-4"
+                    onChange={(event) => updateQueryParam('transfer', event.target.checked ? 'true' : undefined)}
+                    type="checkbox"
+                  />
+                  Transfer-only trips
+                </label>
+                <label className={filterCheckboxLabelClass}>
+                  <input
+                    checked={filters.unassignedOnly ?? false}
+                    className="h-4 w-4"
+                    onChange={(event) => updateQueryParam('unassigned', event.target.checked ? 'true' : undefined)}
+                    type="checkbox"
+                  />
+                  Unassigned resources
+                </label>
+              </FilterBar>
+            )}
+          </div>
+        )}
 
         {retainedDataWarning && (
           <div
@@ -966,6 +1095,7 @@ export const TripOperationsTable: React.FC<TripOperationsTableProps> = ({
                 getRowKey={(row) => row.id}
                 isFiltered={normalizedUrl.hasUserFilters}
                 isLoading={isInitialLoading && !pageResult}
+                isRowSelected={(row) => row.id === quickTripId}
                 noResultsDescription="No trips match the current search and filter combination."
                 onResetFilters={clearAllFilters}
                 onRowClick={openRow}

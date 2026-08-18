@@ -137,6 +137,7 @@ export interface TripOperationsFilters {
   loadType?: TripLoadTypeCode;
   branchId?: string;
   transferOnly?: boolean;
+  unassignedOnly?: boolean;
 }
 
 export interface TripOperationsQuery {

@@ -68,6 +68,32 @@ describe('Phase 2A Trip Operations service contract', () => {
     expect(transfer.results.map((row) => row.id)).toEqual(['trip-5']);
   });
 
+  it('filters trips missing a driver or truck assignment', async () => {
+    const unassignedTrip = {
+      ...(await services.data.getTrips()).find((trip) => trip.id === 'trip-2')!,
+      id: 'trip-unassigned',
+      trip_id: 'trip-unassigned',
+      trip_advise_code: 'T-CEB-UNASSIGNED',
+      trip_code: 'T-CEB-UNASSIGNED',
+      truck_id: undefined,
+      driver_id: undefined,
+      status_id: 'status-sched',
+      status: 'Scheduled',
+      is_deleted: false,
+    };
+    const service = createDevelopmentTripOperationsService({
+      ...services.data,
+      getTrips: vi.fn().mockResolvedValue([unassignedTrip]),
+    });
+
+    const result = await service.list({ filters: { unassignedOnly: true }, limit: 100 });
+    expect(result.results.map((row) => row.id)).toEqual(['trip-unassigned']);
+    expect(result.results[0]).toMatchObject({
+      truck: { id: null },
+      driver: { id: null },
+    });
+  });
+
   it('returns approved labels, route facts, assignments, and factual unavailability only', async () => {
     const result = await services.trips.list({ search: 'T-CEB-001' });
     expect(result.results[0]).toMatchObject({

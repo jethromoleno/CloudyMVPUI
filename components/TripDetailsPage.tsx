@@ -557,7 +557,6 @@ export const TripDetailsPage: React.FC<TripDetailsPageProps> = ({
   const [isSectionLoading, setIsSectionLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const secondarySectionRef = useRef<HTMLDivElement>(null);
   const overviewRef = useRef(overview);
   const overviewRequestRef = useRef<{ controller: AbortController; id: number } | null>(null);
   const sectionRequestRef = useRef<{ controller: AbortController; id: number } | null>(null);
@@ -689,15 +688,6 @@ export const TripDetailsPage: React.FC<TripDetailsPageProps> = ({
     }
     void loadSelectedSection(selectedSection, 'initial', true);
   }, [loadSelectedSection, selectedSection]);
-
-  useEffect(() => {
-    if (selectedSection === 'overview') return;
-    const scrollTimer = window.setTimeout(
-      () => secondarySectionRef.current?.scrollIntoView?.({ block: 'start', behavior: 'auto' }),
-      0,
-    );
-    return () => window.clearTimeout(scrollTimer);
-  }, [sectionDataKey, sectionErrorKey, selectedSection]);
 
   const refresh = useCallback(() => {
     void loadOverview('refresh', false);
@@ -835,8 +825,12 @@ export const TripDetailsPage: React.FC<TripDetailsPageProps> = ({
             </div>
           )}
 
-          <nav aria-label="Trip Details sections" className="mt-5 overflow-x-auto">
-            <div className="flex min-w-max gap-1 border-b border-navy-200 dark:border-carbon-800" role="tablist">
+          <nav className="mt-5 overflow-x-auto">
+            <div
+              aria-label="Trip Details sections"
+              className="flex min-w-max gap-1 border-b border-navy-200 dark:border-carbon-800"
+              role="tablist"
+            >
               {TRIP_DETAIL_SECTIONS.map((section) => (
                 <button
                   key={section}
@@ -873,11 +867,11 @@ export const TripDetailsPage: React.FC<TripDetailsPageProps> = ({
             </div>
           )}
 
-          {overview && (
+          {selectedSection === 'overview' && overview && (
             <div
-              aria-labelledby={selectedSection === 'overview' ? 'trip-details-tab-overview' : undefined}
+              aria-labelledby="trip-details-tab-overview"
               id="trip-details-panel-overview"
-              role={selectedSection === 'overview' ? 'tabpanel' : undefined}
+              role="tabpanel"
             >
               <OverviewSection overview={overview} />
               <div className="mt-4">
@@ -888,10 +882,8 @@ export const TripDetailsPage: React.FC<TripDetailsPageProps> = ({
 
           {selectedSection !== 'overview' && (
             <div
-              ref={secondarySectionRef}
               aria-labelledby={`trip-details-tab-${selectedSection}`}
               aria-live="polite"
-              className="scroll-mt-4 pb-[35vh]"
               id={`trip-details-panel-${selectedSection}`}
               role="tabpanel"
             >
@@ -900,11 +892,11 @@ export const TripDetailsPage: React.FC<TripDetailsPageProps> = ({
               ) : sectionError && sectionErrorKey === selectedSection ? (
                 sectionError.kind === 'authorization' ? (
                   <PermissionDeniedState
-                    description={`The service denied the ${sectionLabels[selectedSection]} request. The safe Overview remains visible.`}
+                    description={`The service denied the ${sectionLabels[selectedSection]} request. The selected section address is unchanged.`}
                   />
                 ) : (
                   <ErrorState
-                    description={`${sectionError.message} The safe Overview remains visible and the selected section address is unchanged.`}
+                    description={`${sectionError.message} The selected section address is unchanged.`}
                     onRetry={() => void loadSelectedSection(selectedSection, 'refresh', true)}
                     title={`${sectionLabels[selectedSection]} unavailable`}
                   />

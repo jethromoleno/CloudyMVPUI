@@ -25,6 +25,7 @@ export const tripOperationsUserFilterParams = [
   'load',
   'branch',
   'transfer',
+  'unassigned',
 ] as const;
 
 const supportedParams = new Set([...tripOperationsUserFilterParams, 'ordering', 'page', 'limit', 'quick']);
@@ -143,6 +144,15 @@ export const normalizeTripOperationsParams = (
     issues.push('The invalid transfer-only value was removed.');
   }
 
+  let unassignedOnly = false;
+  const requestedUnassigned = input.get('unassigned');
+  if (requestedUnassigned === 'true') {
+    unassignedOnly = true;
+    normalized.set('unassigned', 'true');
+  } else if (requestedUnassigned && requestedUnassigned !== 'false') {
+    issues.push('The invalid unassigned-only value was removed.');
+  }
+
   const requestedOrdering = input.get('ordering');
   const ordering = (TRIP_OPERATIONS_ORDERING_VALUES as readonly string[]).includes(requestedOrdering ?? '')
     ? (requestedOrdering as TripOperationsOrdering)
@@ -173,6 +183,7 @@ export const normalizeTripOperationsParams = (
     loadType,
     branchId,
     transferOnly: transferOnly || undefined,
+    unassignedOnly: unassignedOnly || undefined,
   };
   const hasUserFilters = Boolean(search || Object.values(filters).some((value) => value !== undefined));
 

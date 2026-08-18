@@ -57,6 +57,9 @@ const formatDateTime = (value: string | null) => {
   }).format(parsed);
 };
 
+const focusableSelector =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 const Fact: React.FC<{
   icon: React.ReactNode;
   label: string;
@@ -209,8 +212,29 @@ export const TripQuickDetailsPanel: React.FC<TripQuickDetailsPanelProps> = ({
     if (variant !== 'sheet') return undefined;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const appRoot = document.getElementById('root');
+    appRoot?.setAttribute('inert', '');
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !sheetRef.current) return;
+      const focusable = Array.from(sheetRef.current.querySelectorAll(focusableSelector)) as HTMLElement[];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.body.style.overflow = originalOverflow;
+      appRoot?.removeAttribute('inert');
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [variant]);
 
@@ -388,11 +412,10 @@ export const TripQuickDetailsPanel: React.FC<TripQuickDetailsPanelProps> = ({
   if (variant === 'sheet') {
     return createPortal(
       <div className="fixed inset-0 z-50 flex flex-col justify-end md:hidden">
-        <button
-          aria-label="Dismiss Quick Details"
+        <div
+          aria-hidden="true"
           className="absolute inset-0 bg-navy-950/55 backdrop-blur-[1px]"
           onClick={onClose}
-          type="button"
         />
         <div
           aria-labelledby="trip-quick-details-title"

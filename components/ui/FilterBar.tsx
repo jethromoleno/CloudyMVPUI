@@ -5,7 +5,9 @@ import { Button } from './Button';
 export interface FilterBarProps {
   children: React.ReactNode;
   className?: string;
+  contentClassName?: string;
   hasActiveFilters?: boolean;
+  headerClassName?: string;
   onReset?: () => void;
   title?: string;
 }
@@ -13,7 +15,9 @@ export interface FilterBarProps {
 export const FilterBar: React.FC<FilterBarProps> = ({
   children,
   className = '',
+  contentClassName,
   hasActiveFilters = false,
+  headerClassName = '',
   onReset,
   title = 'Filters',
 }) => (
@@ -26,7 +30,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       .filter(Boolean)
       .join(' ')}
   >
-    <div className="mb-3 flex items-center justify-between gap-3 border-b border-navy-100 pb-2 dark:border-carbon-800">
+    <div
+      className={[
+        'mb-3 flex items-center justify-between gap-3 border-b border-navy-100 pb-2 dark:border-carbon-800',
+        headerClassName,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <h2 className="flex items-center gap-2 text-sm font-bold text-navy-900 dark:text-white">
         <SlidersHorizontal aria-hidden="true" className="h-4 w-4 text-blue-500" />
         {title}
@@ -37,6 +48,12 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         </Button>
       )}
     </div>
-    <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">{children}</div>
+    <div
+      className={
+        contentClassName ?? 'grid grid-cols-1 gap-3.5 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5'
+      }
+    >
+      {children}
+    </div>
   </section>
 );

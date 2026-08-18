@@ -21,7 +21,7 @@ Approval record: Jethro approved Phase 2B on 2026-07-24 with the exact instructi
 
 - Desktop/tablet Quick Details uses the list route `quick=<tripId>` as the only selected-record source.
 - Quick Details is an in-layout 420 px maximum right panel; the list remains mounted and usable.
-- Mobile Quick action goes directly to the canonical Full Details route instead of squeezing a side panel into 390 px.
+- Mobile Quick Details uses the same `quick=<tripId>` selection as desktop, rendered as a focus-trapped bottom sheet instead of navigating immediately to Full Details. Compact viewports still reach Full Details through **Open Full Details**. This supersedes the original Phase 2B “mobile goes directly to Full Details” interaction.
 - Full Details remains `/trip-scheduling/trips/:tripId`.
 - Canonical section state is `section=overview|stops|assignments|events|fuel|activity`; Overview omits the parameter.
 - Inbound legacy `tab=` is accepted, normalized to `section=`, and removed with the remaining return context preserved.

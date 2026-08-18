@@ -22,12 +22,15 @@ export interface User {
 // Legacy Alias for User Management and Auth session state
 export interface SystemUser {
   id: string;
+  id_legacy?: number;
   username: string;
-  password?: string;
   role: string; // role code / primary role
-  roles?: string[]; // assigned roles list
+  roles?: string[]; // legacy projection; the effective policy requires exactly one matching role
+  employee_id?: string; // development identity link used only for own-record presentation context
   permissions: string[]; // module codes
   is_active?: boolean; // active/deactive status
+  email?: string;
+  invitation_status?: 'PENDING' | 'ACCEPTED';
 }
 
 // 2. roles
@@ -266,9 +269,9 @@ export interface Employee {
   last_name: string;
   full_name: string;
   employee_role_id: string; // UUID FK -> employee_roles
-  branch_id?: string;      // UUID FK -> branches
+  branch_id?: string; // UUID FK -> branches
   contact_no?: string;
-  email?: string;          // Contact email
+  email?: string; // Contact email
   employment_status: string; // Active, On Leave, Suspended, Terminated
   is_active: boolean;
   is_deleted: boolean;
@@ -320,10 +323,10 @@ export interface Truck {
   load_type_id?: string; // UUID FK -> load_types
   truck_status_id: string; // UUID FK -> truck_statuses
   registration_expiry?: string; // DATE
-  branch_id?: string;      // UUID FK -> branches
+  branch_id?: string; // UUID FK -> branches
   is_active: boolean;
   is_deleted: boolean;
-  remarks?: string;        // Optional notes
+  remarks?: string; // Optional notes
   created_at: string;
   updated_at: string;
 

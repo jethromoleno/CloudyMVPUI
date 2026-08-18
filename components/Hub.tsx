@@ -1,6 +1,8 @@
 import React from 'react';
 import { Package, Map, DollarSign, Lock, Sun, Moon, LogOut } from 'lucide-react';
 import { SystemUser, AppModule, Theme } from '../types';
+import { navigationDestinations, usePermissions } from '../permissions';
+import { Button, StatusBadge } from './ui';
 
 interface HubProps {
   user: SystemUser;
@@ -11,41 +13,40 @@ interface HubProps {
 }
 
 const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onToggleTheme }) => {
-  // Trip Scheduling (LogiTrack) is active. Inventory and Billing are placeholder / coming soon.
-  const hasPermission = (module: AppModule) => module === 'trip_scheduling';
+  const permissions = usePermissions();
+  const hasPermission = (module: AppModule) =>
+    module === 'trip_scheduling' && permissions.canShowNavigation(navigationDestinations.dashboard);
 
   const modules = [
+    {
+      id: 'trip_scheduling' as AppModule,
+      title: 'Trip Scheduling',
+      description: 'Logistics operations, trip scheduling, fleet records, and personnel directories.',
+      icon: Map,
+      lightBg: 'bg-white',
+      lightBorder: 'border-navy-200',
+      lightIconBg: 'bg-navy-50 text-navy-700',
+      lightText: 'text-navy-900',
+      darkBg: 'dark:bg-carbon-900',
+      darkBorder: 'dark:border-carbon-700',
+      darkIconBg: 'dark:bg-blue-500/10 dark:text-blue-400',
+      darkText: 'dark:text-white',
+      isPlaceholder: false,
+    },
     {
       id: 'inventory' as AppModule,
       title: 'Inventory Management',
       description: 'Warehouse tracking, stock levels, and asset management.',
       icon: Package,
-      // Light Mode: Slate/Navy aesthetic
       lightBg: 'bg-white',
       lightBorder: 'border-navy-100',
       lightIconBg: 'bg-emerald-50 text-emerald-600',
       lightText: 'text-navy-900',
-      // Dark Mode: Carbon / Matte Black
       darkBg: 'dark:bg-carbon-900',
       darkBorder: 'dark:border-carbon-800',
       darkIconBg: 'dark:bg-emerald-500/10 dark:text-emerald-500',
       darkText: 'dark:text-white',
-      isPlaceholder: true
-    },
-    {
-      id: 'trip_scheduling' as AppModule,
-      title: 'Trip Scheduling (LogiTrack)',
-      description: 'Logistics, route planning, fleet management, and AI analysis.',
-      icon: Map,
-      lightBg: 'bg-white',
-      lightBorder: 'border-navy-100',
-      lightIconBg: 'bg-navy-50 text-navy-700',
-      lightText: 'text-navy-900',
-      darkBg: 'dark:bg-carbon-900',
-      darkBorder: 'dark:border-carbon-800',
-      darkIconBg: 'dark:bg-blue-500/10 dark:text-blue-500',
-      darkText: 'dark:text-white',
-      isPlaceholder: false
+      isPlaceholder: true,
     },
     {
       id: 'billing' as AppModule,
@@ -54,54 +55,73 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
       icon: DollarSign,
       lightBg: 'bg-white',
       lightBorder: 'border-navy-100',
-      lightIconBg: 'bg-purple-50 text-purple-700',
+      lightIconBg: 'bg-amber-50 text-amber-700',
       lightText: 'text-navy-900',
       darkBg: 'dark:bg-carbon-900',
       darkBorder: 'dark:border-carbon-800',
-      darkIconBg: 'dark:bg-purple-500/10 dark:text-purple-500',
+      darkIconBg: 'dark:bg-amber-500/10 dark:text-amber-400',
       darkText: 'dark:text-white',
-      isPlaceholder: true
-    }
+      isPlaceholder: true,
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-navy-50 dark:bg-carbon-950 flex flex-col relative overflow-hidden transition-colors duration-500">
-      {/* Background Decor - Subtle for Light Mode, Hidden/Minimal for Dark */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-navy-200 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-[120px] opacity-40 dark:opacity-10"></div>
-         <div className="absolute bottom-[-20%] right-[10%] w-[60%] h-[60%] bg-navy-200 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-[120px] opacity-40 dark:opacity-10"></div>
-      </div>
-
-      <header className="relative z-10 px-8 py-6 flex justify-between items-center border-b border-navy-100 dark:border-carbon-800 bg-white/80 dark:bg-carbon-950/50 backdrop-blur-md">
-        <h1 className="text-xl font-bold text-navy-900 dark:text-white tracking-tight flex items-center gap-2">
-            <div className="w-8 h-8 bg-navy-900 dark:bg-white rounded flex items-center justify-center">
-                <div className="w-3 h-3 bg-white dark:bg-carbon-900 rounded-full"></div>
-            </div>
-            Enterprise Portal
-        </h1>
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onToggleTheme}
-            className="p-2 rounded-full bg-navy-100 dark:bg-carbon-800 text-navy-600 dark:text-carbon-300 hover:bg-navy-200 dark:hover:bg-carbon-700 transition-colors"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-          <div className="h-6 w-px bg-navy-200 dark:bg-carbon-800 mx-2"></div>
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-navy-900 dark:text-white">{user.username}</p>
-            <p className="text-xs text-navy-500 dark:text-carbon-500">{user.role}</p>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-b from-navy-50 via-navy-50 to-navy-100/80 transition-colors duration-500 dark:from-carbon-950 dark:via-carbon-950 dark:to-carbon-900">
+      <header className="relative z-10 flex items-center justify-between gap-3 border-b border-navy-100/80 bg-white/70 px-4 py-4 backdrop-blur-md dark:border-carbon-800 dark:bg-carbon-950/50 sm:px-8 sm:py-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy-900 dark:bg-white">
+            <div className="h-3 w-3 rounded-full bg-white dark:bg-carbon-900" />
           </div>
-          <button 
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-bold tracking-tight text-navy-900 dark:text-white sm:text-xl">
+              Cloudy Logistics
+            </h1>
+            <p className="truncate text-xs text-navy-500 dark:text-carbon-400">Choose a workspace module</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+          <Button
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            icon={
+              theme === 'dark' ? (
+                <Sun aria-hidden="true" className="h-4 w-4" />
+              ) : (
+                <Moon aria-hidden="true" className="h-4 w-4" />
+              )
+            }
+            onClick={onToggleTheme}
+            size="icon"
+            variant="secondary"
+          />
+          <div className="mx-0.5 hidden h-6 w-px bg-navy-200 sm:block dark:bg-carbon-800" />
+          <div className="hidden text-right sm:block">
+            <p className="text-sm font-semibold text-navy-900 dark:text-white">{user.username}</p>
+            <p className="text-xs text-navy-500 dark:text-carbon-300">{user.role}</p>
+          </div>
+          <Button
+            aria-label="Sign out"
+            icon={<LogOut aria-hidden="true" className="h-4 w-4" />}
             onClick={onLogout}
-            className="flex items-center gap-2 text-sm font-medium text-navy-600 dark:text-carbon-400 hover:text-navy-900 dark:hover:text-white px-3 py-2 rounded-lg hover:bg-navy-100 dark:hover:bg-carbon-800 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+            size="icon"
+            variant="ghost"
+          />
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 flex items-center justify-center p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center gap-8 px-6 py-10 sm:px-8">
+        <div className="max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-navy-500 dark:text-carbon-400">
+            Workspace hub
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight text-navy-950 dark:text-white sm:text-4xl">
+            Run the next dispatch decision
+          </p>
+          <p className="mt-3 text-sm text-navy-600 dark:text-carbon-300 sm:text-base">
+            Launch Trip Scheduling to run dispatch, or review upcoming modules when they become available.
+          </p>
+        </div>
+
+        <div className="grid w-full max-w-6xl grid-cols-1 gap-5 md:grid-cols-3">
           {modules.map((mod) => {
             const Icon = mod.icon;
             const allowed = hasPermission(mod.id);
@@ -111,39 +131,56 @@ const Hub: React.FC<HubProps> = ({ user, onSelectModule, onLogout, theme, onTogg
                 key={mod.id}
                 onClick={() => allowed && onSelectModule(mod.id)}
                 disabled={!allowed}
+                aria-describedby={mod.isPlaceholder ? `${mod.id}-coming-soon` : undefined}
                 className={`
-                  relative group overflow-hidden rounded-xl border transition-all duration-300 text-left h-80 flex flex-col justify-between p-8
-                  ${allowed 
-                    ? `${mod.lightBg} ${mod.darkBg} ${mod.lightBorder} ${mod.darkBorder} hover:shadow-xl hover:shadow-navy-200/50 dark:hover:shadow-none hover:-translate-y-1` 
-                    : 'bg-navy-50 border-navy-100 dark:bg-carbon-950 dark:border-carbon-800/80 opacity-60 cursor-not-allowed'}
+                  relative group overflow-hidden rounded-xl border text-left transition-all duration-300
+                  flex h-72 flex-col justify-between p-7
+                  ${
+                    allowed
+                      ? `${mod.lightBg} ${mod.darkBg} ${mod.lightBorder} ${mod.darkBorder} shadow-md hover:-translate-y-0.5 hover:shadow-xl`
+                      : 'cursor-not-allowed border-navy-100 bg-navy-50/80 opacity-70 dark:border-carbon-800 dark:bg-carbon-950'
+                  }
                 `}
               >
                 <div>
-                  <div className="flex justify-between items-start">
-                    <div className={`w-14 h-14 rounded-lg flex items-center justify-center mb-6 ${allowed ? `${mod.lightIconBg} ${mod.darkIconBg}` : 'bg-navy-100 text-navy-400 dark:bg-carbon-800/80 text-navy-400/80 dark:text-carbon-600'}`}>
-                      <Icon className="w-7 h-7" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div
+                      className={`mb-5 flex h-12 w-12 items-center justify-center rounded-lg ${
+                        allowed
+                          ? `${mod.lightIconBg} ${mod.darkIconBg}`
+                          : 'bg-navy-100 text-navy-400 dark:bg-carbon-800 dark:text-carbon-600'
+                      }`}
+                    >
+                      <Icon className="h-6 w-6" />
                     </div>
                     {mod.isPlaceholder && (
-                      <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border border-amber-100 dark:border-amber-500/20 rounded">
-                        Coming Soon
-                      </span>
+                      <>
+                        <StatusBadge className="shrink-0" hideCue status="COMING_SOON" />
+                        <span id={`${mod.id}-coming-soon`} className="sr-only">
+                          Coming Soon. This module is visible but not launchable in the MVP.
+                        </span>
+                      </>
                     )}
                   </div>
-                  <h2 className={`text-xl font-bold mb-2 ${mod.lightText} ${mod.darkText}`}>{mod.title}</h2>
-                  <p className="text-navy-500 dark:text-carbon-400 text-sm leading-relaxed">
-                    {mod.isPlaceholder ? `${mod.title} is a modular extension currently in development for a future enterprise release.` : mod.description}
+                  <h3 className={`text-xl font-bold ${mod.lightText} ${mod.darkText}`}>{mod.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-navy-500 dark:text-carbon-400">
+                    {mod.isPlaceholder ? 'Available in a future release.' : mod.description}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between mt-8 pt-6 border-t border-navy-100 dark:border-carbon-800/50">
-                  <span className={`text-xs font-semibold uppercase tracking-wider ${allowed ? 'text-navy-900 dark:text-white' : 'text-navy-500 dark:text-carbon-600'}`}>
-                    {allowed ? 'Launch Workspace' : 'Placeholder Module'}
+                <div className="mt-6 flex items-center justify-between border-t border-navy-100 pt-5 dark:border-carbon-800/50">
+                  <span
+                    className={`text-xs font-semibold uppercase tracking-wider ${
+                      allowed ? 'text-navy-900 dark:text-white' : 'text-navy-500 dark:text-carbon-600'
+                    }`}
+                  >
+                    {allowed ? 'Launch workspace' : 'Unavailable'}
                   </span>
                   {!allowed ? (
-                    <Lock className="w-4 h-4 text-navy-400 dark:text-carbon-600" />
+                    <Lock className="h-4 w-4 text-navy-400 dark:text-carbon-600" />
                   ) : (
-                    <div className="w-6 h-6 rounded-full bg-navy-900 dark:bg-white flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 bg-white dark:bg-carbon-900 rounded-full"></div>
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-navy-900 dark:bg-white">
+                      <div className="h-1.5 w-1.5 rounded-full bg-white dark:bg-carbon-900" />
                     </div>
                   )}
                 </div>

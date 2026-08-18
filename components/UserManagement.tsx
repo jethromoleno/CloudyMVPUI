@@ -1,1027 +1,606 @@
-import React, { useState, useEffect } from 'react';
-import { SystemUser, AppModule, UserRoleType } from '../types';
-import { api } from '../services/apiService';
-import { 
-  Plus, Edit2, Trash2, X, Shield, Check, AlertTriangle, Settings2, Save, 
-  Users, Lock, Unlock, Globe, Building, Clock, SlidersHorizontal, Eye, 
-  Layers, Activity, Info, UserCheck, UserX, HelpCircle, ShieldAlert
-} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Activity, Check, Edit2, Plus, Save, Settings2, Shield, UserCheck, Users, UserX } from 'lucide-react';
+import {
+  OFFICIAL_ROLES,
+  permissionActions,
+  permissionResources,
+  ROLE_PERMISSION_MATRIX,
+  usePermissions,
+} from '../permissions';
+import { normalizeServiceError, services } from '../services';
+import type { AppSetting, AuditLog, SystemUser, UserRoleType } from '../types';
+import { statusToneClasses } from '../design/statusTokens';
+import { uiClasses } from '../design/tokens';
+import { Button, ConfirmDialog, EmptyState, ErrorState, FormField, Modal, SearchInput, StatusBadge } from './ui';
 
 interface UserManagementProps {
   users: SystemUser[];
-  onAddUser: (user: Omit<SystemUser, 'id'>) => void;
-  onUpdateUser: (user: SystemUser) => void;
-  onDeleteUser: (id: string | number) => void;
-  userRole: string;
+  onAddUser: (user: Omit<SystemUser, 'id'>) => void | Promise<void>;
+  onUpdateUser: (user: SystemUser) => void | Promise<void>;
+  onDeactivateUser: (userId: string, reason: string) => void | Promise<void>;
+  onReactivateUser: (userId: string, reason: string) => void | Promise<void>;
 }
 
-const UserManagement: React.FC<UserManagementProps> = ({ 
-  users, onAddUser, onUpdateUser, onDeleteUser, userRole 
+type SettingsTab = 'users' | 'roles' | 'settings' | 'audit';
+
+// Role tone follows the shared brand and status palette: navy/carbon for authority
+// levels, status tones for the remaining operational roles.
+const roleBadgeClasses: Record<UserRoleType, string> = {
+  SuperAdmin: 'border-navy-900 bg-navy-900 text-white dark:border-white dark:bg-white dark:text-carbon-950',
+  Admin: statusToneClasses.info,
+  Dispatcher: statusToneClasses.warning,
+  Encoder: statusToneClasses.success,
+  Viewer: statusToneClasses.neutral,
+};
+
+const isOfficialRole = (role: string): role is UserRoleType => (OFFICIAL_ROLES as readonly string[]).includes(role);
+
+const UserManagement: React.FC<UserManagementProps> = ({
+  users,
+  onAddUser,
+  onUpdateUser,
+  onDeactivateUser,
+  onReactivateUser,
 }) => {
-  const isSuperAdmin = userRole === 'SuperAdmin';
-  
-  // --- STATE FOR SETTINGS TABS ---
-  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'modules' | 'settings'>('users');
+  const permissions = usePermissions();
+  const canManageUsers = permissions.can(permissionActions.manage, permissionResources.users);
+  const canAssignRoles = permissions.can(permissionActions.assign, permissionResources.usersRoles);
+  const canUpdateSettings = permissions.can(permissionActions.update, permissionResources.settings);
+  const canReadAudit = permissions.can(permissionActions.read, permissionResources.auditLogs);
+  const canDeactivateUsers = permissions.can(permissionActions.deactivate, permissionResources.users);
+  const canReactivateUsers = permissions.can(permissionActions.reactivate, permissionResources.users);
 
-  // --- GENERAL DIRECTORY / SYSTEM USERS LOCAL SYNC ---
-  const [confirmDeactivateId, setConfirmDeactivateId] = useState<string | number | null>(null);
-  const [confirmActivateId, setConfirmActivateId] = useState<string | number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | number | null>(null);
-  const [alertMsg, setAlertMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const visibleTabs = useMemo<SettingsTab[]>(
+    () => [
+      ...(canManageUsers ? (['users', 'roles'] as const) : []),
+      'settings',
+      ...(canReadAudit ? (['audit'] as const) : []),
+    ],
+    [canManageUsers, canReadAudit],
+  );
+  const [activeTab, setActiveTab] = useState<SettingsTab>(canManageUsers ? 'users' : 'settings');
+  const [settings, setSettings] = useState<AppSetting[]>([]);
+  const [settingValues, setSettingValues] = useState<Record<string, string>>({});
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [auditQuery, setAuditQuery] = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRoleType>('Viewer');
+  const [userFormError, setUserFormError] = useState<string | null>(null);
+  const [lifecycleTarget, setLifecycleTarget] = useState<{ userId: string; active: boolean } | null>(null);
+  const [lifecycleReason, setLifecycleReason] = useState('');
+  const [lifecycleError, setLifecycleError] = useState<string | null>(null);
 
-  // --- FORM STATE ---
-  const initialFormState = {
-    username: '',
-    password: '',
-    roles: ['Viewer'] as string[], // Assigned Roles multi-select support
-    permissions: {
-      inventory: false,
-      trip_scheduling: true,
-      billing: false
-    }
-  };
-  const [formData, setFormData] = useState(initialFormState);
-
-  // --- ENTERPRISE APP CONFIG STATE ---
-  const [appTimezone, setAppTimezone] = useState('Asia/Manila');
-  const [defaultBranch, setDefaultBranch] = useState('branch-2');
-  const [sessionTimeout, setSessionTimeout] = useState('60');
-  const [pendingTripAlertHours, setPendingTripAlertHours] = useState('2');
-  const [configSaveSuccess, setConfigSaveSuccess] = useState(false);
-
-  // Load app settings from persistent mockup store
   useEffect(() => {
-    const loadSettings = async () => {
+    if (!visibleTabs.includes(activeTab)) setActiveTab(visibleTabs[0] ?? 'settings');
+  }, [activeTab, visibleTabs]);
+
+  useEffect(() => {
+    let active = true;
+    const loadAdministrativeReadModels = async () => {
+      setLoadError(null);
       try {
-        const settings = await api.getAppSettings();
-        const tz = settings.find(s => s.setting_key === 'app_timezone')?.setting_value || 'Asia/Manila';
-        const br = settings.find(s => s.setting_key === 'default_branch_id')?.setting_value || 'branch-2';
-        const to = settings.find(s => s.setting_key === 'session_timeout_minutes')?.setting_value || '60';
-        const pt = settings.find(s => s.setting_key === 'pending_trip_alert_hours')?.setting_value || '2';
-        
-        setAppTimezone(tz);
-        setDefaultBranch(br);
-        setSessionTimeout(to);
-        setPendingTripAlertHours(pt);
-      } catch (err) {
-        console.error('Failed to load settings from apiService', err);
+        const snapshot = await services.settingsAudit.getSnapshot();
+        if (!active) return;
+        setSettings(snapshot.settings);
+        setSettingValues(Object.fromEntries(snapshot.settings.map((setting) => [setting.id, setting.setting_value])));
+        setAuditLogs(canReadAudit ? snapshot.auditLogs : []);
+      } catch (error) {
+        if (active) setLoadError(normalizeServiceError(error).message);
       }
     };
-    loadSettings();
-  }, []);
-
-  // Sync Roles list for check-boxes representation
-  const availableRolesList = ['SuperAdmin', 'Admin', 'Dispatcher', 'Encoder', 'Viewer'];
-  
-  // Role mapping definitions for descriptions and transparency matrix
-  const roleDefinitions = [
-    {
-      code: 'SuperAdmin',
-      name: 'SuperAdmin Role',
-      description: 'Root administrative user. Has unrestricted access to all modules, including user credential provisioning, database variables, system security parameters, and operational logs.',
-      permissions: ['Users & Settings Admin', 'Full Dispatch Controls', 'Fleet Configuration Writes', 'Personnel Records Writes', 'Enterprise Analytics Access']
-    },
-    {
-      code: 'Admin',
-      name: 'Admin Role',
-      description: 'Operations manager. Has full write and read capabilities across all operational modules (Trip Scheduling, Truck Fleet, Employees), but is restricted from editing global system settings, timezone, or creating/modifying credentials.',
-      permissions: ['Full Dispatch Controls', 'Fleet Configuration Writes', 'Personnel Records Writes', 'Operational Reports View']
-    },
-    {
-      code: 'Dispatcher',
-      name: 'Dispatcher Role',
-      description: 'Logistics Dispatch Controller. Can create and modify trip schedules, allocate vehicles and trucks, and read personnel lists.',
-      permissions: ['Dispatch Scheduling Writes', 'Fleet configuration updates (limited)', 'Personnel read-only directory']
-    },
-    {
-      code: 'Encoder',
-      name: 'Encoder Role',
-      description: 'Fulfillment Clerk. Can log trip advices, input fuel slips, record basic timestamps, and view core reference lists.',
-      permissions: ['Fulfillment Trip Log inputs', 'Add fuel logs', 'Core listings view']
-    },
-    {
-      code: 'Viewer',
-      name: 'Viewer Role',
-      description: 'Standard read-only auditor. Has complete visibility across the logistics board, tracking views, and reports, but cannot add or modify any records.',
-      permissions: ['Read-only logistics board', 'No data mutation permissions']
-    }
-  ];
-
-  // Helper to determine the highest role for authorization priority
-  const getHighestRole = (rolesList: string[]): string => {
-    if (rolesList.includes('SuperAdmin')) return 'SuperAdmin';
-    if (rolesList.includes('Admin')) return 'Admin';
-    if (rolesList.includes('Dispatcher')) return 'Dispatcher';
-    if (rolesList.includes('Encoder')) return 'Encoder';
-    return 'Viewer';
-  };
-
-  // --- ACTION HANDLERS ---
-  const handleOpenFormModal = (user?: SystemUser) => {
-    setAlertMsg(null);
-    if (!isSuperAdmin) return; // Guard for SuperAdmin only
-
-    if (user) {
-      // Parse assigned roles or fallback to single role
-      const userRoles = user.roles && user.roles.length > 0 ? user.roles : [user.role];
-      setEditingId(user.id);
-      setFormData({
-        username: user.username,
-        password: user.password || '',
-        roles: userRoles,
-        permissions: {
-          inventory: user.permissions.includes('inventory'),
-          trip_scheduling: user.permissions.includes('trip_scheduling'),
-          billing: user.permissions.includes('billing')
-        }
-      });
-    } else {
-      setEditingId(null);
-      setFormData({
-        username: '',
-        password: '',
-        roles: ['Viewer'],
-        permissions: {
-          inventory: false,
-          trip_scheduling: true,
-          billing: false
-        }
-      });
-    }
-    setIsModalOpen(true);
-  };
-
-  const handleRoleToggle = (selectedRole: string) => {
-    setFormData(prev => {
-      let updatedRoles = [...prev.roles];
-      if (updatedRoles.includes(selectedRole)) {
-        // Prevent empty roles list
-        if (updatedRoles.length > 1) {
-          updatedRoles = updatedRoles.filter(r => r !== selectedRole);
-        }
-      } else {
-        updatedRoles.push(selectedRole);
-      }
-      return { ...prev, roles: updatedRoles };
-    });
-  };
-
-  const handlePermissionToggle = (moduleKey: keyof typeof formData.permissions) => {
-    setFormData(prev => ({
-      ...prev,
-      permissions: {
-        ...prev.permissions,
-        [moduleKey]: !prev.permissions[moduleKey]
-      }
-    }));
-  };
-
-  const handleUserSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAlertMsg(null);
-
-    if (!formData.username.trim()) {
-      setAlertMsg({ type: 'error', text: 'Username is required.' });
-      return;
-    }
-
-    // Determine highest selected role for legacy state compatibility
-    const primaryRole = getHighestRole(formData.roles);
-
-    const compiledPermissions: string[] = [];
-    if (formData.permissions.inventory) compiledPermissions.push('inventory');
-    if (formData.permissions.trip_scheduling) compiledPermissions.push('trip_scheduling');
-    if (formData.permissions.billing) compiledPermissions.push('billing');
-
-    const userInfo: any = {
-      username: formData.username.trim(),
-      password: formData.password || 'cloudy123',
-      role: primaryRole,
-      roles: formData.roles,
-      permissions: compiledPermissions,
-      is_active: true // default active on creation
+    void loadAdministrativeReadModels();
+    return () => {
+      active = false;
     };
+  }, [canReadAudit]);
 
+  const openUserForm = (user?: SystemUser) => {
+    if (!canManageUsers) return;
+    setEditingUser(user ?? null);
+    setUsername(user?.username ?? '');
+    setEmail(user?.email ?? '');
+    setSelectedRole(user && isOfficialRole(user.role) ? user.role : 'Viewer');
+    setUserFormError(null);
+    setUserModalOpen(true);
+  };
+
+  const submitUser = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!canManageUsers || !canAssignRoles) return;
+    setUserFormError(null);
     try {
-      if (editingId) {
-        onUpdateUser({
-          ...userInfo,
-          id: editingId,
-          // Retain activation flag unless toggled
-          is_active: users.find(u => u.id === editingId)?.is_active !== false
+      if (editingUser) {
+        await onUpdateUser({
+          ...editingUser,
+          username,
+          email,
+          role: selectedRole,
+          roles: [selectedRole],
+          permissions: ['trip_scheduling'],
         });
-        setAlertMsg({ type: 'success', text: 'User profile updated successfully.' });
       } else {
-        // Prevent duplicate usernames
-        const exists = users.some(u => u.username.toLowerCase() === formData.username.toLowerCase());
-        if (exists) {
-          setAlertMsg({ type: 'error', text: 'Username already exists. Please choose a unique identifier.' });
-          return;
-        }
-        onAddUser(userInfo);
-        setAlertMsg({ type: 'success', text: 'User profile enrolled successfully.' });
+        await onAddUser({
+          username,
+          email,
+          role: selectedRole,
+          roles: [selectedRole],
+          permissions: ['trip_scheduling'],
+          is_active: true,
+        });
       }
-
-      setTimeout(() => {
-        setIsModalOpen(false);
-        setAlertMsg(null);
-      }, 800);
-    } catch (err: any) {
-      setAlertMsg({ type: 'error', text: err.message || 'Failed to submit profile.' });
+      setUserModalOpen(false);
+      setNotice({
+        type: 'success',
+        text: editingUser ? 'Effective role updated.' : 'Development invitation recorded.',
+      });
+    } catch (error) {
+      setUserFormError(normalizeServiceError(error).message);
     }
   };
 
-  const handleDeactivateTrigger = (id: string | number) => {
-    setAlertMsg(null);
-    const targetUser = users.find(u => u.id === id);
-    if (!targetUser) return;
-
-    if (targetUser.username === 'SuperAdmin') {
-      setAlertMsg({ type: 'error', text: 'Deactivation of default root SuperAdmin is locked.' });
+  const updateUserActiveState = async (user: SystemUser, active: boolean, reason: string) => {
+    if (active ? !canReactivateUsers : !canDeactivateUsers) return;
+    if (!reason.trim()) {
+      setLifecycleError(`A ${active ? 'reactivation' : 'deactivation'} reason is required.`);
       return;
     }
-
-    setConfirmDeactivateId(id);
-  };
-
-  const executeDeactivate = () => {
-    if (confirmDeactivateId) {
-      const targetUser = users.find(u => u.id === confirmDeactivateId);
-      if (targetUser) {
-        onUpdateUser({
-          ...targetUser,
-          is_active: false
-        });
-      }
-      setConfirmDeactivateId(null);
+    setLifecycleError(null);
+    try {
+      if (active) await onReactivateUser(user.id, reason);
+      else await onDeactivateUser(user.id, reason);
+      setLifecycleTarget(null);
+      setNotice({ type: 'success', text: `${user.username} ${active ? 'reactivated' : 'deactivated'}.` });
+    } catch (error) {
+      setLifecycleError(normalizeServiceError(error).message);
     }
   };
 
-  const handleActivateUser = (id: string | number) => {
-    const targetUser = users.find(u => u.id === id);
-    if (targetUser) {
-      onUpdateUser({
-        ...targetUser,
-        is_active: true
+  const openLifecycleConfirmation = (userId: string, active: boolean) => {
+    setLifecycleTarget({ userId, active });
+    setLifecycleReason('');
+    setLifecycleError(null);
+  };
+
+  const saveSettings = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!canUpdateSettings) return;
+    setNotice(null);
+    try {
+      const actorUserId = permissions.identity.user?.id;
+      if (!actorUserId) throw new Error('An authenticated administrator is required to update settings.');
+      const updated = await services.settingsAudit.updateSettings(
+        settings.map((setting) => ({
+          settingId: setting.id,
+          value: settingValues[setting.id] ?? '',
+          actorUserId,
+        })),
+      );
+      setSettings(updated);
+      if (canReadAudit) setAuditLogs((await services.settingsAudit.getSnapshot()).auditLogs);
+      setNotice({ type: 'success', text: 'Development settings updated.' });
+    } catch (error) {
+      setNotice({
+        type: 'error',
+        text: `${normalizeServiceError(error).message} Entered setting values were preserved.`,
       });
     }
   };
 
-  const handleSaveAppConfigurations = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setConfigSaveSuccess(false);
-
-    try {
-      // Find and update each setting asynchronously
-      const mockSettings = await api.getAppSettings();
-      const sTz = mockSettings.find(s => s.setting_key === 'app_timezone');
-      const sBranch = mockSettings.find(s => s.setting_key === 'default_branch_id');
-      const sTimeout = mockSettings.find(s => s.setting_key === 'session_timeout_minutes');
-      const sPending = mockSettings.find(s => s.setting_key === 'pending_trip_alert_hours');
-
-      if (sTz) await api.updateAppSetting(sTz.id, appTimezone);
-      if (sBranch) await api.updateAppSetting(sBranch.id, defaultBranch);
-      if (sTimeout) await api.updateAppSetting(sTimeout.id, sessionTimeout);
-      if (sPending) await api.updateAppSetting(sPending.id, pendingTripAlertHours);
-
-      setConfigSaveSuccess(true);
-      setTimeout(() => setConfigSaveSuccess(false), 3000);
-    } catch (err) {
-      console.error('Failed to update settings parameters:', err);
-    }
+  const tabLabels: Record<SettingsTab, { label: string; icon: React.ReactNode }> = {
+    users: { label: 'Users & roles', icon: <Users aria-hidden="true" className="h-4 w-4" /> },
+    roles: { label: 'Fixed permission matrix', icon: <Shield aria-hidden="true" className="h-4 w-4" /> },
+    settings: { label: 'Application settings', icon: <Settings2 aria-hidden="true" className="h-4 w-4" /> },
+    audit: { label: 'Audit log', icon: <Activity aria-hidden="true" className="h-4 w-4" /> },
   };
+  const filteredAuditLogs = useMemo(() => {
+    const query = auditQuery.trim().toLowerCase();
+    if (!query) return auditLogs;
+    return auditLogs.filter((entry) =>
+      [
+        entry.action,
+        entry.table_name,
+        entry.record_id,
+        entry.user_id,
+        JSON.stringify(entry.old_values),
+        JSON.stringify(entry.new_values),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [auditLogs, auditQuery]);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 h-full bg-navy-50 dark:bg-carbon-950 overflow-y-auto relative transition-colors duration-300">
-      
-      {/* HEADER BAR */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between border-b border-navy-100 dark:border-carbon-800/40 pb-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold font-sans text-navy-900 dark:text-white tracking-tight">System Settings & Controls</h1>
-          <p className="text-navy-500 dark:text-carbon-400 text-xs mt-0.5">Control administrative credentials, view role-based authorization vectors, and config environmental variables.</p>
-        </div>
-        
-        {/* CURRENT ROLE INFORMATIONAL PILL */}
-        <div className="flex items-center gap-1.5 self-start md:self-auto bg-navy-100 dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 px-3.5 py-1.5 rounded-lg">
-          <Shield className="w-3.5 h-3.5 text-navy-800 dark:text-gray-200" />
-          <span className="text-[10.5px] font-bold text-navy-500 dark:text-carbon-500 uppercase tracking-wide">Current Context:</span>
-          <span className="text-xs font-bold text-navy-800 dark:text-white bg-navy-200 dark:bg-carbon-800 px-1.5 py-0.5 rounded text-[10.5px]">{userRole}</span>
-        </div>
-      </div>
+    <div className="h-full overflow-y-auto bg-navy-50 p-4 dark:bg-carbon-950 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="flex flex-col justify-between gap-4 border-b border-navy-200 pb-5 dark:border-carbon-800 sm:flex-row sm:items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-navy-900 dark:text-white">System Settings & Controls</h1>
+            <p className="mt-1 max-w-3xl text-sm text-navy-500 dark:text-carbon-400">
+              Permission-aware development presentation. Frontend checks do not replace production API authorization or
+              RLS.
+            </p>
+          </div>
+          <span className="inline-flex w-fit items-center gap-2 rounded-lg border border-navy-200 bg-white px-3 py-2 text-xs font-semibold text-navy-700 dark:border-carbon-800 dark:bg-carbon-900 dark:text-carbon-300">
+            <Shield aria-hidden="true" className="h-4 w-4" />
+            {permissions.identity.role}
+            {permissions.identity.developmentOnly ? ' - development identity' : ''}
+          </span>
+        </header>
 
-      {/* ERROR/SUCCESS BANNER */}
-      {alertMsg && (
-        <div className={`mb-6 p-3.5 border text-xs rounded-lg flex items-center gap-2.5 transition-all duration-300 ${
-          alertMsg.type === 'error' 
-            ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/30 text-red-700 dark:text-red-400' 
-            : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400'
-        }`}>
-          <Info className="w-4 h-4 shrink-0" />
-          <p className="font-semibold">{alertMsg.text}</p>
-        </div>
-      )}
-
-      {/* CORE CONFIG NAVIGATION TABS */}
-      <div className="flex border-b border-navy-200 dark:border-carbon-800 mb-6 overflow-x-auto gap-1">
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`px-4 py-2.5 font-sans font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'users'
-              ? 'border-navy-900 dark:border-white text-navy-900 dark:text-white'
-              : 'border-transparent text-navy-500 dark:text-carbon-500 hover:text-navy-700 dark:hover:text-carbon-300'
-          }`}
-        >
-          <Users className="w-4 h-4" /> Users Directory
-        </button>
-        <button
-          onClick={() => setActiveTab('roles')}
-          className={`px-4 py-2.5 font-sans font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'roles'
-              ? 'border-navy-900 dark:border-white text-navy-900 dark:text-white'
-              : 'border-transparent text-navy-500 dark:text-carbon-500 hover:text-navy-700 dark:hover:text-carbon-300'
-          }`}
-        >
-          <Shield className="w-4 h-4" /> Role Permissions Matrix
-        </button>
-        <button
-          onClick={() => setActiveTab('modules')}
-          className={`px-4 py-2.5 font-sans font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'modules'
-              ? 'border-navy-900 dark:border-white text-navy-900 dark:text-white'
-              : 'border-transparent text-navy-500 dark:text-carbon-500 hover:text-navy-700 dark:hover:text-carbon-300'
-          }`}
-        >
-          <Layers className="w-4 h-4" /> App Modules Portfolio
-        </button>
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`px-4 py-2.5 font-sans font-bold text-xs uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-            activeTab === 'settings'
-              ? 'border-navy-900 dark:border-white text-navy-900 dark:text-white'
-              : 'border-transparent text-navy-500 dark:text-carbon-500 hover:text-navy-700 dark:hover:text-carbon-300'
-          }`}
-        >
-          <Settings2 className="w-4 h-4" /> Enterprise App Config
-        </button>
-      </div>
-
-      {/* TAB CONTENT PANELS */}
-      <div className="grid grid-cols-1">
-        
-        {/* TAB 1: USERS DIRECTORY */}
-        {activeTab === 'users' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h3 className="text-base font-extrabold text-navy-900 dark:text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-navy-800 dark:text-gray-300" /> Identity Allocation Directory
-                </h3>
-                <p className="text-navy-500 dark:text-carbon-400 text-xs mt-0.5">
-                  {isSuperAdmin 
-                    ? 'Manage active logging accounts, assign multiple roles, and adjust module scope.' 
-                    : 'List of registered logistics platform credentials (Admin Read Only).'}
-                </p>
-              </div>
-
-              {isSuperAdmin && (
-                <button
-                  onClick={() => handleOpenFormModal()}
-                  className="bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-100 text-white dark:text-black px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors text-xs font-bold shrink-0 shadow-sm cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" /> Create System User
-                </button>
-              )}
-            </div>
-
-            <div className="bg-white dark:bg-carbon-900 rounded-xl border border-navy-200 dark:border-carbon-800 overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-navy-50/70 dark:bg-carbon-950/40 border-b border-navy-200 dark:border-carbon-800 text-navy-500 dark:text-carbon-400 text-[10.5px] uppercase tracking-wider font-bold">
-                      <th className="p-4">Staff Identifier</th>
-                      <th className="p-4">Assigned Role Vectors</th>
-                      <th className="p-4">Module Allowances</th>
-                      <th className="p-4">Credentials Status</th>
-                      <th className="p-4 text-center">Account State</th>
-                      {isSuperAdmin && <th className="p-4 text-right">Actions</th>}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-navy-50 dark:divide-carbon-800/50 text-xs">
-                    {users.map((user) => {
-                      const userRoles = user.roles && user.roles.length > 0 ? user.roles : [user.role];
-                      const activeState = user.is_active !== false;
-
-                      return (
-                        <tr key={user.id} className="hover:bg-navy-50/50 dark:hover:bg-carbon-900/20 transition-colors">
-                          <td className="p-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-navy-900 dark:bg-carbon-800 text-white dark:text-gray-300 items-center justify-center font-bold text-xs flex">
-                                {user.username[0].toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-extrabold text-navy-900 dark:text-white">{user.username}</p>
-                                <p className="text-[10px] text-navy-400 font-mono tracking-wide">ID: {user.id}</p>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="p-4">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {userRoles.map((r) => (
-                                <span 
-                                  key={r} 
-                                  className={`px-2 py-0.5 rounded text-[9px] font-extrabold border uppercase tracking-wider ${
-                                    r === 'SuperAdmin' ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border-purple-100 dark:border-purple-900/40' :
-                                    r === 'Admin' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-900/40' :
-                                    r === 'Dispatcher' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/40' :
-                                    r === 'Encoder' ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-100 dark:border-sky-900/40' :
-                                    'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'
-                                  }`}
-                                >
-                                  {r}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-
-                          <td className="p-4">
-                            <div className="flex gap-1.5 flex-wrap">
-                              {user.permissions.includes('trip_scheduling') && (
-                                <span className="px-2 py-0.5 bg-sky-500/10 dark:bg-sky-500/5 text-sky-700 dark:text-sky-400 border border-sky-500/15 dark:border-sky-500/10 rounded text-[9.5px] font-medium">LogiTrack</span>
-                              )}
-                              {user.permissions.includes('inventory') && (
-                                <span className="px-2 py-0.5 bg-amber-500/10 dark:bg-amber-500/5 text-amber-700 dark:text-amber-400 border border-amber-500/15 dark:border-amber-500/10 rounded text-[9.5px] font-medium">Inventory</span>
-                              )}
-                              {user.permissions.includes('billing') && (
-                                <span className="px-2 py-0.5 bg-purple-500/10 dark:bg-purple-500/5 text-purple-700 dark:text-purple-400 border border-purple-500/15 dark:border-purple-500/10 rounded text-[9.5px] font-medium">Billing</span>
-                              )}
-                              {user.permissions.length === 0 && (
-                                <span className="text-navy-400 dark:text-carbon-500 italic text-[11px]">No module access configured</span>
-                              )}
-                            </div>
-                          </td>
-
-                          <td className="p-4">
-                            <span className="font-mono text-navy-500 dark:text-carbon-400 tracking-wide select-all bg-navy-50 dark:bg-carbon-950 px-2 py-1 rounded">
-                              {user.password || '●●●●●●●●'}
-                            </span>
-                          </td>
-
-                          <td className="p-4 text-center">
-                            {activeState ? (
-                              <button
-                                onClick={() => isSuperAdmin && handleDeactivateTrigger(user.id)}
-                                disabled={!isSuperAdmin}
-                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/30 text-[10px] font-bold uppercase tracking-wider ${isSuperAdmin ? 'hover:bg-red-50 hover:text-red-700 hover:border-red-200 cursor-pointer group' : ''}`}
-                              >
-                                <UserCheck className="w-3.5 h-3.5" />
-                                <span className="group-hover:hidden">Active</span>
-                                <span className="hidden group-hover:inline">Deactivate</span>
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => isSuperAdmin && handleActivateUser(user.id)}
-                                disabled={!isSuperAdmin}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-[10px] font-bold uppercase tracking-wider ${isSuperAdmin ? 'hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 cursor-pointer' : ''}`}
-                              >
-                                <UserX className="w-3.5 h-3.5" />
-                                <span>Suspended</span>
-                              </button>
-                            )}
-                          </td>
-
-                          {isSuperAdmin && (
-                            <td className="p-4 text-right">
-                              <div className="flex justify-end gap-1.5">
-                                <button 
-                                  onClick={() => handleOpenFormModal(user)} 
-                                  title="Edit User profile, roles and credentials"
-                                  className="p-1.5 hover:bg-navy-100 dark:hover:bg-carbon-800 text-navy-600 dark:text-carbon-400 hover:text-navy-900 dark:hover:text-white rounded transition-colors cursor-pointer"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                                {user.username !== 'SuperAdmin' && (
-                                  <button 
-                                    onClick={() => onDeleteUser && onDeleteUser(user.id)} 
-                                    title="Hard Delete credential record"
-                                    className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 text-navy-400 hover:text-red-600 dark:text-carbon-400 dark:hover:text-red-400 rounded transition-colors cursor-pointer"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          )}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        {notice && (
+          <div
+            className={`rounded-lg border p-3 text-sm ${
+              notice.type === 'error'
+                ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300'
+            }`}
+            role={notice.type === 'error' ? 'alert' : 'status'}
+          >
+            {notice.text}
           </div>
         )}
 
-        {/* TAB 2: ROLE PERMISSION MATRIX */}
-        {activeTab === 'roles' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-base font-extrabold text-navy-900 dark:text-white flex items-center gap-2">
-                <Shield className="w-5 h-5 text-teal-650 dark:text-teal-400" /> Role & Privilege Vectors
-              </h3>
-              <p className="text-navy-500 dark:text-carbon-400 text-xs mt-0.5">
-                The enterprise role hierarchy is globally mapped here. Modifications of role capabilities require configuration patches.
-              </p>
-            </div>
+        <div className="flex flex-wrap gap-1 border-b border-navy-200 dark:border-carbon-800" role="tablist">
+          {visibleTabs.map((tab) => (
+            <button
+              aria-label={tabLabels[tab].label}
+              aria-selected={activeTab === tab}
+              className={`inline-flex min-h-11 shrink-0 items-center gap-2 border-b-2 px-2 text-xs font-bold uppercase tracking-wide sm:px-4 ${
+                activeTab === tab
+                  ? 'border-navy-900 text-navy-900 dark:border-white dark:text-white'
+                  : 'border-transparent text-navy-500 hover:text-navy-900 dark:text-carbon-500 dark:hover:text-white'
+              }`}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              role="tab"
+            >
+              {tabLabels[tab].icon}
+              <span className="hidden sm:inline">{tabLabels[tab].label}</span>
+            </button>
+          ))}
+        </div>
 
-            {/* DETAILED CARDS INVENTORY */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {roleDefinitions.map((role) => (
-                <div key={role.code} className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 p-5 rounded-xl shadow-sm relative flex flex-col justify-between">
+        {loadError ? (
+          <ErrorState description={loadError} title="Settings service unavailable" />
+        ) : (
+          <>
+            {activeTab === 'users' && canManageUsers && (
+              <section aria-labelledby="users-heading" className="space-y-4">
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                   <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <span className={`px-2.5 py-0.5 rounded text-[9.5px] font-extrabold border uppercase tracking-wider ${
-                        role.code === 'SuperAdmin' ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border-purple-100' :
-                        role.code === 'Admin' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-100' :
-                        role.code === 'Dispatcher' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-100' :
-                        role.code === 'Encoder' ? 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-100' :
-                        'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200'
-                      }`}>
-                        {role.code}
-                      </span>
-                      <Lock className="w-3.5 h-3.5 text-navy-300 dark:text-carbon-600" title="Fixed Role Architecture" />
-                    </div>
-                    
-                    <p className="text-[11.5px] text-navy-600 dark:text-carbon-400 leading-relaxed font-sans mb-4">
-                      {role.description}
+                    <h2 className="font-bold text-navy-900 dark:text-white" id="users-heading">
+                      Platform user invitations
+                    </h2>
+                    <p className="text-sm text-navy-500 dark:text-carbon-400">
+                      Exactly one official role is effective. Credentials and production invitations remain
+                      provider-owned.
                     </p>
                   </div>
-
-                  <div className="pt-3 border-t border-navy-50 dark:border-carbon-800/55">
-                    <p className="text-[9.5px] font-extrabold text-navy-500 dark:text-carbon-500 uppercase tracking-widest mb-1.5">Authorized Capabilities</p>
-                    <ul className="space-y-1 text-[10.5px] text-navy-700 dark:text-carbon-300">
-                      {role.permissions.map((p, idx) => (
-                        <li key={idx} className="flex items-center gap-1.5 truncate">
-                          <Check className="w-3 h-3 text-emerald-500 shrink-0" />
-                          <span>{p}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <Button icon={<Plus aria-hidden="true" className="h-4 w-4" />} onClick={() => openUserForm()}>
+                    Invite platform user
+                  </Button>
                 </div>
-              ))}
-            </div>
 
-            {/* HIGH DENSITY PERMISSION MATRIX */}
-            <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl overflow-hidden shadow-sm mt-6">
-              <div className="p-4 border-b border-navy-100 dark:border-carbon-800 bg-navy-50/20 dark:bg-carbon-950/30 flex items-center justify-between">
-                <h4 className="text-xs font-extrabold text-navy-900 dark:text-white uppercase tracking-wider">Cross-Reference Permission Matrix</h4>
-                <span className="text-[10px] font-semibold text-navy-500 dark:text-carbon-500">Read-Only transparency map</span>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-navy-50/30 dark:bg-carbon-950/10 border-b border-navy-100 dark:border-carbon-800 text-[10px] text-navy-500 dark:text-carbon-400 uppercase font-bold tracking-wider">
-                      <th className="p-3 pl-4">Platform Module / Control Vector</th>
-                      <th className="p-3 text-center">SuperAdmin</th>
-                      <th className="p-3 text-center">Admin</th>
-                      <th className="p-3 text-center">Dispatcher</th>
-                      <th className="p-3 text-center">Encoder</th>
-                      <th className="p-3 text-center">Viewer</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-navy-50 dark:divide-carbon-800/40 text-[11px] text-navy-700 dark:text-carbon-300">
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Credentials & Users Provisioning</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Enterprise Systems Configurations</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Trip Scheduling (Create trips/advices)</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Trip Allocation (Assign vehicle & staff)</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center text-yellow-500 font-semibold">Limited</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Fleet Truck Profile Config (Writes)</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Operators & Personnel Enrollments</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                      <td className="p-3 text-center text-red-500 font-bold">-</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 pl-4 font-bold text-navy-900 dark:text-white">Logistics Tables & Dispatch board (Read Only)</td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                      <td className="p-3 text-center"><Check className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+                <div className="overflow-x-auto rounded-xl border border-navy-200 bg-white dark:border-carbon-800 dark:bg-carbon-900">
+                  <table className="w-full min-w-[720px] text-left text-sm">
+                    <thead className="border-b border-navy-200 bg-navy-50 text-xs uppercase tracking-wide text-navy-500 dark:border-carbon-800 dark:bg-carbon-950 dark:text-carbon-400">
+                      <tr>
+                        <th className="p-4">Identity</th>
+                        <th className="p-4">Effective role</th>
+                        <th className="p-4">Boundary</th>
+                        <th className="p-4">State</th>
+                        <th className="p-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-navy-100 dark:divide-carbon-800">
+                      {users.map((user) => {
+                        const role = isOfficialRole(user.role) ? user.role : 'Viewer';
+                        const pendingInvitation = user.invitation_status === 'PENDING';
+                        const active = user.is_active !== false;
+                        const rootStateBlocked = user.id === 'user-1';
+                        return (
+                          <tr key={user.id}>
+                            <td className="p-4 font-semibold text-navy-900 dark:text-white">{user.username}</td>
+                            <td className="p-4">
+                              <span className={`rounded border px-2 py-1 text-xs font-bold ${roleBadgeClasses[role]}`}>
+                                {role}
+                              </span>
+                            </td>
+                            <td className="p-4 text-navy-500 dark:text-carbon-400">
+                              Development-only; no password stored
+                            </td>
+                            <td className="p-4">
+                              <StatusBadge
+                                hideCue
+                                label={pendingInvitation ? 'Invitation pending' : active ? 'Active' : 'Inactive'}
+                                status={pendingInvitation ? 'WARNING' : active ? 'ACTIVE' : 'INACTIVE'}
+                              />
+                            </td>
+                            <td className="p-4">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  aria-label={`Edit ${user.username}`}
+                                  icon={<Edit2 aria-hidden="true" className="h-4 w-4" />}
+                                  onClick={() => openUserForm(user)}
+                                  size="icon"
+                                  variant="secondary"
+                                />
+                                {active ? (
+                                  <Button
+                                    aria-label={`Deactivate ${user.username}`}
+                                    disabled={rootStateBlocked}
+                                    icon={<UserX aria-hidden="true" className="h-4 w-4" />}
+                                    onClick={() => openLifecycleConfirmation(user.id, false)}
+                                    size="icon"
+                                    title={
+                                      rootStateBlocked
+                                        ? 'The default development SuperAdmin identity must remain active.'
+                                        : 'Deactivate user'
+                                    }
+                                    variant="danger"
+                                  />
+                                ) : !pendingInvitation ? (
+                                  <Button
+                                    aria-label={`Reactivate ${user.username}`}
+                                    icon={<UserCheck aria-hidden="true" className="h-4 w-4" />}
+                                    onClick={() => openLifecycleConfirmation(user.id, true)}
+                                    size="icon"
+                                    title="Reactivate user"
+                                    variant="success"
+                                  />
+                                ) : null}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
 
-        {/* TAB 3: APP MODULES PORTFOLIO */}
-        {activeTab === 'modules' && (
-          <div className="space-y-6 animate-fade-in">
-            <div>
-              <h3 className="text-base font-extrabold text-navy-900 dark:text-white flex items-center gap-2">
-                <Layers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> App Modules Portfolio
-              </h3>
-              <p className="text-navy-500 dark:text-carbon-400 text-xs mt-0.5">
-                Overview of primary enterprise service pipelines. Custom modules are loaded relative to system dependencies.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* TRIP SCHEDULING - ACTIVE */}
-              <div className="bg-white dark:bg-carbon-900 border-2 border-emerald-500/25 dark:border-emerald-500/10 p-6 rounded-xl relative overflow-hidden shadow-sm flex flex-col justify-between h-[200px]">
+            {activeTab === 'roles' && canManageUsers && (
+              <section aria-labelledby="roles-heading" className="space-y-4">
                 <div>
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="text-sm font-bold text-navy-900 dark:text-white">Trip Scheduling (LogiTrack)</h4>
-                    <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 text-[9.5px] font-bold uppercase tracking-wide">
-                      Active
-                    </span>
-                  </div>
-                  <p className="text-xs text-navy-500 dark:text-carbon-400 leading-relaxed font-sans mb-4">
-                    Primary dispatch matrix board. Integrated with telemetry registers, route managers, operator directories, and live tracking alerts.
+                  <h2 className="font-bold text-navy-900 dark:text-white" id="roles-heading">
+                    Fixed MVP permission catalog
+                  </h2>
+                  <p className="text-sm text-navy-500 dark:text-carbon-400">
+                    This catalog is read-only and comes from the centralized policy. Role capabilities are not
+                    configurable in the MVP.
                   </p>
                 </div>
-
-                <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
-                  <Check className="w-3.5 h-3.5" /> Fully functional Core Module
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {OFFICIAL_ROLES.map((role) => (
+                    <article
+                      className="rounded-xl border border-navy-200 bg-white p-5 dark:border-carbon-800 dark:bg-carbon-900"
+                      key={role}
+                    >
+                      <span className={`rounded border px-2 py-1 text-xs font-bold ${roleBadgeClasses[role]}`}>
+                        {role}
+                      </span>
+                      <ul className="mt-4 space-y-2 text-xs text-navy-600 dark:text-carbon-300">
+                        {ROLE_PERMISSION_MATRIX[role].map((permission) => (
+                          <li className="flex items-start gap-2" key={permission}>
+                            <Check aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                            <code>{permission}</code>
+                          </li>
+                        ))}
+                      </ul>
+                    </article>
+                  ))}
                 </div>
-              </div>
+              </section>
+            )}
 
-              {/* INVENTORY - PLACEHOLDER */}
-              <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 p-6 rounded-xl relative overflow-hidden shadow-sm flex flex-col justify-between h-[200px]">
+            {activeTab === 'settings' && (
+              <section aria-labelledby="settings-heading" className="space-y-4">
                 <div>
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="text-sm font-bold text-navy-400 dark:text-carbon-500">Warehouse Inventory</h4>
-                    <span className="px-2 py-0.5 rounded bg-navy-100 dark:bg-carbon-800 text-navy-500 dark:text-carbon-400 border border-navy-200 dark:border-carbon-700 text-[9.5px] font-bold uppercase tracking-wide">
-                      Placeholder
-                    </span>
-                  </div>
-                  <p className="text-xs text-navy-500 dark:text-carbon-400 leading-relaxed font-sans mb-4">
-                    Container storage, warehouse pallet slots, yard allocation indices, and bulk grain transport scales. Scheduled for engineering release in Q3 2026.
+                  <h2 className="font-bold text-navy-900 dark:text-white" id="settings-heading">
+                    Application settings
+                  </h2>
+                  <p className="text-sm text-navy-500 dark:text-carbon-400">
+                    {canUpdateSettings
+                      ? 'SuperAdmin may update development setting values.'
+                      : 'Admin has read-only Settings access. Update controls are not available.'}
                   </p>
                 </div>
-
-                <div className="flex items-center gap-1.5 text-[11px] text-navy-500 dark:text-carbon-400 font-medium bg-navy-50 dark:bg-carbon-950 p-2 rounded">
-                  <Lock className="w-3.5 h-3.5 shrink-0" /> Config & CRUD settings locked
-                </div>
-              </div>
-
-              {/* BILLING - PLACEHOLDER */}
-              <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 p-6 rounded-xl relative overflow-hidden shadow-sm flex flex-col justify-between h-[200px]">
-                <div>
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="text-sm font-bold text-navy-400 dark:text-carbon-500">Accounts & Billing</h4>
-                    <span className="px-2 py-0.5 rounded bg-navy-100 dark:bg-carbon-800 text-navy-500 dark:text-carbon-400 border border-navy-200 dark:border-carbon-700 text-[9.5px] font-bold uppercase tracking-wide">
-                      Placeholder
-                    </span>
-                  </div>
-                  <p className="text-xs text-navy-500 dark:text-carbon-400 leading-relaxed font-sans mb-4">
-                    Client tariff matrices, automatic demurrage scaling, fuel surcharges, driver commission slips, and AR invoicing pipelines. Scheduled for engineering release in Q4 2026.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-[11px] text-navy-500 dark:text-carbon-400 font-medium bg-navy-50 dark:bg-carbon-950 p-2 rounded">
-                  <Lock className="w-3.5 h-3.5 shrink-0" /> Config & CRUD settings locked
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: APP SETTINGS */}
-        {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-base font-extrabold text-navy-900 dark:text-white flex items-center gap-2">
-                <Settings2 className="w-5 h-5 text-navy-800 dark:text-gray-300" /> Administrative Telemetry Config
-              </h3>
-              <p className="text-navy-500 dark:text-carbon-400 text-xs mt-0.5">
-                Set operational variables, branch definitions, and critical alerts thresholds globally for Cloudy.
-              </p>
-            </div>
-
-            <form onSubmit={handleSaveAppConfigurations} className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl p-6 sm:p-8 max-w-2xl shadow-sm space-y-6">
-              
-              {configSaveSuccess && (
-                <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-400 text-xs rounded-lg font-bold text-center flex items-center justify-center gap-2 transition-all">
-                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> System settings recorded and enforced across telemetry boards!
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                
-                {/* TIMEZONE INPUT */}
-                <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-navy-500 dark:text-carbon-500" /> Application Jet-Timezone
-                  </label>
-                  <select
-                    value={appTimezone}
-                    onChange={(e) => setAppTimezone(e.target.value)}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg p-2.5 text-navy-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-navy-400 cursor-pointer"
-                  >
-                    <option value="Asia/Manila">Asia/Manila (PST, UTC+08:00)</option>
-                    <option value="Asia/Singapore">Asia/Singapore (SST, UTC+08:00)</option>
-                    <option value="Asia/Tokyo">Asia/Tokyo (JST, UTC+09:00)</option>
-                    <option value="UTC">Coordinated Universal Time (UTC)</option>
-                  </select>
-                  <p className="text-[10px] text-navy-400 dark:text-carbon-500 mt-1">Default timezone used to synchronize all trip dispatch timestamp logs.</p>
-                </div>
-
-                {/* DEFAULT STORAGE HUB BRANCH */}
-                <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <Building className="w-3.5 h-3.5 text-navy-500 dark:text-carbon-500" /> Primary Dispatch Branch Hub
-                  </label>
-                  <select
-                    value={defaultBranch}
-                    onChange={(e) => setDefaultBranch(e.target.value)}
-                    className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg p-2.5 text-navy-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-navy-400 cursor-pointer"
-                  >
-                    <option value="branch-1">MNL-HUB : Metro Manila Operations</option>
-                    <option value="branch-2">CEB-HUB : Visayas Mandaue Hub</option>
-                    <option value="branch-3">DVO-HUB : Mindanao Davao Port Hub</option>
-                  </select>
-                  <p className="text-[10px] text-navy-400 dark:text-carbon-500 mt-1">Default origin terminal pre-selected for new logi trip schedules.</p>
-                </div>
-
-                {/* PLATFORM SESSION TIMEOUT */}
-                <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-navy-500 dark:text-carbon-500" /> Inactivity Session Expiry
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min="1"
-                      max="1440"
-                      value={sessionTimeout}
-                      onChange={(e) => setSessionTimeout(e.target.value)}
-                      className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg pl-3 pr-12 py-2.5 text-navy-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-navy-400"
-                    />
-                    <span className="absolute right-3.5 top-3 text-[10.5px] font-bold text-navy-500 dark:text-carbon-500 uppercase">mins</span>
-                  </div>
-                  <p className="text-[10px] text-navy-400 dark:text-carbon-500 mt-1">Time elapsed without platform action before user gets forced-login validation.</p>
-                </div>
-
-                {/* TRIP OVERDUE ALERT LIMITS */}
-                <div>
-                  <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-navy-500 dark:text-carbon-500" /> Pending Trip alert offset
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min="1"
-                      max="48"
-                      value={pendingTripAlertHours}
-                      onChange={(e) => setPendingTripAlertHours(e.target.value)}
-                      className="w-full bg-navy-50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg pl-3 pr-14 py-2.5 text-navy-900 dark:text-white text-xs font-mono font-bold focus:outline-none focus:ring-1 focus:ring-navy-400"
-                    />
-                    <span className="absolute right-3.5 top-3 text-[10.5px] font-bold text-navy-500 dark:text-carbon-500 uppercase">hours</span>
-                  </div>
-                  <p className="text-[10px] text-navy-400 dark:text-carbon-500 mt-1">Pickup offset margin to flag "Scheduled" trips as overdue on dispatch alert boards.</p>
-                </div>
-
-              </div>
-
-              {/* SAVE FORM ACTION BAR */}
-              <div className="pt-4 border-t border-navy-100 dark:border-carbon-800 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={!isSuperAdmin}
-                  className={`px-5 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm ${
-                    isSuperAdmin
-                      ? 'bg-navy-900 dark:bg-white text-white dark:text-black hover:bg-navy-800 dark:hover:bg-gray-100 cursor-pointer'
-                      : 'bg-navy-100 dark:bg-carbon-800 text-navy-400 dark:text-carbon-500 cursor-not-allowed'
-                  }`}
+                <form
+                  className="max-w-3xl space-y-4 rounded-xl border border-navy-200 bg-white p-5 dark:border-carbon-800 dark:bg-carbon-900"
+                  onSubmit={saveSettings}
                 >
-                  <Save className="w-3.5 h-3.5" /> Save system Settings
-                </button>
-              </div>
+                  {settings.map((setting) => (
+                    <FormField
+                      hint={setting.description}
+                      key={setting.id}
+                      label={setting.setting_key.replaceAll('_', ' ')}
+                    >
+                      <input
+                        className={`${uiClasses.field} min-h-11`}
+                        disabled={!canUpdateSettings}
+                        onChange={(event) =>
+                          setSettingValues((current) => ({ ...current, [setting.id]: event.target.value }))
+                        }
+                        value={settingValues[setting.id] ?? ''}
+                      />
+                    </FormField>
+                  ))}
+                  {canUpdateSettings && (
+                    <div className="flex justify-end border-t border-navy-100 pt-4 dark:border-carbon-800">
+                      <Button icon={<Save aria-hidden="true" className="h-4 w-4" />} type="submit">
+                        Save settings
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              </section>
+            )}
 
-              {!isSuperAdmin && (
-                <div className="flex items-center gap-1.5 p-3 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-semibold">
-                  <ShieldAlert className="w-4 h-4 shrink-0" />
-                  <span>Modification of enterprise database configurations is strictly locked to Root SuperAdmin users.</span>
+            {activeTab === 'audit' && canReadAudit && (
+              <section aria-labelledby="audit-heading" className="space-y-4">
+                <div>
+                  <h2 className="font-bold text-navy-900 dark:text-white" id="audit-heading">
+                    Audit log
+                  </h2>
+                  <p className="text-sm text-navy-500 dark:text-carbon-400">
+                    Read-only development activity. This adapter provides no production audit guarantee.
+                  </p>
                 </div>
-              )}
-            </form>
-          </div>
+                <FormField className="max-w-md" label="Filter audit history">
+                  <SearchInput
+                    className="min-h-11"
+                    onChange={setAuditQuery}
+                    placeholder="Action, resource, record, or value"
+                    value={auditQuery}
+                  />
+                </FormField>
+                {filteredAuditLogs.length === 0 ? (
+                  <EmptyState
+                    description={
+                      auditLogs.length
+                        ? 'No audit entries match this filter.'
+                        : 'No development activity has been recorded in this in-memory session.'
+                    }
+                    title={auditLogs.length ? 'No matching audit entries' : 'No audit entries'}
+                  />
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-navy-200 bg-white dark:border-carbon-800 dark:bg-carbon-900">
+                    <table className="w-full min-w-[840px] text-left text-sm">
+                      <thead className="border-b border-navy-200 bg-navy-50 text-xs uppercase text-navy-500 dark:border-carbon-800 dark:bg-carbon-950 dark:text-carbon-400">
+                        <tr>
+                          <th className="p-4">Action</th>
+                          <th className="p-4">Resource</th>
+                          <th className="p-4">Record</th>
+                          <th className="p-4">Actor</th>
+                          <th className="p-4">Change</th>
+                          <th className="p-4">Recorded</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-navy-100 dark:divide-carbon-800">
+                        {filteredAuditLogs.map((entry) => (
+                          <tr key={entry.id}>
+                            <td className="p-4 font-semibold text-navy-900 dark:text-white">{entry.action}</td>
+                            <td className="p-4 text-navy-600 dark:text-carbon-300">{entry.table_name}</td>
+                            <td className="p-4 font-mono text-xs text-navy-500 dark:text-carbon-400">
+                              {entry.record_id ?? '-'}
+                            </td>
+                            <td className="p-4 font-mono text-xs text-navy-500 dark:text-carbon-400">
+                              {entry.user_id ?? 'Development adapter'}
+                            </td>
+                            <td className="max-w-xs p-4 text-xs text-navy-600 dark:text-carbon-300">
+                              {entry.old_values || entry.new_values ? (
+                                <span>
+                                  {entry.old_values ? `${JSON.stringify(entry.old_values)} → ` : ''}
+                                  {entry.new_values ? JSON.stringify(entry.new_values) : ''}
+                                </span>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
+                            <td className="p-4 text-navy-500 dark:text-carbon-400">
+                              {new Date(entry.created_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+          </>
         )}
-
       </div>
 
-      {/* DIALOG 1: CONFIRM USER DEACTIVATION */}
-      {confirmDeactivateId && (
-        <div className="fixed inset-0 bg-navy-900/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-carbon-900 border border-navy-200 dark:border-carbon-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
-            <h3 className="text-sm font-extrabold text-navy-900 dark:text-white flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" /> Confirm User Deactivation
-            </h3>
-            
-            <p className="text-xs text-navy-600 dark:text-carbon-400 leading-relaxed mb-5">
-              Are you sure you want to suspend/deactivate the user <strong className="text-black dark:text-white">"{users.find(u => u.id === confirmDeactivateId)?.username}"</strong>? 
-              Suspended users are instantly blocked from entering any module of the Cloudy Logistics suite.
-            </p>
-
-            <div className="flex gap-2 justify-end">
-              <button 
-                onClick={() => setConfirmDeactivateId(null)}
-                className="bg-navy-50 hover:bg-navy-100 dark:bg-carbon-800 dark:hover:bg-carbon-700 text-navy-800 dark:text-white px-3.5 py-2 rounded text-xs font-bold cursor-pointer"
-              >
-                No, Keep Active
-              </button>
-              <button 
-                onClick={executeDeactivate}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-xs font-bold shadow cursor-pointer"
-              >
-                Confirm Deactivation
-              </button>
+      <Modal
+        description="Cloudy stores no password. Invitations are development-only records until a production identity provider accepts them. Select exactly one official effective role."
+        onClose={() => setUserModalOpen(false)}
+        open={userModalOpen && canManageUsers}
+        title={editingUser ? 'Edit platform user' : 'Invite platform user'}
+      >
+        <form className="space-y-4" onSubmit={submitUser}>
+          {userFormError && (
+            <div
+              className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
+              role="alert"
+            >
+              {userFormError} Current form values were preserved.
             </div>
+          )}
+          <FormField label="Username" required>
+            <input
+              className={`${uiClasses.field} min-h-11`}
+              disabled={editingUser?.id === 'user-1'}
+              onChange={(event) => setUsername(event.target.value)}
+              value={username}
+            />
+          </FormField>
+          {!editingUser && (
+            <FormField label="Invitation email" required>
+              <input
+                className={`${uiClasses.field} min-h-11`}
+                onChange={(event) => setEmail(event.target.value)}
+                type="email"
+                value={email}
+              />
+            </FormField>
+          )}
+          <FormField label="Effective role">
+            <select
+              className={`${uiClasses.field} min-h-11`}
+              onChange={(event) => setSelectedRole(event.target.value as UserRoleType)}
+              value={selectedRole}
+            >
+              {OFFICIAL_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <div className="flex justify-end gap-2 border-t border-navy-100 pt-4 dark:border-carbon-800">
+            <Button onClick={() => setUserModalOpen(false)} variant="secondary">
+              Cancel
+            </Button>
+            <Button type="submit">{editingUser ? 'Save effective role' : 'Record invitation'}</Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
 
-      {/* DIALOG 2: CREATE / EDIT USER MODAL */}
-      {isModalOpen && isSuperAdmin && (
-        <div className="fixed inset-0 bg-navy-900/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-carbon-900 rounded-xl border border-navy-200 dark:border-carbon-800 w-full max-w-md shadow-2xl overflow-hidden my-8">
-            
-            <div className="p-5 border-b border-navy-100 dark:border-carbon-900 flex justify-between items-center bg-navy-50/70 dark:bg-carbon-950">
-              <h2 className="text-xs font-extrabold text-navy-900 dark:text-white uppercase tracking-wider">
-                {editingId ? 'Modify Staff Credentials Profile' : 'Enroll New Access Profile'}
-              </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-navy-500 hover:text-navy-800 dark:text-carbon-400 dark:hover:text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUserSubmit} className="p-5 space-y-4">
-              
-              {/* USERNAME INPUT */}
-              <div>
-                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-500 mb-1.5 uppercase tracking-wide">Account Username</label>
-                <input 
-                  type="text" 
-                  value={formData.username}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
-                  placeholder="e.g. CebuDispatcher"
-                  className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg p-2.5 text-navy-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-navy-500 font-semibold"
-                  required 
-                  disabled={editingId === 'user-1' || formData.username === 'SuperAdmin'} // Root cannot be renamed
-                />
-              </div>
-
-              {/* PASSWORD FIELD */}
-              <div>
-                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-500 mb-1.5 uppercase tracking-wide">Access Password</label>
-                <input 
-                  type="text" 
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  placeholder="admin123"
-                  className="w-full bg-navy-50/50 dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg p-2.5 text-navy-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-navy-500 font-mono font-bold"
-                  required={!editingId}
-                />
-              </div>
-
-              {/* MULTI_ROLE OPTION SELECTOR FIELD */}
-              <div>
-                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-500 mb-2 uppercase tracking-wide flex items-center justify-between">
-                  <span>Assign Access Roles (one or more)</span>
-                  <HelpCircle className="w-3.5 h-3.5 text-navy-300 dark:text-carbon-600" title="Assign multiple roles. Highest privilege level operates as standard view level." />
-                </label>
-                
-                <div className="space-y-2 bg-navy-50/20 dark:bg-carbon-950/20 p-3 rounded-lg border border-navy-100 dark:border-carbon-800">
-                  {availableRolesList.map((roleOpt) => {
-                    const isChecked = formData.roles.includes(roleOpt);
-                    return (
-                      <div 
-                        key={roleOpt}
-                        onClick={() => handleRoleToggle(roleOpt)}
-                        className={`flex items-center justify-between p-2 rounded border text-xs cursor-pointer select-none transition-all ${
-                          isChecked 
-                            ? 'bg-navy-900 text-white border-navy-900 dark:bg-carbon-800 dark:border-carbon-700' 
-                            : 'bg-white dark:bg-carbon-900 hover:bg-navy-50 dark:hover:bg-carbon-900/30 border-navy-200 dark:border-carbon-800 text-navy-800 dark:text-carbon-300'
-                        }`}
-                      >
-                        <span className="font-bold">{roleOpt}</span>
-                        {isChecked ? (
-                          <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-[9px]">✓</span>
-                        ) : (
-                          <div className="w-4 h-4 rounded-full border border-navy-300 dark:border-carbon-700" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* MODULE ACCESS ASSIGNMENT */}
-              <div>
-                <label className="block text-[10px] font-bold text-navy-500 dark:text-carbon-500 mb-2.5 uppercase tracking-wide">Scope permissions</label>
-                <div className="space-y-2">
-                  <div 
-                    onClick={() => handlePermissionToggle('trip_scheduling')}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition-colors ${formData.permissions.trip_scheduling ? 'bg-navy-50 dark:bg-carbon-800 border-navy-200 dark:border-carbon-700' : 'bg-white dark:bg-carbon-950 border-navy-200 dark:border-carbon-800'}`}
-                  >
-                    <div className="text-xs">
-                      <p className={`font-bold ${formData.permissions.trip_scheduling ? 'text-navy-900 dark:text-white' : 'text-navy-500 dark:text-carbon-500'}`}>Trip Scheduling Module</p>
-                      <p className="text-[10px] text-navy-400 mt-0.5">Allows access to LogiTrack dispatch desks</p>
-                    </div>
-                    {formData.permissions.trip_scheduling && <Check className="w-4 h-4 text-navy-900 dark:text-white" />}
-                  </div>
-
-                  <div 
-                    onClick={() => handlePermissionToggle('inventory')}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition-colors ${formData.permissions.inventory ? 'bg-navy-50 dark:bg-carbon-900 border-navy-200 dark:border-carbon-700' : 'bg-white dark:bg-carbon-950 border-navy-200 dark:border-carbon-800'}`}
-                  >
-                    <div className="text-xs">
-                      <p className={`font-bold ${formData.permissions.inventory ? 'text-navy-900 dark:text-white' : 'text-navy-500 dark:text-carbon-500'}`}>Inventory Management</p>
-                      <p className="text-[10px] text-navy-400 mt-0.5">Placeholder portfolio status view limits</p>
-                    </div>
-                    {formData.permissions.inventory && <Check className="w-4 h-4 text-navy-900 dark:text-white" />}
-                  </div>
-
-                  <div 
-                    onClick={() => handlePermissionToggle('billing')}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer select-none transition-colors ${formData.permissions.billing ? 'bg-navy-50 dark:bg-carbon-900 border-navy-200 dark:border-carbon-700' : 'bg-white dark:bg-carbon-950 border-navy-200 dark:border-carbon-800'}`}
-                  >
-                    <div className="text-xs">
-                      <p className={`font-bold ${formData.permissions.billing ? 'text-navy-900 dark:text-white' : 'text-navy-500 dark:text-carbon-500'}`}>Billing & Account Module</p>
-                      <p className="text-[10px] text-navy-400 mt-0.5">Placeholder invoicing limits</p>
-                    </div>
-                    {formData.permissions.billing && <Check className="w-4 h-4 text-navy-900 dark:text-white" />}
-                  </div>
-                </div>
-              </div>
-
-              {/* SAVE FORM ACTIONS */}
-              <div className="pt-4 flex gap-3">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 bg-white border border-navy-200 dark:bg-carbon-800 dark:border-carbon-700 hover:bg-navy-50 dark:hover:bg-carbon-700 text-navy-700 dark:text-white py-2 rounded text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-100 text-white dark:text-black py-2 rounded text-xs font-bold transition-colors shadow shadow-navy-900/20"
-                >
-                  {editingId ? 'Save Credentials' : 'Enroll Operator'}
-                </button>
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
-
+      <ConfirmDialog
+        cancelLabel="Keep active"
+        confirmLabel={lifecycleTarget?.active ? 'Reactivate user' : 'Deactivate user'}
+        detail="The development adapter is in-memory and provides no production authorization or audit guarantee. Historical references remain readable."
+        description={`${lifecycleTarget?.active ? 'Reactivate' : 'Deactivate'} ${users.find((user) => user.id === lifecycleTarget?.userId)?.username ?? 'this user'}?`}
+        onCancel={() => setLifecycleTarget(null)}
+        onConfirm={() => {
+          const user = users.find((candidate) => candidate.id === lifecycleTarget?.userId);
+          if (user && lifecycleTarget) void updateUserActiveState(user, lifecycleTarget.active, lifecycleReason);
+        }}
+        open={Boolean(lifecycleTarget) && (lifecycleTarget?.active ? canReactivateUsers : canDeactivateUsers)}
+        title={`Confirm User ${lifecycleTarget?.active ? 'Reactivation' : 'Deactivation'}`}
+      >
+        <FormField label={`${lifecycleTarget?.active ? 'Reactivation' : 'Deactivation'} reason`} required>
+          <textarea
+            className={`${uiClasses.field} min-h-20`}
+            onChange={(event) => setLifecycleReason(event.target.value)}
+            value={lifecycleReason}
+          />
+        </FormField>
+        {lifecycleError ? (
+          <p className="text-sm text-red-700 dark:text-red-300" role="alert">
+            {lifecycleError}
+          </p>
+        ) : null}
+      </ConfirmDialog>
     </div>
   );
 };

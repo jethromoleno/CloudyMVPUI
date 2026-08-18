@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
-import { Truck, Sun, Moon } from 'lucide-react';
+import { Moon, Sun, Truck } from 'lucide-react';
 import { Theme } from '../types';
+import type { DevelopmentIdentitySummary } from '../services';
+import { uiClasses } from '../design/tokens';
+import { Button, FormField } from './ui';
 
 interface LoginProps {
   onLogin: (username: string, password: string) => void;
   error?: string | null;
+  isAuthenticating?: boolean;
   theme: Theme;
   onToggleTheme: () => void;
+  developmentIdentities?: readonly DevelopmentIdentitySummary[];
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, error, theme, onToggleTheme }) => {
+const Login: React.FC<LoginProps> = ({
+  onLogin,
+  error,
+  isAuthenticating = false,
+  theme,
+  onToggleTheme,
+  developmentIdentities = [],
+}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -21,69 +33,87 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, theme, onToggleTheme }) =
   };
 
   return (
-    <div className="min-h-screen bg-navy-50 dark:bg-carbon-950 flex items-center justify-center relative overflow-hidden transition-colors duration-500">
-      {/* Decorative background elements - Softer for Omni Light */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-navy-200 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl animate-blob opacity-60 dark:opacity-10"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-navy-300 dark:bg-carbon-800 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl animate-blob animation-delay-2000 opacity-60 dark:opacity-10"></div>
-      </div>
-
-      <button 
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-50 transition-colors duration-500 dark:bg-carbon-950">
+      <Button
+        aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+        className="absolute right-6 top-6 z-20 rounded-full"
+        icon={
+          theme === 'dark' ? (
+            <Sun aria-hidden="true" className="h-5 w-5" />
+          ) : (
+            <Moon aria-hidden="true" className="h-5 w-5" />
+          )
+        }
         onClick={onToggleTheme}
-        className="absolute top-6 right-6 p-3 rounded-full bg-white dark:bg-carbon-800 shadow-lg border border-navy-100 dark:border-carbon-700 text-navy-600 dark:text-carbon-300 hover:scale-110 transition-transform z-20"
-      >
-        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-      </button>
+        size="icon"
+        variant="secondary"
+      />
 
-      <div className="relative z-10 w-full max-w-md p-8 bg-white/80 dark:bg-carbon-900/80 backdrop-blur-xl border border-white/50 dark:border-carbon-800 rounded-2xl shadow-xl transition-all duration-300">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-navy-900 dark:bg-white rounded-xl flex items-center justify-center mb-4 shadow-xl shadow-navy-900/20 dark:shadow-none">
-            <Truck className="text-white dark:text-carbon-900 w-8 h-8" />
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-navy-100 bg-white p-8 shadow-xl transition-all duration-300 dark:border-carbon-800 dark:bg-carbon-900">
+        <div className="mb-8 flex flex-col items-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-navy-900 shadow-xl shadow-navy-900/20 dark:bg-white dark:shadow-none">
+            <Truck className="h-8 w-8 text-white dark:text-carbon-900" />
           </div>
-          <h1 className="text-3xl font-bold text-navy-900 dark:text-white tracking-tight">LogiTrack AI</h1>
-          <p className="text-navy-500 dark:text-carbon-400 mt-2">Enterprise Logistics Portal</p>
+          <h1 className="text-3xl font-bold tracking-tight text-navy-900 dark:text-white">Cloudy Logistics</h1>
+          <p className="mt-2 text-navy-500 dark:text-carbon-100">Trip Scheduling Workspace</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg text-red-600 dark:text-red-400 text-sm text-center">
+            <div
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm font-medium text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+            >
               {error}
             </div>
           )}
-          
-          <div>
-            <label className="block text-xs font-semibold text-navy-500 dark:text-carbon-300 mb-2 uppercase tracking-wide">Username</label>
+
+          <FormField label="Username" required>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-white dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg text-navy-900 dark:text-white placeholder-navy-400 dark:placeholder-carbon-600 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-white focus:border-transparent transition-all shadow-sm"
+              className={uiClasses.field}
               placeholder="e.g. SuperAdmin"
               required
             />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-navy-500 dark:text-carbon-300 mb-2 uppercase tracking-wide">Password</label>
+          </FormField>
+
+          <FormField label="Password" required>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-white dark:bg-carbon-950 border border-navy-200 dark:border-carbon-800 rounded-lg text-navy-900 dark:text-white placeholder-navy-400 dark:placeholder-carbon-600 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-white focus:border-transparent transition-all shadow-sm"
-              placeholder="••••••••"
+              className={uiClasses.field}
+              placeholder="Password"
               required
             />
-          </div>
-          <button
-            type="submit"
-            className="w-full py-3 bg-navy-900 dark:bg-white hover:bg-navy-800 dark:hover:bg-gray-200 text-white dark:text-carbon-900 font-semibold rounded-lg shadow-lg shadow-navy-900/20 dark:shadow-none transition-all duration-200 transform hover:scale-[1.01]"
-          >
-            Sign In
-          </button>
+          </FormField>
+
+          <Button type="submit" className="w-full" isLoading={isAuthenticating} size="lg">
+            {isAuthenticating ? 'Signing in' : 'Sign In'}
+          </Button>
         </form>
 
-        <p className="text-center text-navy-400 dark:text-carbon-600 text-xs mt-8 font-medium">
-          Secure System &bull; Authorized Personnel Only
+        <p className="mt-8 text-center text-xs font-medium text-navy-500 dark:text-carbon-100">
+          Development auth adapter &bull; Session remains in memory only
         </p>
+        {developmentIdentities.length > 0 && (
+          <details className="mt-4 rounded-lg border border-navy-200 bg-navy-50 p-3 text-xs text-navy-600 dark:border-carbon-800 dark:bg-carbon-950 dark:text-carbon-300">
+            <summary className="cursor-pointer font-semibold">Development review identities</summary>
+            <ul className="mt-2 grid grid-cols-2 gap-1" aria-label="Development review identities by role">
+              {developmentIdentities.map((identity) => (
+                <li key={identity.username}>
+                  <span className="font-mono">{identity.username}</span> - {identity.role}
+                  {identity.active === false ? ' (inactive fixture)' : ''}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-navy-500 dark:text-carbon-400">
+              These identities exercise presentation policy only. They are not production accounts or authorization.
+            </p>
+          </details>
+        )}
       </div>
     </div>
   );

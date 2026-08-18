@@ -1,5 +1,5 @@
 {
-  "name": "MyVersion: LogiTrack AI",
-  "description": "A comprehensive logistics management dashboard for trucking companies featuring trip scheduling, fleet metrics, and Gemini-powered route analysis.",
+  "name": "Cloudy Logistics MVP UI",
+  "description": "A logistics operations interface for trip scheduling, fleet records, and personnel directories.",
   "requestFramePermissions": []
 }

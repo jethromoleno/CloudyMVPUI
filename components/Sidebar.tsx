@@ -1,216 +1,248 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  LayoutDashboard, Map, Truck, Users, Settings, 
-  LogOut, ClipboardList, ChevronDown, Package, 
-  DollarSign, Grid
+import React from 'react';
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Grid,
+  LayoutDashboard,
+  LogOut,
+  Moon,
+  Plus,
+  Settings,
+  Tags,
+  Sun,
+  Truck,
+  Users,
 } from 'lucide-react';
-import { Theme, AppModule } from '../types';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { navigationDestinations, type NavigationDestination, usePermissions } from '../permissions';
+import { routePaths } from '../routes';
+import type { Theme } from '../types';
+import { Button } from './ui';
 
 interface SidebarProps {
-  currentView: string;
-  setCurrentView: (view: string) => void;
+  collapsed?: boolean;
+  drawer?: boolean;
+  onNavigate?: () => void;
   onLogout: () => void;
+  onToggleCollapsed?: () => void;
+  onToggleTheme: () => void;
+  theme: Theme;
   username: string;
   userRole: string;
-  theme: Theme;
-  onSelectModule: (module: AppModule | 'hub') => void;
-  activeModule?: AppModule | 'hub';
 }
 
-const ALLOWED_VIEWS_BY_ROLE: Record<string, string[]> = {
-  SuperAdmin: ['dashboard', 'trip-management', 'trips', 'trucks', 'employees', 'settings'],
-  Admin: ['dashboard', 'trip-management', 'trips', 'trucks', 'employees', 'settings'],
-  Dispatcher: ['dashboard', 'trip-management', 'trips', 'trucks', 'employees'],
-  Encoder: ['dashboard', 'trip-management', 'trips'],
-  Viewer: ['dashboard', 'trip-management', 'trucks', 'employees']
+type NavigationItem = {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  to: string;
+  destination: NavigationDestination;
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  currentView, setCurrentView, onLogout, username, userRole, theme, onSelectModule, activeModule 
+const navigationItems: NavigationItem[] = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    to: routePaths.dashboard,
+    destination: navigationDestinations.dashboard,
+  },
+  {
+    id: 'trip-operations',
+    label: 'Trip Operations',
+    icon: ClipboardList,
+    to: routePaths.trips,
+    destination: navigationDestinations.tripOperations,
+  },
+  {
+    id: 'trip-schedule',
+    label: 'Trip Schedule',
+    icon: CalendarDays,
+    to: `${routePaths.trips}?view=schedule`,
+    destination: navigationDestinations.tripSchedule,
+  },
+  {
+    id: 'trip-create',
+    label: 'Create Trip',
+    icon: Plus,
+    to: routePaths.tripCreate,
+    destination: navigationDestinations.tripCreate,
+  },
+  {
+    id: 'trucks',
+    label: 'Truck Management',
+    icon: Truck,
+    to: routePaths.trucks,
+    destination: navigationDestinations.trucks,
+  },
+  {
+    id: 'employees',
+    label: 'Employee Directory',
+    icon: Users,
+    to: routePaths.employees,
+    destination: navigationDestinations.employees,
+  },
+  {
+    id: 'reference-data',
+    label: 'Reference Data',
+    icon: Tags,
+    to: routePaths.referenceData,
+    destination: navigationDestinations.referenceData,
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: Settings,
+    to: routePaths.settings,
+    destination: navigationDestinations.settings,
+  },
+];
+
+const Sidebar: React.FC<SidebarProps> = ({
+  collapsed = false,
+  drawer = false,
+  onNavigate,
+  onLogout,
+  onToggleCollapsed,
+  onToggleTheme,
+  theme,
+  username,
+  userRole,
 }) => {
-  const [isAppMenuOpen, setIsAppMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const permissions = usePermissions();
+  const compact = collapsed && !drawer;
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'trip-management', label: 'Trip Management', icon: ClipboardList },
-    { id: 'trips', label: 'Trip Schedule', icon: Map },
-    { id: 'trucks', label: 'Truck Management', icon: Truck },
-    { id: 'employees', label: 'Employee Directory', icon: Users },
-  ];
+  const isItemActive = (item: NavigationItem) => {
+    if (item.id === 'trip-schedule') {
+      return location.pathname === routePaths.trips && new URLSearchParams(location.search).get('view') === 'schedule';
+    }
+    if (item.id === 'trip-operations') {
+      return location.pathname === routePaths.trips && new URLSearchParams(location.search).get('view') !== 'schedule';
+    }
+    if (item.id === 'trip-create') return location.pathname === routePaths.tripCreate;
+    return location.pathname === item.to;
+  };
 
-  const apps = [
-    { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'trip_scheduling', label: 'LogiTrack AI', icon: Map },
-    { id: 'billing', label: 'Billing System', icon: DollarSign },
-  ];
+  const visibleItems = navigationItems.filter((item) => permissions.canShowNavigation(item.destination));
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsAppMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const currentApp = apps.find(app => app.id === activeModule) || { id: 'trip_scheduling', label: 'LogiTrack AI', icon: Map };
-  const allowedViews = ALLOWED_VIEWS_BY_ROLE[userRole] || ['dashboard', 'trip-management'];
-  const filteredMenuItems = menuItems.filter(item => allowedViews.includes(item.id));
+  const navigateTo = (to: string) => {
+    navigate(to);
+    onNavigate?.();
+  };
 
   return (
-    <div className="w-64 bg-white dark:bg-carbon-950 h-screen border-r border-navy-100 dark:border-carbon-800 flex flex-col text-navy-600 dark:text-carbon-300 transition-colors duration-300 shrink-0 z-50">
-      {/* App Switcher Header */}
-      <div className="p-4 border-b border-navy-100 dark:border-carbon-800 relative" ref={menuRef}>
-        <button 
-          onClick={() => setIsAppMenuOpen(!isAppMenuOpen)}
-          className="w-full flex items-center justify-between p-3 rounded-xl bg-navy-50 dark:bg-carbon-900 border border-navy-100 dark:border-carbon-800 hover:border-navy-300 dark:hover:border-carbon-600 transition-all group"
+    <aside
+      aria-label="Trip Scheduling workspace navigation"
+      className={`flex h-full flex-col border-r border-navy-100 bg-white text-navy-600 transition-[width] duration-200 dark:border-carbon-800 dark:bg-carbon-950 dark:text-carbon-300 ${compact ? 'w-20' : 'w-64'}`}
+    >
+      <div className="flex min-h-20 items-center gap-3 border-b border-navy-100 px-4 dark:border-carbon-800">
+        <button
+          aria-label="Return to application hub"
+          className={`flex min-w-0 flex-1 items-center gap-3 rounded-lg p-2 text-left hover:bg-navy-50 dark:hover:bg-carbon-900 ${compact ? 'justify-center' : ''}`}
+          onClick={() => navigateTo(routePaths.hub)}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-navy-900 dark:bg-white rounded-lg flex items-center justify-center shadow-lg shadow-navy-900/20 dark:shadow-none animate-fade-in">
-              <currentApp.icon className="text-white dark:text-carbon-900 w-4 h-4" />
-            </div>
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest">Workspace</p>
-              <p className="text-sm font-bold text-navy-900 dark:text-white truncate">{currentApp.label}</p>
-            </div>
-          </div>
-          <ChevronDown className={`w-4 h-4 text-navy-400 transition-transform duration-300 ${isAppMenuOpen ? 'rotate-180' : ''}`} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy-900 text-white dark:bg-white dark:text-carbon-950">
+            <Grid aria-hidden="true" className="h-4 w-4" />
+          </span>
+          {!compact && (
+            <span className="min-w-0">
+              <span className="block text-[10px] font-bold uppercase tracking-widest text-navy-400 dark:text-carbon-500">
+                Workspace
+              </span>
+              <span className="block truncate text-sm font-bold text-navy-900 dark:text-white">Cloudy Logistics</span>
+            </span>
+          )}
         </button>
-
-        {/* Dropdown Menu */}
-        {isAppMenuOpen && (
-          <div className="absolute top-full left-4 right-4 mt-2 bg-white dark:bg-carbon-900 border border-navy-100 dark:border-carbon-800 rounded-xl shadow-2xl z-[60] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="p-2 border-b border-navy-50 dark:border-carbon-800">
-              <button 
-                onClick={() => { onSelectModule('hub'); setIsAppMenuOpen(false); }}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-navy-50 dark:hover:bg-carbon-800 transition-colors text-navy-600 dark:text-carbon-300"
-              >
-                <Grid className="w-4 h-4" />
-                <span className="text-sm font-medium">Back to Hub</span>
-              </button>
-            </div>
-            <div className="p-2 space-y-1">
-              <p className="px-3 py-1 text-[10px] font-bold text-navy-400 dark:text-carbon-500 uppercase tracking-widest">Switch App</p>
-              {apps.map((app) => {
-                const isDisabled = app.id === 'inventory' || app.id === 'billing';
-                return (
-                  <button
-                    key={app.id}
-                    disabled={isDisabled}
-                    onClick={() => { if (!isDisabled) { onSelectModule(app.id as AppModule); setIsAppMenuOpen(false); } }}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors text-left ${
-                      isDisabled
-                        ? 'opacity-40 cursor-not-allowed text-navy-400 dark:text-carbon-600'
-                        : app.id === activeModule 
-                          ? 'bg-navy-50 dark:bg-carbon-800 text-navy-900 dark:text-white font-semibold' 
-                          : 'hover:bg-navy-50 dark:hover:bg-carbon-800 text-navy-600 dark:text-carbon-400'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <app.icon className="w-4 h-4" />
-                      <span className="text-sm font-medium">{app.label}</span>
-                    </div>
-                    {isDisabled && (
-                      <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-500 border border-amber-100 dark:border-amber-500/20 rounded scale-[0.85] select-none">
-                        Soon
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        {!drawer && onToggleCollapsed && (
+          <Button
+            aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+            className="hidden lg:inline-flex"
+            icon={
+              collapsed ? (
+                <ChevronRight aria-hidden="true" className="h-4 w-4" />
+              ) : (
+                <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+              )
+            }
+            onClick={onToggleCollapsed}
+            size="icon"
+            variant="ghost"
+          />
         )}
       </div>
 
-      <nav className="flex-1 px-4 py-6 flex flex-col overflow-y-auto">
-        {activeModule === 'inventory' || activeModule === 'billing' ? (
-          <div className="space-y-4">
-            <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">Navigation</p>
-            <button
-              onClick={() => onSelectModule('hub')}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-navy-900 dark:bg-white text-white dark:text-black font-semibold shadow-md"
-            >
-              <Grid className="w-5 h-5 shrink-0" />
-              <span>Back to Hub</span>
-            </button>
-            <button
-              onClick={() => onSelectModule('trip_scheduling')}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-navy-50 dark:hover:bg-carbon-900 border border-dashed border-navy-200 dark:border-carbon-800 text-navy-600 dark:text-carbon-300 font-medium"
-            >
-              <Map className="w-5 h-5 shrink-0 text-navy-400" />
-              <span>Return to Logistics</span>
-            </button>
-          </div>
-        ) : (
-          <>
-            <div>
-              <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">Trip Scheduling</p>
-              <div className="space-y-1">
-                {filteredMenuItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = currentView === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setCurrentView(item.id)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? 'bg-navy-900 dark:bg-carbon-800 text-white dark:text-white font-semibold shadow-md dark:shadow-none'
-                          : 'hover:bg-navy-50 dark:hover:bg-carbon-900 hover:text-navy-900 dark:hover:text-white text-navy-500 dark:text-carbon-400'
-                      }`}
-                    >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-navy-400 dark:text-carbon-500'}`} />
-                      <span className="">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex-1"></div>
-
-            {allowedViews.includes('settings') && (
-              <div className="mt-4">
-                <p className="px-4 text-xs font-semibold text-navy-400 dark:text-carbon-500 uppercase tracking-wider mb-2">System</p>
-                <button
-                  onClick={() => setCurrentView('settings')}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    currentView === 'settings'
-                      ? 'bg-navy-900 dark:bg-carbon-800 text-white dark:text-white font-semibold shadow-md dark:shadow-none'
-                      : 'hover:bg-navy-50 dark:hover:bg-carbon-900 hover:text-navy-900 dark:hover:text-white text-navy-500 dark:text-carbon-400'
-                  }`}
-                >
-                  <Settings className={`w-5 h-5 ${currentView === 'settings' ? 'text-white' : 'text-navy-400 dark:text-carbon-500'}`} />
-                  <span className="">Settings</span>
-                </button>
-              </div>
-            )}
-          </>
+      <nav className="flex-1 overflow-y-auto px-3 py-5">
+        {!compact && (
+          <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-navy-400 dark:text-carbon-500">
+            Trip Scheduling
+          </p>
         )}
+        <div className="space-y-1">
+          {visibleItems.map((item) => {
+            const Icon = item.icon;
+            const active = isItemActive(item);
+            return (
+              <button
+                aria-current={active ? 'page' : undefined}
+                className={`flex min-h-11 w-full items-center rounded-lg px-3 text-sm transition-colors ${compact ? 'justify-center' : 'gap-3'} ${
+                  active
+                    ? 'bg-navy-900 font-semibold text-white dark:bg-carbon-800'
+                    : 'text-navy-500 hover:bg-navy-50 hover:text-navy-900 dark:text-carbon-400 dark:hover:bg-carbon-900 dark:hover:text-white'
+                }`}
+                key={item.id}
+                onClick={() => navigateTo(item.to)}
+                title={compact ? item.label : undefined}
+              >
+                <Icon aria-hidden="true" className="h-5 w-5 shrink-0" />
+                {compact ? <span className="sr-only">{item.label}</span> : <span>{item.label}</span>}
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
-      <div className="p-4 border-t border-navy-100 dark:border-carbon-800">
-        <div className="flex items-center mb-4 px-4">
-          <div className="w-8 h-8 bg-navy-100 dark:bg-carbon-800 rounded-full flex items-center justify-center text-xs font-bold text-navy-600 dark:text-white border border-navy-200 dark:border-carbon-700">
+      <div className="space-y-2 border-t border-navy-100 p-3 dark:border-carbon-800">
+        <div className={`flex items-center rounded-lg px-2 py-2 ${compact ? 'justify-center' : 'gap-3'}`}>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-navy-200 bg-navy-100 text-xs font-bold text-navy-700 dark:border-carbon-700 dark:bg-carbon-800 dark:text-white">
             {username.charAt(0).toUpperCase()}
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-navy-900 dark:text-white">{username}</p>
-            <p className="text-xs text-navy-500 dark:text-carbon-500">{userRole}</p>
-          </div>
+          </span>
+          {!compact && (
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-navy-900 dark:text-white">{username}</span>
+              <span className="block text-xs text-navy-500 dark:text-carbon-500">{userRole}</span>
+            </span>
+          )}
         </div>
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center justify-center space-x-2 p-2 rounded-md text-navy-500 dark:text-carbon-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-colors text-sm"
+        <Button
+          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          className={`w-full ${compact ? 'justify-center' : 'justify-start'}`}
+          icon={
+            theme === 'dark' ? (
+              <Sun aria-hidden="true" className="h-5 w-5" />
+            ) : (
+              <Moon aria-hidden="true" className="h-5 w-5" />
+            )
+          }
+          onClick={onToggleTheme}
+          variant="ghost"
         >
-          <LogOut className="w-4 h-4" />
-          <span>Sign Out</span>
-        </button>
+          {compact ? <span className="sr-only">Toggle theme</span> : theme === 'dark' ? 'Light theme' : 'Dark theme'}
+        </Button>
+        <Button
+          aria-label="Sign out"
+          className={`w-full text-navy-500 hover:bg-red-50 hover:text-red-600 dark:text-carbon-400 dark:hover:bg-red-900/10 dark:hover:text-red-400 ${compact ? 'justify-center' : 'justify-start'}`}
+          icon={<LogOut aria-hidden="true" className="h-5 w-5" />}
+          onClick={onLogout}
+          variant="ghost"
+        >
+          {compact ? <span className="sr-only">Sign out</span> : 'Sign out'}
+        </Button>
       </div>
-    </div>
+    </aside>
   );
 };
 
